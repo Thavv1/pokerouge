@@ -9,6 +9,8 @@ export class GameStats {
   public ribbonsOwned: integer;
   public dailyRunSessionsPlayed: integer;
   public dailyRunSessionsWon: integer;
+  public nuzlockeSessionsPlayed: integer;
+  public nuzlockeSessionsWon: integer;
   public endlessSessionsPlayed: integer;
   public highestEndlessWave: integer;
   public highestLevel: integer;
@@ -47,6 +49,8 @@ export class GameStats {
     this.ribbonsOwned = source?.ribbonsOwned || 0;
     this.dailyRunSessionsPlayed = source?.dailyRunSessionsPlayed || 0;
     this.dailyRunSessionsWon = source?.dailyRunSessionsWon || 0;
+    this.nuzlockeSessionsPlayed = source?.nuzlockeSessionsPlayed || 0;
+    this.nuzlockeSessionsWon = source?.nuzlockeSessionsWon || 0;
     this.endlessSessionsPlayed = source?.endlessSessionsPlayed || 0;
     this.highestEndlessWave = source?.highestEndlessWave || 0;
     this.highestLevel = source?.highestLevel || 0;
