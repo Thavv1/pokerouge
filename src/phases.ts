@@ -700,7 +700,7 @@ export class EncounterPhase extends BattlePhase {
           if (this.scene.currentBattle.battleSpec === BattleSpec.FINAL_BOSS)
             battle.enemyParty[e].ivs = new Array(6).fill(31);
           this.scene.getParty().slice(0, !battle.double ? 1 : 2).reverse().forEach(playerPokemon => {
-            applyAbAttrs(SyncEncounterNatureAbAttr, playerPokemon, null, battle.enemyParty[e]);
+            applyAbAttrs(SyncEncounterNatureAbAttr, playerPokemon, null, false, battle.enemyParty[e]);
           });
         }
       }
@@ -1971,8 +1971,8 @@ export class TurnStartPhase extends FieldPhase {
         const aPriority = new Utils.IntegerHolder(aMove.priority);
         const bPriority = new Utils.IntegerHolder(bMove.priority);
 
-		    applyAbAttrs(IncrementMovePriorityAbAttr, this.scene.getField().find(p => p?.isActive() && p.getBattlerIndex() === a), null, aMove, aPriority);
-        applyAbAttrs(IncrementMovePriorityAbAttr, this.scene.getField().find(p => p?.isActive() && p.getBattlerIndex() === b), null, bMove, bPriority);
+		    applyAbAttrs(IncrementMovePriorityAbAttr, this.scene.getField().find(p => p?.isActive() && p.getBattlerIndex() === a), null, false, aMove, aPriority);
+        applyAbAttrs(IncrementMovePriorityAbAttr, this.scene.getField().find(p => p?.isActive() && p.getBattlerIndex() === b), null, false, bMove, bPriority);
         
         if (aPriority.value !== bPriority.value)
           return aPriority.value < bPriority.value ? 1 : -1;
@@ -2215,7 +2215,7 @@ export class MovePhase extends BattlePhase {
       ? new Utils.IntegerHolder(this.targets[0])
       : null;
     if (moveTarget) {
-      this.scene.getField(true).filter(p => p !== this.pokemon).forEach(p => applyAbAttrs(RedirectMoveAbAttr, p, null, this.move.moveId, moveTarget));
+      this.scene.getField(true).filter(p => p !== this.pokemon).forEach(p => applyAbAttrs(RedirectMoveAbAttr, p, null, false, this.move.moveId, moveTarget));
       this.targets[0] = moveTarget.value;
     }
 
@@ -2570,8 +2570,8 @@ export class MoveEffectPhase extends PokemonPhase {
       
     const userAccuracyLevel = new Utils.IntegerHolder(user.summonData.battleStats[BattleStat.ACC]);
     const targetEvasionLevel = new Utils.IntegerHolder(target.summonData.battleStats[BattleStat.EVA]);
-    applyAbAttrs(IgnoreOpponentStatChangesAbAttr, target, null, userAccuracyLevel);
-    applyAbAttrs(IgnoreOpponentStatChangesAbAttr, user, null, targetEvasionLevel);
+    applyAbAttrs(IgnoreOpponentStatChangesAbAttr, target, null, false, userAccuracyLevel);
+    applyAbAttrs(IgnoreOpponentStatChangesAbAttr, user, null, false, targetEvasionLevel);
     applyMoveAttrs(IgnoreOpponentStatChangesAttr, user, target, this.move.getMove(), targetEvasionLevel);
     this.scene.applyModifiers(TempBattleStatBoosterModifier, this.player, TempBattleStat.ACC, userAccuracyLevel);
 
@@ -2584,7 +2584,7 @@ export class MoveEffectPhase extends PokemonPhase {
         : 3 / (3 + Math.min(targetEvasionLevel.value - userAccuracyLevel.value, 6));
     }
 
-    applyBattleStatMultiplierAbAttrs(BattleStatMultiplierAbAttr, user, BattleStat.ACC, accuracyMultiplier, this.move.getMove());
+    applyBattleStatMultiplierAbAttrs(BattleStatMultiplierAbAttr, user, BattleStat.ACC, accuracyMultiplier, false, this.move.getMove());
 
     const evasionMultiplier = new Utils.NumberHolder(1);
     applyBattleStatMultiplierAbAttrs(BattleStatMultiplierAbAttr, this.getTarget(), BattleStat.EVA, evasionMultiplier);
@@ -2734,7 +2734,7 @@ export class StatChangePhase extends PokemonPhase {
     const levels = new Utils.IntegerHolder(this.levels);
 
     if (!this.ignoreAbilities)
-      applyAbAttrs(StatChangeMultiplierAbAttr, pokemon, null, levels);
+      applyAbAttrs(StatChangeMultiplierAbAttr, pokemon, null, false, levels);
 
     const battleStats = this.getPokemon().summonData.battleStats;
     const relLevels = filteredStats.map(stat => (levels.value >= 1 ? Math.min(battleStats[stat] + levels.value, 6) : Math.max(battleStats[stat] + levels.value, -6)) - battleStats[stat]);
@@ -2751,7 +2751,7 @@ export class StatChangePhase extends PokemonPhase {
       
       if (levels.value > 0 && this.canBeCopied)
         for (let opponent of pokemon.getOpponents())
-          applyAbAttrs(StatChangeCopyAbAttr, opponent, null, this.stats, levels.value);
+          applyAbAttrs(StatChangeCopyAbAttr, opponent, null, false, this.stats, levels.value);
       
       applyPostStatChangeAbAttrs(PostStatChangeAbAttr, pokemon, filteredStats, this.levels, this.selfTarget);
       
@@ -4299,7 +4299,7 @@ export class AttemptRunPhase extends PokemonPhase {
     const enemySpeed = enemyField.reduce((total: integer, enemyPokemon: Pokemon) => total + enemyPokemon.getStat(Stat.SPD), 0) / enemyField.length;
 
     const escapeChance = new Utils.IntegerHolder((((playerPokemon.getStat(Stat.SPD) * 128) / enemySpeed) + (30 * this.scene.currentBattle.escapeAttempts++)) % 256);
-    applyAbAttrs(RunSuccessAbAttr, playerPokemon, null, escapeChance);
+    applyAbAttrs(RunSuccessAbAttr, playerPokemon, null, false, escapeChance);
 
     if (playerPokemon.randSeedInt(256) < escapeChance.value) {
       this.scene.playSound('flee');

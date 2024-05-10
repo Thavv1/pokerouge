@@ -326,7 +326,7 @@ export default class Move implements Localizable {
       case MoveFlags.IGNORE_ABILITIES:
         if (user.hasAbilityWithAttr(MoveAbilityBypassAbAttr)) {
           const abilityEffectsIgnored = new Utils.BooleanHolder(false);
-          applyAbAttrs(MoveAbilityBypassAbAttr, user, abilityEffectsIgnored, this);
+          applyAbAttrs(MoveAbilityBypassAbAttr, user, abilityEffectsIgnored, false, this);
           if (abilityEffectsIgnored.value)
             return true;
         }
@@ -1021,7 +1021,7 @@ export class MultiHitAttr extends MoveAttr {
         {
           const rand = user.randSeedInt(16);
           const hitValue = new Utils.IntegerHolder(rand);
-          applyAbAttrs(MaxMultiHitAbAttr, user, null, hitValue);
+          applyAbAttrs(MaxMultiHitAbAttr, user, null, false, hitValue);
           if (hitValue.value >= 10)
             hitTimes = 2;
           else if (hitValue.value >= 4)
@@ -1046,7 +1046,7 @@ export class MultiHitAttr extends MoveAttr {
         {
           const rand = user.randSeedInt(90);
           const hitValue = new Utils.IntegerHolder(rand);
-          applyAbAttrs(MaxMultiHitAbAttr, user, null, hitValue);
+          applyAbAttrs(MaxMultiHitAbAttr, user, null, false, hitValue);
           if (hitValue.value >= 81)
             hitTimes = 1;
           else if (hitValue.value >= 73)
