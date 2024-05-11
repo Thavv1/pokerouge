@@ -15,7 +15,7 @@ import { ArenaTagType } from "./enums/arena-tag-type";
 import { UnswappableAbilityAbAttr, UncopiableAbilityAbAttr, UnsuppressableAbilityAbAttr, NoTransformAbilityAbAttr, BlockRecoilDamageAttr, BlockOneHitKOAbAttr, IgnoreContactAbAttr, MaxMultiHitAbAttr, applyAbAttrs, BlockNonDirectDamageAbAttr, applyPreSwitchOutAbAttrs, PreSwitchOutAbAttr, applyPostDefendAbAttrs, PostDefendContactApplyStatusEffectAbAttr, MoveAbilityBypassAbAttr, ReverseDrainAbAttr, FieldPreventExplosiveMovesAbAttr, ForceSwitchOutImmunityAbAttr } from "./ability";
 import { Abilities } from "./enums/abilities";
 import { allAbilities } from './ability';
-import { PokemonHeldItemModifier } from "../modifier/modifier";
+import { ExtendScreenModifier, PokemonHeldItemModifier } from "../modifier/modifier";
 import { BattlerIndex } from "../battle";
 import { Stat } from "./pokemon-stat";
 import { TerrainType } from "./terrain";
@@ -77,6 +77,7 @@ export enum MoveFlags {
   WIND_MOVE         = 1 << 14,
   TRIAGE_MOVE       = 1 << 15,
   IGNORE_ABILITIES  = 1 << 16,
+  SCREEN_MOVE       = 1 << 17,
 }
 
 type MoveConditionFunc = (user: Pokemon, target: Pokemon, move: Move) => boolean;
@@ -309,6 +310,11 @@ export default class Move implements Localizable {
 
   triageMove(triageMove?: boolean): this {
     this.setFlag(MoveFlags.TRIAGE_MOVE, triageMove);
+    return this;
+  }
+
+  screenMove(screenMove?: boolean): this {
+    this.setFlag(MoveFlags.SCREEN_MOVE, screenMove);
     return this;
   }
 
@@ -3035,8 +3041,13 @@ export class AddArenaTagAttr extends MoveEffectAttr {
     if (!super.apply(user, target, move, args))
       return false;
 
+    const turnCountHolder = new Utils.IntegerHolder(this.turnCount);
+
+    if (move.hasFlag(MoveFlags.SCREEN_MOVE))
+      user.scene.applyModifiers(ExtendScreenModifier, user.isPlayer(), user, turnCountHolder);
+
     if (move.chance < 0 || move.chance === 100 || user.randSeedInt(100) < move.chance) {
-      user.scene.arena.addTag(this.tagType, this.turnCount, move.id, user.id, (this.selfSideTarget ? user : target).isPlayer() ? ArenaTagSide.PLAYER : ArenaTagSide.ENEMY);
+      user.scene.arena.addTag(this.tagType, turnCountHolder.value, move.id, user.id, (this.selfSideTarget ? user : target).isPlayer() ? ArenaTagSide.PLAYER : ArenaTagSide.ENEMY);
       return true;
     }
 
@@ -4401,6 +4412,7 @@ export function initMoves() {
       .attr(StatChangeAttr, BattleStat.DEF, 2, true),
     new StatusMove(Moves.LIGHT_SCREEN, Type.PSYCHIC, -1, 30, -1, 0, 1)
       .attr(AddArenaTagAttr, ArenaTagType.LIGHT_SCREEN, 5, true)
+      .screenMove()
       .target(MoveTarget.USER_SIDE),
     new StatusMove(Moves.HAZE, Type.ICE, -1, 30, -1, 0, 1)
       .target(MoveTarget.BOTH_SIDES)
@@ -6028,6 +6040,7 @@ export function initMoves() {
     new StatusMove(Moves.AURORA_VEIL, Type.ICE, -1, 20, -1, 0, 7)
       .condition((user, target, move) => (user.scene.arena.weather?.weatherType === WeatherType.HAIL || user.scene.arena.weather?.weatherType === WeatherType.SNOW) && !user.scene.arena.weather?.isEffectSuppressed(user.scene))
       .attr(AddArenaTagAttr, ArenaTagType.AURORA_VEIL, 5, true)
+      .screenMove()
       .target(MoveTarget.USER_SIDE),
     /* Unused */
     new AttackMove(Moves.SINISTER_ARROW_RAID, Type.GHOST, MoveCategory.PHYSICAL, 180, -1, 1, -1, 0, 7)
@@ -6152,8 +6165,10 @@ export function initMoves() {
     new AttackMove(Moves.SIZZLY_SLIDE, Type.FIRE, MoveCategory.PHYSICAL, 60, 100, 20, 100, 0, 7)
       .attr(StatusEffectAttr, StatusEffect.BURN),
     new AttackMove(Moves.GLITZY_GLOW, Type.PSYCHIC, MoveCategory.SPECIAL, 80, 95, 15, -1, 0, 7)
+      .screenMove()
       .attr(AddArenaTagAttr, ArenaTagType.LIGHT_SCREEN, 5, false, true),
     new AttackMove(Moves.BADDY_BAD, Type.DARK, MoveCategory.SPECIAL, 80, 95, 15, -1, 0, 7)
+      .screenMove()
       .attr(AddArenaTagAttr, ArenaTagType.REFLECT, 5, false, true),
     new AttackMove(Moves.SAPPY_SEED, Type.GRASS, MoveCategory.PHYSICAL, 100, 90, 10, 100, 0, 7)
       .attr(AddBattlerTagAttr, BattlerTagType.SEEDED),
