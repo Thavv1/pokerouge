@@ -31,6 +31,8 @@ export class LoadingScene extends SceneBase {
     this.loadAtlas('bg', 'ui');
     this.loadImage('command_fight_labels', 'ui');
     this.loadAtlas('prompt', 'ui');
+    this.loadImage('candy', 'ui');
+    this.loadImage('candy_overlay', 'ui');
     this.loadImage('cursor', 'ui');
     this.loadImage('cursor_reverse', 'ui');
     for (let wv of Utils.getEnumValues(WindowVariant)) {
@@ -67,6 +69,7 @@ export class LoadingScene extends SceneBase {
     this.loadImage('achv_bar_2', 'ui');
     this.loadImage('achv_bar_3', 'ui');
     this.loadImage('achv_bar_4', 'ui');
+    this.loadImage('achv_bar_5', 'ui');
     this.loadImage('shiny_star', 'ui', 'shiny.png');
     this.loadImage('shiny_star_1', 'ui', 'shiny_1.png');
     this.loadImage('shiny_star_2', 'ui', 'shiny_2.png');
@@ -74,6 +77,7 @@ export class LoadingScene extends SceneBase {
     this.loadImage('shiny_star_small_1', 'ui', 'shiny_small_1.png');
     this.loadImage('shiny_star_small_2', 'ui', 'shiny_small_2.png');
     this.loadImage('ha_capsule', 'ui', 'ha_capsule.png');
+    this.loadImage('champion_ribbon', 'ui', 'champion_ribbon.png');
     this.loadImage('icon_spliced', 'ui');
     this.loadImage('icon_tera', 'ui');
     this.loadImage('type_tera', 'ui');
@@ -96,6 +100,10 @@ export class LoadingScene extends SceneBase {
     this.loadImage('summary_bg', 'ui');
     this.loadImage('summary_overlay_shiny', 'ui');
     this.loadImage('summary_profile', 'ui');
+    this.loadImage('summary_profile_prompt_z', 'ui')      // The pixel Z button prompt
+    this.loadImage('summary_profile_prompt_a', 'ui');     // The pixel A button prompt
+    this.loadImage('summary_profile_ability', 'ui');      // Pixel text 'ABILITY'
+    this.loadImage('summary_profile_passive', 'ui');      // Pixel text 'PASSIVE'
     this.loadImage('summary_status', 'ui');
     this.loadImage('summary_stats', 'ui');
     this.loadImage('summary_stats_overlay_exp', 'ui');
@@ -201,6 +209,9 @@ export class LoadingScene extends SceneBase {
 
     this.loadImage('egg_list_bg', 'ui');
 
+    this.loadImage('end_m', 'cg');
+    this.loadImage('end_f', 'cg');
+
     for (let i = 0; i < 10; i++) {
       this.loadAtlas(`pokemon_icons_${i}`, '');
       if (i)
@@ -222,6 +233,7 @@ export class LoadingScene extends SceneBase {
     this.loadSe('sparkle');
     this.loadSe('restore');
     this.loadSe('shine');
+    this.loadSe('shing');
     this.loadSe('charge');
     this.loadSe('beam');
     this.loadSe('upgrade');

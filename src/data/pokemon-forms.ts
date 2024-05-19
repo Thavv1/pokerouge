@@ -82,7 +82,11 @@ export enum FormChangeItem {
   SHADOW_REINS_OF_UNITY,
   WELLSPRING_MASK,
   HEARTHFLAME_MASK,
-  CORNERSTONE_MASK
+  CORNERSTONE_MASK,
+  SHOCK_DRIVE,
+  BURN_DRIVE,
+  CHILL_DRIVE,
+  DOUSE_DRIVE
 }
 
 export type SpeciesFormChangeConditionPredicate = (p: Pokemon) => boolean;
@@ -542,6 +546,12 @@ export const pokemonFormChanges: PokemonFormChanges = {
     new SpeciesFormChange(Species.MELOETTA, 'pirouette', 'aria', new SpeciesFormChangePostMoveTrigger(Moves.RELIC_SONG), true),
     new SpeciesFormChange(Species.MELOETTA, 'pirouette', 'aria', new SpeciesFormChangeActiveTrigger(false), true)
   ],
+  [Species.GENESECT]: [
+    new SpeciesFormChange(Species.GENESECT, '', 'shock', new SpeciesFormChangeItemTrigger(FormChangeItem.SHOCK_DRIVE)),
+    new SpeciesFormChange(Species.GENESECT, '', 'burn', new SpeciesFormChangeItemTrigger(FormChangeItem.BURN_DRIVE)),
+    new SpeciesFormChange(Species.GENESECT, '', 'chill', new SpeciesFormChangeItemTrigger(FormChangeItem.CHILL_DRIVE)),
+    new SpeciesFormChange(Species.GENESECT, '', 'douse', new SpeciesFormChangeItemTrigger(FormChangeItem.DOUSE_DRIVE))
+  ],
   [Species.GRENINJA]: [
     new SpeciesFormChange(Species.GRENINJA, 'battle-bond', 'ash', new SpeciesFormChangeManualTrigger(), true),
     new SpeciesFormChange(Species.GRENINJA, 'ash', 'battle-bond', new SpeciesFormChangeManualTrigger(), true)
@@ -695,7 +705,9 @@ export const pokemonFormChanges: PokemonFormChanges = {
     new SpeciesFormChange(Species.OGERPON, 'cornerstone-mask-tera', 'cornerstone-mask', new SpeciesFormChangeManualTrigger(), true) //When no longer holding a Rock Tera Shard
   ],
   [Species.TERAPAGOS]: [
-    new SpeciesFormChange(Species.TERAPAGOS, '', 'terastal', new SpeciesFormChangeManualTrigger(), true)
+    new SpeciesFormChange(Species.TERAPAGOS, '', 'terastal', new SpeciesFormChangeManualTrigger(), true),
+    new SpeciesFormChange(Species.TERAPAGOS, 'terastal', 'stellar', new SpeciesFormChangeManualTrigger(), true), //When holding a Stellar Tera Shard
+    new SpeciesFormChange(Species.TERAPAGOS, 'stellar', 'terastal', new SpeciesFormChangeManualTrigger(), true) //When no longer holding a Stellar Tera Shard
   ],
   [Species.GALAR_DARMANITAN]: [
     new SpeciesFormChange(Species.GALAR_DARMANITAN, '', 'zen', new SpeciesFormChangeManualTrigger(), true),
