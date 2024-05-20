@@ -9,6 +9,7 @@ import { WindowVariant, getWindowVariantSuffix } from "./ui/ui-theme";
 import { isMobile } from "./touch-controls";
 import * as Utils from "./utils";
 import { initI18n } from "./plugins/i18n";
+import { TimedEventManager } from "./timed-event-manager";
 
 export class LoadingScene extends SceneBase {
   constructor() {
@@ -29,6 +30,9 @@ export class LoadingScene extends SceneBase {
 
     // Load menu images
     this.loadAtlas('bg', 'ui');
+    if (new TimedEventManager().isEventActive() && new TimedEventManager().activeEventHasBanner()) {
+      this.loadImage(new TimedEventManager().getEventBannerFilename(), 'events')
+    }
     this.loadImage('command_fight_labels', 'ui');
     this.loadAtlas('prompt', 'ui');
     this.loadImage('candy', 'ui');

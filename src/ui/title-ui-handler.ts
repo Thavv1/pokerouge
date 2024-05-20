@@ -6,6 +6,7 @@ import * as Utils from "../utils";
 import { TextStyle, addTextObject } from "./text";
 import { getBattleCountSplashMessage, getSplashMessages } from "../data/splash-messages";
 import i18next from "i18next";
+import { TimedEventManager } from "#app/timed-event-manager.js";
 
 export default class TitleUiHandler extends OptionSelectUiHandler {
   private titleContainer: Phaser.GameObjects.Container;
@@ -15,6 +16,7 @@ export default class TitleUiHandler extends OptionSelectUiHandler {
   private splashMessageText: Phaser.GameObjects.Text;
 
   private titleStatsTimer: number;
+  private timedEventManager: TimedEventManager = new TimedEventManager();
 
   constructor(scene: BattleScene, mode: Mode = Mode.TITLE) {
     super(scene, mode);
@@ -31,7 +33,17 @@ export default class TitleUiHandler extends OptionSelectUiHandler {
 
     const logo = this.scene.add.image((this.scene.game.canvas.width / 6) / 2, 8, 'logo');
     logo.setOrigin(0.5, 0);
+    
     this.titleContainer.add(logo);
+    
+    if (this.timedEventManager.isEventActive() && this.timedEventManager.activeEventHasBanner()) {
+      const banner = this.scene.add.image((this.scene.game.canvas.width / 6.5) / 2, (this.scene.game.canvas.height / 4.65) / 2, new TimedEventManager().getEventBannerFilename());
+      banner.displayWidth = this.scene.game.canvas.width / 18.33
+      banner.displayHeight = banner.displayWidth / 3
+      banner.setOrigin(0.315, -0.8);
+
+      this.titleContainer.add(banner);
+    }
 
     this.dailyRunScoreboard = new DailyRunScoreboard(this.scene, 1, 44);
 		this.dailyRunScoreboard.setup();
