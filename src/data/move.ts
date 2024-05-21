@@ -2094,34 +2094,62 @@ export class ResetStatsAttr extends MoveEffectAttr {
 }
 
 /**
- * Attribute used for moves which swap the user and the target's stat changes.
+ * Attribute used for moves which swap the user and the target's battle stat changes.
  */
-export class SwapStatsAttr extends MoveEffectAttr
+export class SwapBattleStatsAttr extends MoveEffectAttr
 {
-    /**
-   * Swaps the user and the target's stat changes.
+  public statsToSwap: BattleStat[];
+
+  constructor(statToSwap: BattleStat[] = [...Array(7).keys()]) {
+    super();
+
+    this.statsToSwap = statToSwap;
+  }
+  /**
+   * Swaps the user and the target's battle stat changes.
    * @param user Pokemon that used the move
    * @param target The target of the move
    * @param move Move with this attribute
    * @param args N/A
    * @returns true if the function succeeds
    */
-    apply(user: Pokemon, target: Pokemon, move: Move, args: any []): boolean
-    {
-        if (!super.apply(user, target, move, args))
-            return false; //Exits if the move can't apply
-        let priorBoost : integer; //For storing a stat boost
-        for (let s = 0; s < target.summonData.battleStats.length; s++)
-          {
-            priorBoost = user.summonData.battleStats[s]; //Store user stat boost
-            user.summonData.battleStats[s] = target.summonData.battleStats[s]; //Applies target boost to self
-            target.summonData.battleStats[s] = priorBoost; //Applies stored boost to target
-          }
-        target.updateInfo();
-        user.updateInfo();
-        target.scene.queueMessage(getPokemonMessage(user, ' switched stat changes with the target!'));
-        return true;
+  apply(user: Pokemon, target: Pokemon, move: Move, args: any []): boolean
+  {
+    if (!super.apply(user, target, move, args))
+      return false;
+
+    const userBattleStat   = user.summonData.battleStats;
+    const targetBattleStat = target.summonData.battleStats;
+
+    this.statsToSwap.forEach(stat => {
+      const userStat = userBattleStat[stat];
+      userBattleStat[stat] = targetBattleStat[stat];
+      targetBattleStat[stat] = userStat;
+    });
+
+    user.updateInfo();
+    target.updateInfo();
+
+    if (this.statsToSwap.length === 7) {
+      target.scene.queueMessage(getPokemonMessage(user, ' switched stat changes with the target!'));
     }
+    else {
+      const statsNames = this.statsToSwap.map(stat => getBattleStatName(stat));
+      const lastStat   = statsNames.pop();
+      let statsMessage = '';
+
+      if (statsNames.length) {
+        statsMessage = statsNames.join(', ') + ` and ${lastStat}`;
+      }
+      else {
+        statsMessage = lastStat;
+      }
+            
+      target.scene.queueMessage(getPokemonMessage(user, ` switched all changes to its ${statsMessage} with its target!`));
+    }
+
+    return true;
+  }
 }
 
 export class HpSplitAttr extends MoveEffectAttr {
@@ -5802,9 +5830,9 @@ export function initMoves() {
       .attr(CopyMoveAttr)
       .ignoresVirtual(),
     new StatusMove(Moves.POWER_SWAP, Type.PSYCHIC, -1, 10, -1, 0, 4)
-      .unimplemented(),
+      .attr(SwapBattleStatsAttr, [BattleStat.ATK, BattleStat.SPATK]),
     new StatusMove(Moves.GUARD_SWAP, Type.PSYCHIC, -1, 10, -1, 0, 4)
-      .unimplemented(),
+      .attr(SwapBattleStatsAttr, [BattleStat.DEF, BattleStat.SPDEF]),
     new AttackMove(Moves.PUNISHMENT, Type.DARK, MoveCategory.PHYSICAL, -1, 100, 5, -1, 0, 4)
       .unimplemented(),
     new AttackMove(Moves.LAST_RESORT, Type.NORMAL, MoveCategory.PHYSICAL, 140, 100, 5, -1, 0, 4)
@@ -5817,7 +5845,7 @@ export function initMoves() {
       .attr(AddArenaTrapTagAttr, ArenaTagType.TOXIC_SPIKES)
       .target(MoveTarget.ENEMY_SIDE),
     new StatusMove(Moves.HEART_SWAP, Type.PSYCHIC, -1, 10, -1, 0, 4)
-      .attr(SwapStatsAttr),
+      .attr(SwapBattleStatsAttr),
     new SelfStatusMove(Moves.AQUA_RING, Type.WATER, -1, 20, -1, 0, 4)
       .attr(AddBattlerTagAttr, BattlerTagType.AQUA_RING, true, true),
     new SelfStatusMove(Moves.MAGNET_RISE, Type.ELECTRIC, -1, 10, -1, 0, 4)
