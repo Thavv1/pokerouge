@@ -2098,7 +2098,7 @@ export default abstract class Pokemon extends Phaser.GameObjects.Container {
           // Check if the source Pokemon has an ability that cancels the Poison/Toxic immunity
           const cancelImmunity = new Utils.BooleanHolder(false);
           if (sourcePokemon) {
-            applyAbAttrs(IgnoreTypeStatusEffectImmunityAbAttr, sourcePokemon, cancelImmunity, effect, defType);
+            applyPreSetStatusAbAttrs(IgnoreTypeStatusEffectImmunityAbAttr, sourcePokemon, effect, cancelImmunity, quiet, defType);
             if (cancelImmunity.value)
               return false;
           }
