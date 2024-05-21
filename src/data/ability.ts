@@ -2162,6 +2162,43 @@ export class PostTerrainChangeAddBattlerTagAttr extends PostTerrainChangeAbAttr 
   }
 }
 
+/**
+ * When the terrain changes or the pokemon is summoned, change its type according to
+ * a Record passed into the constructor.
+ * @
+ * @extends PostTerrainChangeAbAttr
+ * @see {@link applyPostTerrainChange}
+ */
+export class PostTerrainChangeTypeAttr extends PostTerrainChangeAbAttr {
+  private terrainToTypeMap: Record<TerrainType, Type>;
+
+  /**
+   * @param {Record<TerrainType, Type>} terrainToTypeMap a map from terrain types to pokemon 
+   *                types containing information about what type to change to. 
+   *                Type.UNKOWN reverts to original typing.
+   */
+  constructor(terrainToTypeMap: Record<TerrainType, Type>) {
+    super();
+    this.terrainToTypeMap = terrainToTypeMap;
+  }
+
+  applyPostTerrainChange(pokemon: Pokemon, passive: boolean, terrain: TerrainType, args: any[]): boolean {
+
+    if (this.terrainToTypeMap[terrain] == Type.UNKNOWN) { //If no type is given, transform back to original type
+      if (pokemon.summonData.types == null) return false; //If already original type, ability did not activate
+      pokemon.summonData.types = null;                    //Clear any changed type
+      pokemon.updateInfo();                               //Update info to apply change
+      pokemon.scene.queueMessage(getPokemonMessage(pokemon, ` transformed\nback into its original type!`));
+      return true;
+    }
+
+    pokemon.summonData.types = [this.terrainToTypeMap[terrain]] //Changes type to the specified type based on the record
+    pokemon.updateInfo();                                       //Apply changes
+    pokemon.scene.queueMessage(getPokemonMessage(pokemon, ` transformed\ninto the ${Utils.toReadableString(Type[pokemon.getTypes()[0]])} type!`));
+    return true;
+  }
+}
+
 function getTerrainCondition(...terrainTypes: TerrainType[]): AbAttrCondition {
   return (pokemon: Pokemon) => {
     const terrainType = pokemon.scene.arena.terrain?.terrainType;
@@ -3752,7 +3789,11 @@ export function initAbilities() {
     new Ability(Abilities.POWER_SPOT, 8)
       .unimplemented(),
     new Ability(Abilities.MIMICRY, 8)
-      .unimplemented(),
+      .attr(PostTerrainChangeTypeAttr, {
+        [TerrainType.NONE]: Type.UNKNOWN, [TerrainType.MISTY]: Type.FAIRY, [TerrainType.ELECTRIC]: Type.ELECTRIC,
+        [TerrainType.GRASSY]: Type.GRASS, [TerrainType.PSYCHIC]: Type.PSYCHIC
+      })
+    .partial(),
     new Ability(Abilities.SCREEN_CLEANER, 8)
       .unimplemented(),
     new Ability(Abilities.STEELY_SPIRIT, 8)
@@ -3855,14 +3896,12 @@ export function initAbilities() {
     new Ability(Abilities.ELECTROMORPHOSIS, 9)
       .attr(PostDefendApplyBattlerTagAbAttr, (target, user, move) => move.category !== MoveCategory.STATUS, BattlerTagType.CHARGED),
     new Ability(Abilities.PROTOSYNTHESIS, 9)
-      .conditionalAttr(getWeatherCondition(WeatherType.SUNNY, WeatherType.HARSH_SUN), PostSummonAddBattlerTagAbAttr, BattlerTagType.PROTOSYNTHESIS, 0, true)
       .attr(PostWeatherChangeAddBattlerTagAttr, BattlerTagType.PROTOSYNTHESIS, 0, WeatherType.SUNNY, WeatherType.HARSH_SUN)
       .attr(UncopiableAbilityAbAttr)
       .attr(UnswappableAbilityAbAttr)
       .attr(NoTransformAbilityAbAttr)
       .partial(), // While setting the tag, the getbattlestat should ignore all modifiers to stats except stat stages
     new Ability(Abilities.QUARK_DRIVE, 9)
-      .conditionalAttr(getTerrainCondition(TerrainType.ELECTRIC), PostSummonAddBattlerTagAbAttr, BattlerTagType.QUARK_DRIVE, 0, true)
       .attr(PostTerrainChangeAddBattlerTagAttr, BattlerTagType.QUARK_DRIVE, 0, TerrainType.ELECTRIC)
       .attr(UncopiableAbilityAbAttr)
       .attr(UnswappableAbilityAbAttr)
