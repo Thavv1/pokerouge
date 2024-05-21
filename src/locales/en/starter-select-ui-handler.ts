@@ -40,5 +40,7 @@ export const starterSelectUiHandler: SimpleTranslationEntries = {
     "disablePassive": "Disable Passive",
     "locked": "Locked",
     "disabled": "Disabled",
+    "random": "Random",
+    "confirmRandomize":"Begin with a random team?",
     "uncaught": "Uncaught"
 }
