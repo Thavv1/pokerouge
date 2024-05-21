@@ -2803,8 +2803,11 @@ export class StatChangePhase extends PokemonPhase {
       if (!this.selfTarget && this.levels < 0)
         this.scene.arena.applyTagsForSide(MistTag, pokemon.isPlayer() ? ArenaTagSide.PLAYER : ArenaTagSide.ENEMY, cancelled);
 
+      const allyCheck = true;
       if (!cancelled.value && !this.selfTarget && this.levels < 0)
-        applyPreStatChangeAbAttrs(ProtectStatAbAttr, this.getPokemon(), stat, cancelled);
+        applyPreStatChangeAbAttrs(ProtectStatAbAttr, this.getPokemon(), stat, cancelled, !allyCheck);
+        if (!cancelled.value && !this.selfTarget) // If Pokemon fails to protect themselves, check if ally has an ability to protect them
+          applyPreStatChangeAbAttrs(ProtectStatAbAttr, this.getPokemon().getAlly(), stat, cancelled, allyCheck);
       
       return !cancelled.value;
     });

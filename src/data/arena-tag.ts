@@ -435,7 +435,11 @@ class StickyWebTag extends ArenaTrapTag {
   activateTrap(pokemon: Pokemon): boolean {
     if (pokemon.isGrounded()) {
       const cancelled = new Utils.BooleanHolder(false);
-      applyAbAttrs(ProtectStatAbAttr, pokemon, cancelled);
+      const allyCheck = true;
+      applyAbAttrs(ProtectStatAbAttr, pokemon, cancelled, !allyCheck);
+      if (!cancelled.value) // If Pokemon fails to protect themselves, check if ally has an ability to protect them
+        applyAbAttrs(ProtectStatAbAttr, pokemon.getAlly(), cancelled, allyCheck);
+
       if (!cancelled.value) {
         pokemon.scene.queueMessage(`The opposing ${pokemon.name} was caught in a sticky web!`);
         const statLevels = new Utils.NumberHolder(-1);

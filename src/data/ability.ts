@@ -1713,17 +1713,40 @@ export class PreStatChangeAbAttr extends AbAttr {
   }
 }
 
+/**
+ * Prevents a Pokemon from being inflicted with status effects, ie. Limber, Insomnia, etc
+ * @extends PreStatChangeAbAttr
+ * @see {@link applyPreStatChange}
+ */
 export class ProtectStatAbAttr extends PreStatChangeAbAttr {
-  private protectedStat: BattleStat;
+  /** BattleStat to be protected by this ability attribute. */
+  private protectedStat: BattleStat; 
+  /** Should this ability attribute apply to their ally too. */
+  private applyToAlly: boolean; 
 
-  constructor(protectedStat?: BattleStat) {
+  constructor(protectedStat?: BattleStat, applyToAlly: boolean = false) {
     super();
 
     this.protectedStat = protectedStat;
+    this.applyToAlly = applyToAlly;
   }
 
+  /**
+   * Check if stat change should be canceled.
+   * @param pokemon {@linkcode Pokemon} that has this ability attribute
+   * @param passive - If this ability is passive
+   * @param stat {@linkcode BattleStat} that is being changed
+   * @param cancelled {@linkcode Utils.BooleanHolder}- Check if the stat change was canceled
+   * @param args [0] boolean of allyCheck - if the ability check is for the ally
+   * @returns true if function succeeds
+   */
   applyPreStatChange(pokemon: Pokemon, passive: boolean, stat: BattleStat, cancelled: Utils.BooleanHolder, args: any[]): boolean {
-    if (this.protectedStat === undefined || stat === this.protectedStat) {
+    const allyCheck = args[0];
+    if ((this.protectedStat === undefined || stat === this.protectedStat) && !allyCheck) {
+      cancelled.value = true;
+      return true;
+    } else if ((this.protectedStat === undefined || stat === this.protectedStat) 
+      && allyCheck && this.applyToAlly) {
       cancelled.value = true;
       return true;
     }
@@ -1742,17 +1765,42 @@ export class PreSetStatusAbAttr extends AbAttr {
   }
 }
 
+/**
+ * Prevents a Pokemon from being inflicted with status effects, ie. Limber, Insomnia, etc
+ * @extends PreSetStatusAbAttr
+ * @see {@link applyPreSetStatus}
+ */
 export class StatusEffectImmunityAbAttr extends PreSetStatusAbAttr {
-  private immuneEffects: StatusEffect[];
+  /** Should this ability attribute apply to their ally too. */
+  private applyToAlly: boolean; 
+  /** StatusEffects that this ability attribute prevents */
+  private immuneEffects: StatusEffect[]; 
 
-  constructor(...immuneEffects: StatusEffect[]) {
+  constructor(immuneEffects: StatusEffect[] = [], applyToAlly: boolean = false) {
     super();
 
     this.immuneEffects = immuneEffects;
+    this.applyToAlly = applyToAlly;
   }
 
+  /**
+   * Check if status being afflicted should be canceled.
+   * @param pokemon {@linkcode Pokemon} that has this ability attribute
+   * @param passive - If this ability is passive
+   * @param effect {@linkcode StatusEffect} that is being applied
+   * @param cancelled {@linkcode Utils.BooleanHolder}- Check if the status effect was canceled
+   * @param args [0] boolean of quiet - if the trigger is quiet
+   *             [1] boolean of allyCheck - if the ability check is for the ally
+   * @returns true if function succeeds
+   */
   applyPreSetStatus(pokemon: Pokemon, passive: boolean, effect: StatusEffect, cancelled: Utils.BooleanHolder, args: any[]): boolean {
-    if (!this.immuneEffects.length || this.immuneEffects.indexOf(effect) > -1) {
+    const allyCheck = args[1];
+    if ((!this.immuneEffects.length || this.immuneEffects.indexOf(effect) > -1) && !allyCheck) {
+      cancelled.value = true;
+      return true;
+    }
+    else if((!this.immuneEffects.length || this.immuneEffects.indexOf(effect) > -1) 
+      && allyCheck && this.applyToAlly) {
       cancelled.value = true;
       return true;
     }
@@ -1771,17 +1819,40 @@ export class PreApplyBattlerTagAbAttr extends AbAttr {
   }
 }
 
+/**
+ * Prevents a Pokemon from being inflicted with status effects, ie. Limber, Insomnia, etc
+ * @extends PreApplyBattlerTagAbAttr
+ * @see {@link applyPreApplyBattlerTag}
+ */
 export class BattlerTagImmunityAbAttr extends PreApplyBattlerTagAbAttr {
-  private immuneTagType: BattlerTagType;
+  /** BattlerTag this ability attribute prevents */
+  private immuneTagType: BattlerTagType; 
+  /** Should this ability attribute apply to their ally too */
+  private applyToAlly: boolean; 
 
-  constructor(immuneTagType: BattlerTagType) {
+  constructor(immuneTagType: BattlerTagType, applyToAlly: boolean = false) {
     super();
 
     this.immuneTagType = immuneTagType;
+    this.applyToAlly = applyToAlly;
   }
 
+  /**
+   * Check if tag being afflicted should be canceled.
+   * @param pokemon {@linkcode Pokemon} that has this ability attribute
+   * @param passive boolean - If this ability is passive
+   * @param tag {@linkcode BattlerTag} that is being applied
+   * @param cancelled {@linkcode Utils.BooleanHolder}- Check if the tag was canceled
+   * @param args [0] boolean of allyCheck - if the ability check is for the ally
+   * @returns true if function succeeds
+   */
   applyPreApplyBattlerTag(pokemon: Pokemon, passive: boolean, tag: BattlerTag, cancelled: Utils.BooleanHolder, args: any[]): boolean {
-    if (tag.tagType === this.immuneTagType) {
+    const allyCheck = args[0];
+    if ((tag.tagType === this.immuneTagType) && !allyCheck) {
+      cancelled.value = true;
+      return true;
+    } else if ((tag.tagType === this.immuneTagType) 
+      && allyCheck && this.applyToAlly) {
       cancelled.value = true;
       return true;
     }
@@ -2938,8 +3009,8 @@ export function applyPostStatChangeAbAttrs(attrType: { new(...args: any[]): Post
 
 export function applyPreSetStatusAbAttrs(attrType: { new(...args: any[]): PreSetStatusAbAttr },
   pokemon: Pokemon, effect: StatusEffect, cancelled: Utils.BooleanHolder, ...args: any[]): Promise<void> {
-  const simulated = args.length > 1 && args[1];
-  return applyAbAttrsInternal<PreSetStatusAbAttr>(attrType, pokemon, (attr, passive) => attr.applyPreSetStatus(pokemon, passive, effect, cancelled, args), args, false, false, !simulated);
+  const simulated = args.length > 2 && args[2];
+  return applyAbAttrsInternal<PreSetStatusAbAttr>(attrType, pokemon, (attr, passive) => attr.applyPreSetStatus(pokemon, passive, effect, cancelled, args), args, false, false, simulated);
 }
 
 export function applyPreApplyBattlerTagAbAttrs(attrType: { new(...args: any[]): PreApplyBattlerTagAbAttr },
@@ -3019,7 +3090,7 @@ export function initAbilities() {
       .attr(FieldPreventExplosiveMovesAbAttr)
       .ignorable(),
     new Ability(Abilities.LIMBER, 3)
-      .attr(StatusEffectImmunityAbAttr, StatusEffect.PARALYSIS)
+      .attr(StatusEffectImmunityAbAttr, [StatusEffect.PARALYSIS])
       .ignorable(),
     new Ability(Abilities.SAND_VEIL, 3)
       .attr(BattleStatMultiplierAbAttr, BattleStat.EVA, 1.2)
@@ -3044,13 +3115,13 @@ export function initAbilities() {
     new Ability(Abilities.COMPOUND_EYES, 3)
       .attr(BattleStatMultiplierAbAttr, BattleStat.ACC, 1.3),
     new Ability(Abilities.INSOMNIA, 3)
-      .attr(StatusEffectImmunityAbAttr, StatusEffect.SLEEP)
+      .attr(StatusEffectImmunityAbAttr, [StatusEffect.SLEEP])
       .attr(BattlerTagImmunityAbAttr, BattlerTagType.DROWSY)
       .ignorable(),
     new Ability(Abilities.COLOR_CHANGE, 3)
       .attr(PostDefendTypeChangeAbAttr),
     new Ability(Abilities.IMMUNITY, 3)
-      .attr(StatusEffectImmunityAbAttr, StatusEffect.POISON, StatusEffect.TOXIC)
+      .attr(StatusEffectImmunityAbAttr, [StatusEffect.POISON, StatusEffect.TOXIC])
       .ignorable(),
     new Ability(Abilities.FLASH_FIRE, 3)
       .attr(TypeImmunityAddBattlerTagAbAttr, Type.FIRE, BattlerTagType.FIRE_BOOST, 1, (pokemon: Pokemon) => !pokemon.status || pokemon.status.effect !== StatusEffect.FREEZE)
@@ -3119,10 +3190,10 @@ export function initAbilities() {
       .attr(IntimidateImmunityAbAttr)
       .ignorable(),
     new Ability(Abilities.MAGMA_ARMOR, 3)
-      .attr(StatusEffectImmunityAbAttr, StatusEffect.FREEZE)
+      .attr(StatusEffectImmunityAbAttr, [StatusEffect.FREEZE])
       .ignorable(),
     new Ability(Abilities.WATER_VEIL, 3)
-      .attr(StatusEffectImmunityAbAttr, StatusEffect.BURN)
+      .attr(StatusEffectImmunityAbAttr, [StatusEffect.BURN])
       .ignorable(),
     new Ability(Abilities.MAGNET_PULL, 3)
       /*.attr(ArenaTrapAbAttr)
@@ -3204,7 +3275,7 @@ export function initAbilities() {
       .attr(ArenaTrapAbAttr)
       .attr(DoubleBattleChanceAbAttr),
     new Ability(Abilities.VITAL_SPIRIT, 3)
-      .attr(StatusEffectImmunityAbAttr, StatusEffect.SLEEP)
+      .attr(StatusEffectImmunityAbAttr, [StatusEffect.SLEEP])
       .attr(BattlerTagImmunityAbAttr, BattlerTagType.DROWSY)
       .ignorable(),
     new Ability(Abilities.WHITE_SMOKE, 3)
@@ -3479,9 +3550,13 @@ export function initAbilities() {
     new Ability(Abilities.AROMA_VEIL, 6)
       .ignorable()
       .unimplemented(),
-    new Ability(Abilities.FLOWER_VEIL, 6)
+    new Ability(Abilities.FLOWER_VEIL, 6) /** TODO: Check against Spectral Thief once implemented, check against Toxic orb and flame orb once implemented.
+    Also needs to not prevent the user from using Rest. */
+      .conditionalAttr(p => (p.isOfType(Type.GRASS)), ProtectStatAbAttr, undefined, true)
+      .conditionalAttr(p => (p.isOfType(Type.GRASS)), StatusEffectImmunityAbAttr, [], true)
+      .conditionalAttr(p => (p.isOfType(Type.GRASS)), BattlerTagImmunityAbAttr, BattlerTagType.DROWSY, true)
       .ignorable()
-      .unimplemented(),
+      .partial(), 
     new Ability(Abilities.CHEEK_POUCH, 6)
       .unimplemented(),
     new Ability(Abilities.PROTEAN, 6)
@@ -3501,10 +3576,9 @@ export function initAbilities() {
     new Ability(Abilities.REFRIGERATE, 6)
       .attr(MoveTypeChangePowerMultiplierAbAttr, Type.NORMAL, Type.ICE, 1.2),
     new Ability(Abilities.SWEET_VEIL, 6)
-      .attr(StatusEffectImmunityAbAttr, StatusEffect.SLEEP)
-      .attr(BattlerTagImmunityAbAttr, BattlerTagType.DROWSY)
-      .ignorable()
-      .partial(),
+      .attr(StatusEffectImmunityAbAttr, [StatusEffect.SLEEP], true)
+      .attr(BattlerTagImmunityAbAttr, BattlerTagType.DROWSY, true)
+      .ignorable(),
     new Ability(Abilities.STANCE_CHANGE, 6)
       .attr(UncopiableAbilityAbAttr)
       .attr(UnswappableAbilityAbAttr)
@@ -3571,7 +3645,7 @@ export function initAbilities() {
     new Ability(Abilities.WATER_BUBBLE, 7)
       .attr(ReceivedTypeDamageMultiplierAbAttr, Type.FIRE, 0.5)
       .attr(MoveTypePowerBoostAbAttr, Type.WATER, 2)
-      .attr(StatusEffectImmunityAbAttr, StatusEffect.BURN)
+      .attr(StatusEffectImmunityAbAttr, [StatusEffect.BURN])
       .ignorable(),
     new Ability(Abilities.STEELWORKER, 7)
       .attr(MoveTypePowerBoostAbAttr, Type.STEEL),
@@ -3773,7 +3847,7 @@ export function initAbilities() {
       .attr(PostSummonMessageAbAttr, (pokemon: Pokemon) => getPokemonMessage(pokemon, '\'s Neutralizing Gas filled the area!'))
       .partial(),
     new Ability(Abilities.PASTEL_VEIL, 8)
-      .attr(StatusEffectImmunityAbAttr, StatusEffect.POISON, StatusEffect.TOXIC)
+      .attr(StatusEffectImmunityAbAttr, [StatusEffect.POISON, StatusEffect.TOXIC], true)
       .ignorable(),
     new Ability(Abilities.HUNGER_SWITCH, 8)
       .attr(PostTurnFormChangeAbAttr, p => p.getFormKey ? 0 : 1)
@@ -3816,7 +3890,7 @@ export function initAbilities() {
       .attr(PostDefendTerrainChangeAbAttr, TerrainType.GRASSY),
     new Ability(Abilities.THERMAL_EXCHANGE, 9)
       .attr(PostDefendStatChangeAbAttr, (target, user, move) => move.type === Type.FIRE && move.category !== MoveCategory.STATUS, BattleStat.ATK, 1)
-      .attr(StatusEffectImmunityAbAttr, StatusEffect.BURN)
+      .attr(StatusEffectImmunityAbAttr, [StatusEffect.BURN])
       .ignorable(),
     new Ability(Abilities.ANGER_SHELL, 9)
       .attr(PostDefendHpGatedStatChangeAbAttr, (target, user, move) => move.category !== MoveCategory.STATUS, 0.5, [ BattleStat.ATK, BattleStat.SPATK, BattleStat.SPD ], 1)
