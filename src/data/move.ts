@@ -4,7 +4,7 @@ import { BattleEndPhase, MoveEffectPhase, MovePhase, NewBattlePhase, PartyStatus
 import { BattleStat, getBattleStatName } from "./battle-stat";
 import { EncoreTag } from "./battler-tags";
 import { BattlerTagType } from "./enums/battler-tag-type";
-import { getPokemonMessage } from "../messages";
+import { getPokemonMessage, getPokemonPrefix } from "../messages";
 import Pokemon, { AttackMoveResult, EnemyPokemon, HitResult, MoveResult, PlayerPokemon, PokemonMove, TurnMove } from "../field/pokemon";
 import { StatusEffect, getStatusEffectHealText } from "./status-effect";
 import { Type } from "./type";
@@ -953,9 +953,42 @@ export class HealAttr extends MoveEffectAttr {
       Math.max(Math.floor(target.getMaxHp() * healRatio), 1), getPokemonMessage(target, ' \nhad its HP restored.'), true, !this.showAnim));
   }
 
+  getHealRatio(h: number = -1){
+    if (h > 0)
+      this.healRatio = h;
+
+    return this.healRatio;
+  }
+
   getTargetBenefitScore(user: Pokemon, target: Pokemon, move: Move): integer {
     let score = ((1 - (this.selfTarget ? user : target).getHpRatio()) * 20) - this.healRatio * 10;
     return Math.round(score / (1 - this.healRatio / 2));
+  }
+}
+
+/**
+ * Attribute used by the {@link Moves.STOCKPILE} to heal based on STOCKPILE stored
+ * @extends HealAttr
+ */
+export class SwallowHealAttr extends HealAttr {
+  constructor() {
+    super(1, true, true);
+  }
+  
+  apply(user: Pokemon, target: Pokemon, move: Move, args: any[]): boolean {
+    // uses the getStockpiles function to get number of STOCKPILE's stored
+    const stock = getStockpiles(user);
+
+    /**
+     * if stock is:
+     * 1, then healing is 0.25 of health
+     * 2, then healing is 0.50 of health
+     * 3, then healing is 1.00 of health
+     */
+    this.getHealRatio(stock >= 3 ? 1 : (stock * 0.25));
+
+    super.apply(user, target, move, args);
+    return true;
   }
 }
 
@@ -1990,6 +2023,44 @@ export class GrowthStatChangeAttr extends StatChangeAttr {
   }
 }
 
+/**
+ * Attribute for the stat changes for {@link Move.STOCKPILE}, {@link Move.SPIT_UP}, and {@link Move.SWALLOW}
+ * @extends StatChangeAttr
+ */
+export class StockpileStatChangeAttr extends StatChangeAttr {
+  private tagTypes = [BattlerTagType.STOCKPILE_ONE, BattlerTagType.STOCKPILE_TWO, BattlerTagType.STOCKPILE_THREE];
+  // this will show if we will gain 1 stack of stats with Stockpile
+  // or lose stacks of stats with Spit Up or Swallow
+  private gainStats:boolean;
+
+  constructor(gainStats:boolean = true) {
+    super([ BattleStat.DEF, BattleStat.SPDEF ], 1, true);
+
+    this.gainStats = gainStats;
+  }
+
+  apply(user: Pokemon, target: Pokemon, move: Move, args: any[]): boolean | Promise<boolean> {
+    const stock = getStockpiles(user);
+    
+    if (!this.gainStats) {
+      /**
+       *  since the Pokemon will be losing stats in this if statement,
+       * {@link this.levels} become equal to the negative of stock
+       */
+      this.levels = stock * -1;
+
+      // remove the stats equal to the number of stocks
+      for (let tagType of this.tagTypes)
+        user.removeTag(tagType);
+    }
+
+    if (!super.apply(user, target, move, args))
+      return false;
+
+    return true;
+  }
+}
+
 export class HalfHpStatMaxAttr extends StatChangeAttr {
   constructor(stat: BattleStat) {
     super(stat, 12, true, null, false);
@@ -2648,6 +2719,26 @@ export class WaterShurikenPowerAttr extends VariablePowerAttr {
       return true;
     }
     return false;
+  }
+}
+
+/**
+ * Attribute used by the {@link Moves.SPIT_UP} based on the number of stored STOCKPILE BattlerTagTypes
+ * @extends VariablePowerAttr
+ */
+export class SpitUpPowerAttr extends VariablePowerAttr {
+  apply(user: Pokemon, target: Pokemon, move: Move, args: any[]): boolean {
+    const power = args[0] as Utils.NumberHolder;
+
+    /**
+     * if stock is:
+     * 1, then power is 100
+     * 2, then power is 100
+     * 3, then power is 100
+     */
+    power.value = getStockpiles(user)*100;
+
+    return true;
   }
 }
 
@@ -3380,6 +3471,9 @@ export class AddBattlerTagAttr extends MoveEffectAttr {
       case BattlerTagType.INGRAIN:
       case BattlerTagType.IGNORE_ACCURACY:
       case BattlerTagType.AQUA_RING:
+      case BattlerTagType.STOCKPILE_ONE:
+      case BattlerTagType.STOCKPILE_TWO:
+      case BattlerTagType.STOCKPILE_THREE:
         return 3;
       case BattlerTagType.PROTECTED:
       case BattlerTagType.FLYING:
@@ -3554,6 +3648,53 @@ export class FaintCountdownAttr extends AddBattlerTagAttr {
     user.scene.queueMessage(getPokemonMessage(target, `\nwill faint in ${this.turnCountMin - 1} turns.`));
 
     return true;
+  }
+}
+
+/**
+ * Attribute used by the {@link Moves.STOCKPILE} to add the STOCKPILE BattlerTagTypes
+ * @extends AddBattlerTagTypeAttr
+ */
+export class StockpileAttr extends AddBattlerTagAttr {
+  constructor() {
+    super(BattlerTagType.STOCKPILE_THREE, true, false, 20, 20);
+  }
+
+  /**
+   * This changes {@link this.tagType} based on the {@link stock} of the user
+   * @param user is needed to retrieve how much stockpile the Pokemon has
+   *    as well as its name for the message
+   */
+  apply(user: Pokemon, target: Pokemon, move: Move, args: any[]): boolean {
+    const stock = getStockpiles(user);
+    // boolean failsafe that the tag will not apply when inappropriate
+    let willFail = false;
+
+    // check how many stock the user has then change the tag based on that
+    // keep the STOCKPILE_THREE tag if the stock is 2 or more
+    switch (stock){
+      case 0:
+        this.tagType = BattlerTagType.STOCKPILE_ONE;
+        break;
+      case 1:
+        this.tagType = BattlerTagType.STOCKPILE_TWO;
+        break;
+      default:
+        if (stock == 3)
+          willFail = true;
+        break;
+    }
+
+    if (willFail || !super.apply(user, target, move, args))
+      return false;
+
+    user.scene.queueMessage(this.getTriggerMessage(user, (stock+1)));
+
+    return true;
+  }
+  
+  getTriggerMessage(pokemon: Pokemon, stockpileNumber: integer, ...args: any[]) {
+    return i18next.t('abilityTriggers:stockpile', {pokemonName: `${getPokemonPrefix(pokemon)}${pokemon.name}`, stockpileNumber: stockpileNumber});
   }
 }
 
@@ -4594,11 +4735,33 @@ export class VariableTargetAttr extends MoveAttr {
   }
 }
 
+/**
+ * Used to get how many stockpiles a Pokemon has
+ * @param user to retrieve the BattlerTagTypes
+ * @returns number of stockpile BattleTagTypes on the Pokemon
+ */
+function getStockpiles(user: Pokemon) : integer {
+  let s = 0;
+  const stock = [BattlerTagType.STOCKPILE_ONE, BattlerTagType.STOCKPILE_TWO, BattlerTagType.STOCKPILE_THREE];
+
+  for (let x = 0 ; x < stock.length ; x++){
+    if (user.getTag(stock[x])){
+      s++;
+    }
+  }
+
+  return s;
+}
+
 const failOnGravityCondition: MoveConditionFunc = (user, target, move) => !user.scene.arena.getTag(ArenaTagType.GRAVITY);
 
 const failOnBossCondition: MoveConditionFunc = (user, target, move) => !target.isBossImmune();
 
 const failOnMaxCondition: MoveConditionFunc = (user, target, move) => !target.isMax();
+
+const failOnMaxStockCondition: MoveConditionFunc = (user, target, move) => getStockpiles(user) != 3;
+
+const failOnNoStockCondition: MoveConditionFunc = (user, target, move) => getStockpiles(user) != 0;
 
 const failIfDampCondition: MoveConditionFunc = (user, target, move) => {
   const cancelled = new Utils.BooleanHolder(false);
@@ -5445,12 +5608,18 @@ export function initMoves() {
       .target(MoveTarget.RANDOM_NEAR_ENEMY)
       .partial(),
     new SelfStatusMove(Moves.STOCKPILE, Type.NORMAL, -1, 20, -1, 0, 3)
-      .unimplemented(),
+      .attr(StockpileAttr)
+      .attr(StockpileStatChangeAttr)
+      .condition(failOnMaxStockCondition),
     new AttackMove(Moves.SPIT_UP, Type.NORMAL, MoveCategory.SPECIAL, -1, 100, 10, -1, 0, 3)
-      .unimplemented(),
+      .attr(SpitUpPowerAttr)
+      .attr(StockpileStatChangeAttr, false)
+      .condition(failOnNoStockCondition),
     new SelfStatusMove(Moves.SWALLOW, Type.NORMAL, -1, 10, -1, 0, 3)
-      .triageMove()
-      .unimplemented(),
+      .attr(SwallowHealAttr)
+      .attr(StockpileStatChangeAttr, false)
+      .condition(failOnNoStockCondition)
+      .triageMove(),
     new AttackMove(Moves.HEAT_WAVE, Type.FIRE, MoveCategory.SPECIAL, 95, 90, 10, 10, 0, 3)
       .attr(HealStatusEffectAttr, true, StatusEffect.FREEZE)
       .attr(StatusEffectAttr, StatusEffect.BURN)
@@ -5481,7 +5650,8 @@ export function initMoves() {
       .attr(MovePowerMultiplierAttr, (user, target, move) => target.status?.effect === StatusEffect.PARALYSIS ? 2 : 1)
       .attr(HealStatusEffectAttr, true, StatusEffect.PARALYSIS),
     new SelfStatusMove(Moves.FOLLOW_ME, Type.NORMAL, -1, 20, -1, 2, 3)
-      .unimplemented(),
+      .attr(AddBattlerTagAttr, BattlerTagType.CENTER_OF_ATTENTION, true, true)
+      .partial(),
     new StatusMove(Moves.NATURE_POWER, Type.NORMAL, -1, 20, -1, 0, 3)
       .attr(NaturePowerAttr)
       .ignoresVirtual(),
@@ -5494,7 +5664,8 @@ export function initMoves() {
       .attr(AddBattlerTagAttr, BattlerTagType.HELPING_HAND)
       .target(MoveTarget.NEAR_ALLY),
     new StatusMove(Moves.TRICK, Type.PSYCHIC, 100, 10, -1, 0, 3)
-      .unimplemented(),
+      .target(MoveTarget.NEAR_OTHER)
+      .partial(),
     new StatusMove(Moves.ROLE_PLAY, Type.PSYCHIC, -1, 10, -1, 0, 3)
       .attr(AbilityCopyAttr),
     new SelfStatusMove(Moves.WISH, Type.NORMAL, -1, 10, -1, 0, 3)
@@ -6046,8 +6217,9 @@ export function initMoves() {
       .attr(StatChangeAttr, BattleStat.SPD, 2, true)
       .partial(),
     new SelfStatusMove(Moves.RAGE_POWDER, Type.BUG, -1, 20, -1, 2, 5)
+      .attr(AddBattlerTagAttr, BattlerTagType.CENTER_OF_ATTENTION, true, true)
       .powderMove()
-      .unimplemented(),
+      .partial(),
     new StatusMove(Moves.TELEKINESIS, Type.PSYCHIC, -1, 15, -1, 0, 5)
       .condition(failOnGravityCondition)
       .unimplemented(),
@@ -6347,7 +6519,8 @@ export function initMoves() {
       .attr(TerrainChangeAttr, TerrainType.MISTY)
       .target(MoveTarget.BOTH_SIDES),
     new StatusMove(Moves.ELECTRIFY, Type.ELECTRIC, -1, 20, -1, 0, 6)
-      .unimplemented(),
+      .target(MoveTarget.NEAR_OTHER)
+      .partial(),
     new AttackMove(Moves.PLAY_ROUGH, Type.FAIRY, MoveCategory.PHYSICAL, 90, 90, 10, 10, 0, 6)
       .attr(StatChangeAttr, BattleStat.ATK, -1),
     new AttackMove(Moves.FAIRY_WIND, Type.FAIRY, MoveCategory.SPECIAL, 40, 100, 30, -1, 0, 6)
@@ -6605,7 +6778,9 @@ export function initMoves() {
     new AttackMove(Moves.LEAFAGE, Type.GRASS, MoveCategory.PHYSICAL, 40, 100, 40, -1, 0, 7)
       .makesContact(false),
     new StatusMove(Moves.SPOTLIGHT, Type.NORMAL, -1, 15, -1, 3, 7)
-      .unimplemented(),
+      .attr(AddBattlerTagAttr, BattlerTagType.CENTER_OF_ATTENTION, false)
+      .target(MoveTarget.NEAR_OTHER)
+      .partial(),
     new StatusMove(Moves.TOXIC_THREAD, Type.POISON, 100, 20, 100, 0, 7)
       .attr(StatusEffectAttr, StatusEffect.POISON)
       .attr(StatChangeAttr, BattleStat.SPD, -1),
