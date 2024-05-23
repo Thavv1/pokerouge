@@ -103,6 +103,27 @@ function getValueReductionCandyCounts(baseValue: integer): [integer, integer] {
   return starterCandyCosts[baseValue - 1].costReduction;
 }
 
+function getEggMoveCandyCount(baseValue: integer): integer {
+  switch (baseValue) {
+    case 1:
+      return 50;
+    case 2:
+      return 45;
+    case 3:
+      return 40;
+    case 4:
+      return 30;
+    case 5:
+      return 25;
+    case 6:
+      return 20;
+    case 7:
+      return 15;
+    default:
+      return 10;
+  }
+}
+
 const gens = [
     i18next.t("starterSelectUiHandler:gen1"),
     i18next.t("starterSelectUiHandler:gen2"),
@@ -955,6 +976,39 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
                   if (candyCount >= reductionCost) {
                     starterData.valueReduction++;
                     starterData.candyCount -= reductionCost;
+                    this.pokemonCandyCountText.setText(`x${starterData.candyCount}`);
+                    this.scene.gameData.saveSystem().then(success => {
+                      if (!success)
+                        return this.scene.reset(true);
+                    });
+                    this.updateStarterValueLabel(this.cursor);
+                    this.tryUpdateValue(0);
+                    ui.setMode(Mode.STARTER_SELECT);
+                    this.scene.playSound('buy');
+                    return true;
+                  }
+                  return false;
+                },
+                item: 'candy',
+                itemArgs: starterColors[this.lastSpecies.speciesId]
+              });
+            }
+            const eggMovesAvailableCount = speciesEggMoves[this.lastSpecies.speciesId].length;
+            const eggMovesLearnedCount = starterData.eggMoves;
+            //There's probably a more elegant way to do the bitwise comparison
+            if (eggMovesAvailableCount != 0 && eggMovesLearnedCount != (Math.pow(2, eggMovesAvailableCount) - 1)) { 
+              const eggMoveCost = getEggMoveCandyCount(speciesStarters[this.lastSpecies.speciesId]);
+              options.push({
+                label: `x${eggMoveCost} ${i18next.t("starterSelectUiHandler:learnEggMove")}`,
+                handler: () => {
+                  if (candyCount >= eggMoveCost) {
+                    for (let em = 0; em < 4; em++) {
+                      if (!(this.scene.gameData.starterData[this.lastSpecies.speciesId].eggMoves & Math.pow(2, em))) {
+                        this.scene.gameData.setEggMoveUnlocked(this.lastSpecies, em);
+                        break;
+                      }
+                    }
+                    starterData.candyCount -= eggMoveCost;
                     this.pokemonCandyCountText.setText(`x${starterData.candyCount}`);
                     this.scene.gameData.saveSystem().then(success => {
                       if (!success)
