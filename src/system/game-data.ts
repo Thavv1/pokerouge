@@ -56,10 +56,7 @@ export function getDataTypeKey(dataType: GameDataType, slotId: integer = 0): str
     case GameDataType.SYSTEM:
       return 'data';
     case GameDataType.SESSION:
-      let ret = 'sessionData';
-      if (slotId)
-        ret += slotId;
-      return ret;
+      return `sessionData${slotId ? slotId : ''}`;
     case GameDataType.SETTINGS:
       return 'settings';
     case GameDataType.TUTORIALS:
@@ -1320,7 +1317,7 @@ export class GameData {
     return ret;
   }
 
-  getSpeciesDexAttrProps(species: PokemonSpecies, dexAttr: bigint): DexAttrProps {
+  getSpeciesDexAttrProps(_species: PokemonSpecies, dexAttr: bigint): DexAttrProps {
     const shiny = !(dexAttr & DexAttr.NON_SHINY);
     const female = !(dexAttr & DexAttr.MALE);
     const variant = dexAttr & DexAttr.DEFAULT_VARIANT ? 0 : dexAttr & DexAttr.VARIANT_2 ? 1 : dexAttr & DexAttr.VARIANT_3 ? 2 : 0;

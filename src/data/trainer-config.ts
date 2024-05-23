@@ -569,37 +569,29 @@ export class TrainerConfig {
      * @returns {string} - The title of the trainer.
      **/
     getTitle(trainerSlot: TrainerSlot = TrainerSlot.NONE, variant: TrainerVariant): string {
-        let ret = this.name;
-
         // Check if the variant is double and the name for double exists
-        if (!trainerSlot && variant === TrainerVariant.DOUBLE && this.nameDouble)
+        if (trainerSlot === TrainerSlot.NONE && variant === TrainerVariant.DOUBLE && this.nameDouble)
             return this.nameDouble;
 
-        // Female variant
-        if (this.hasGenders) {
-            // If the name is already set
-            if (this.nameFemale) {
-                // Check if the variant is either female or this is for the partner in a double battle
-                if (variant === TrainerVariant.FEMALE || (variant === TrainerVariant.DOUBLE && trainerSlot === TrainerSlot.TRAINER_PARTNER))
-                    return this.nameFemale;
-            } else
-                // Check if !variant is true, if so return the name, else return the name with _female appended
-                if (variant) {
-                    if (!getIsInitialized()) {
-                        initI18n();
-                    }
-                    // Check if the female version exists in the i18n file
-                    if (i18next.exists(`trainerClasses:${this.name.toLowerCase().replace()}`)) {
-                        // If it does, return
-                        return ret + "_female";
-                    } else {
-                        // If it doesn't, we do not do anything and go to the normal return
-                        // This is to prevent the game from displaying an error if a female version of the trainer does not exist in the localization
-                    }
-                }
-        }
+        if (!this.hasGenders) 
+          return this.name;
 
-        return ret;
+        // If the name is already set
+        // Check if the variant is either female or this is for the partner in a double battle
+        if (this.nameFemale && (variant === TrainerVariant.FEMALE || (variant === TrainerVariant.DOUBLE && trainerSlot === TrainerSlot.TRAINER_PARTNER))) 
+          return this.nameFemale;
+
+        // Check if variant is default, if so return the name, else return the name with _female appended
+        if (variant === TrainerVariant.DEFAULT) 
+          return this.name;
+
+        if (!getIsInitialized())
+            initI18n();
+        
+        // Check if the female version exists in the i18n file
+        // If it doesn't, we do not do anything and go to the normal return
+        // This is to prevent the game from displaying an error if a female version of the trainer does not exist in the localization
+        return i18next.exists(`trainerClasses:${this.name.toLowerCase().replace()}`) ? `${this.name}_female` : this.name;
     }
 
     loadAssets(scene: BattleScene, variant: TrainerVariant): Promise<void> {

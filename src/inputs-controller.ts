@@ -271,7 +271,7 @@ export class InputsController {
      * - Checks if the pressed button is mapped to a game action.
      * - If mapped, emits an 'input_down' event with the controller type and button action, and updates the interaction of this button.
      */
-    gamepadButtonDown(pad: Phaser.Input.Gamepad.Gamepad, button: Phaser.Input.Gamepad.Button, value: number): void {
+    gamepadButtonDown(_pad: Phaser.Input.Gamepad.Gamepad, button: Phaser.Input.Gamepad.Button, value: number): void {
         if (!this.gamepadSupport) return;
         const actionMapping = this.getActionGamepadMapping();
         const buttonDown = actionMapping.hasOwnProperty(button.index) && actionMapping[button.index];
@@ -297,7 +297,7 @@ export class InputsController {
      * - Checks if the released button is mapped to a game action.
      * - If mapped, emits an 'input_up' event with the controller type and button action, and clears the interaction for this button.
      */
-    gamepadButtonUp(pad: Phaser.Input.Gamepad.Gamepad, button: Phaser.Input.Gamepad.Button, value: number): void {
+    gamepadButtonUp(_pad: Phaser.Input.Gamepad.Gamepad, button: Phaser.Input.Gamepad.Button, value: number): void {
         if (!this.gamepadSupport) return;
         const actionMapping = this.getActionGamepadMapping();
         const buttonUp = actionMapping.hasOwnProperty(button.index) && actionMapping[button.index];

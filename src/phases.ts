@@ -1,4 +1,4 @@
-import BattleScene, { AnySound, bypassLogin, startingWave } from "./battle-scene";
+import BattleScene, { bypassLogin, startingWave } from "./battle-scene";
 import { default as Pokemon, PlayerPokemon, EnemyPokemon, PokemonMove, MoveResult, DamageResult, FieldPosition, HitResult, TurnMove } from "./field/pokemon";
 import * as Utils from './utils';
 import { Moves } from "./data/enums/moves";
@@ -55,7 +55,7 @@ import { OptionSelectConfig, OptionSelectItem } from "./ui/abstact-option-select
 import { SaveSlotUiMode } from "./ui/save-slot-select-ui-handler";
 import { fetchDailyRunSeed, getDailyRunStarters } from "./data/daily-run";
 import { GameModes, gameModes } from "./game-mode";
-import PokemonSpecies, { getPokemonSpecies, getPokemonSpeciesForm, speciesStarters } from "./data/pokemon-species";
+import PokemonSpecies, { getPokemonSpecies, speciesStarters } from "./data/pokemon-species";
 import i18next from './plugins/i18n';
 import { Abilities } from "./data/enums/abilities";
 import * as Overrides from './overrides';
