@@ -2975,6 +2975,50 @@ export class IgnoreTypeStatusEffectImmunityAbAttr extends AbAttr {
   }
 }
 
+/**
+ * Base class for aura effects. Aura effects apply tags
+ * to a list of targets and keeps reapplying them as long
+ * as the aura source is active.
+ *
+ * @extends AbAttr
+ */
+export class AuraAbAttr extends AbAttr {
+  protected targetFunc: (source: Pokemon) => [Pokemon];
+
+  constructor(targetFunc: (source: Pokemon) => [Pokemon]) {
+    super();
+    this.targetFunc = targetFunc;
+  }
+}
+
+/**
+ * Damage reduction aura triggered by {@linkcode Abilities.FRIEND_GUARD}.
+ *
+ * @extends AuraAbAttr
+ * @see {@linkcode apply}
+ */
+export class FriendGuardAbAttr extends AuraAbAttr {
+  constructor() {
+    super((source: Pokemon) => [source.getAlly()]);
+  }
+
+  /**
+   * Applies {@linkcode BattlerTagType.FRIEND_GUARD} to ally pokemon.
+   * @param {Pokemon} pokemon that is the source of the aura effect.
+   * @param {boolean} passive N/A
+   * @param {Utils.BooleanHolder} cancelled N/A
+   * @param args N/A
+   * @returns true
+   */
+  apply(pokemon: Pokemon, passive: boolean, cancelled: Utils.BooleanHolder, args: any[]): boolean {
+    this.targetFunc(pokemon).forEach(
+      target => target?.addTag(BattlerTagType.FRIEND_GUARD, 0, undefined, pokemon.id)
+    );
+
+    return true;
+  }
+}
+
 function applyAbAttrsInternal<TAttr extends AbAttr>(attrType: { new(...args: any[]): TAttr },
   pokemon: Pokemon, applyFunc: AbAttrApplyFunc<TAttr>, args: any[], isAsync: boolean = false, showAbilityInstant: boolean = false, quiet: boolean = false, passive: boolean = false): Promise<void> {
   return new Promise(resolve => {
@@ -3561,8 +3605,8 @@ export function initAbilities() {
     new Ability(Abilities.HEALER, 5)
       .conditionalAttr(pokemon => pokemon.getAlly() && Utils.randSeedInt(10) < 3, PostTurnResetStatusAbAttr, true),
     new Ability(Abilities.FRIEND_GUARD, 5)
-      .ignorable()
-      .unimplemented(),
+      .attr(FriendGuardAbAttr)
+      .ignorable(),
     new Ability(Abilities.WEAK_ARMOR, 5)
       .attr(PostDefendStatChangeAbAttr, (target, user, move) => move.category === MoveCategory.PHYSICAL, BattleStat.DEF, -1)
       .attr(PostDefendStatChangeAbAttr, (target, user, move) => move.category === MoveCategory.PHYSICAL, BattleStat.SPD, 2),
