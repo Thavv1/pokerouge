@@ -9,7 +9,7 @@ import { BattlerTag } from "./battler-tags";
 import { BattlerTagType } from "./enums/battler-tag-type";
 import { StatusEffect, getNonVolatileStatusEffects, getStatusEffectDescriptor, getStatusEffectHealText } from "./status-effect";
 import { Gender } from "./gender";
-import Move, { AttackMove, MoveCategory, MoveFlags, MoveTarget, StatusMoveTypeImmunityAttr, FlinchAttr, OneHitKOAttr, HitHealAttr, StrengthSapHealAttr, allMoves, StatusMove, SelfStatusMove, VariablePowerAttr, applyMoveAttrs, IncrementMovePriorityAttr  } from "./move";
+import Move, { AttackMove, MoveCategory, MoveFlags, MoveTarget, StatusMoveTypeImmunityAttr, FlinchAttr, OneHitKOAttr, HitHealAttr, StrengthSapHealAttr, allMoves, StatusMove, SelfStatusMove, VariablePowerAttr, applyMoveAttrs, IncrementMovePriorityAttr, VariableMoveTypeAttr } from "./move";
 import { ArenaTagSide, ArenaTrapTag } from "./arena-tag";
 import { ArenaTagType } from "./enums/arena-tag-type";
 import { Stat } from "./pokemon-stat";
@@ -951,6 +951,39 @@ export class VariableMovePowerAbAttr extends PreAttackAbAttr {
 export class VariableMoveTypeAbAttr extends AbAttr {
   apply(pokemon: Pokemon, passive: boolean, cancelled: Utils.BooleanHolder, args: any[]): boolean {
     //const power = args[0] as Utils.IntegerHolder;
+    return false;
+  }
+}
+
+/**
+ * Before an attack, changes the type of the pokemon using said attack to the type of the move being used
+ * @extends PreAttackAbAttr
+ * @see {@link Abilities.PROTEAN} {@link Abilities.LIBERO}
+ */
+export class UserTypeChangeToMoveTypeAbAttr extends PreAttackAbAttr {
+  private condition: PokemonAttackCondition;
+
+  constructor(condition: PokemonAttackCondition) {
+    super(true);
+    this.condition = condition;
+  }
+
+  /**
+   *
+   * @param pokemon
+   * @param passive
+   * @param defender
+   * @param move
+   * @param {Type[]} args the types to change to.
+   * @returns
+   */
+  applyPreAttack(pokemon: Pokemon, passive: boolean, defender: Pokemon, move: PokemonMove, args: Type[]): boolean | Promise<boolean> {
+    if (this.condition(pokemon, defender, move.getMove())) {
+      pokemon.summonData.types = args;
+      pokemon.updateInfo();
+      return true;
+    }
+
     return false;
   }
 }
@@ -2137,6 +2170,19 @@ function getOncePerBattleCondition(ability: Abilities): AbAttrCondition {
   };
 }
 
+/**
+ * Creates an ability condition that causes the ability to fail if that ability
+ * has already been used by that pokemon this switch in. Once switched out for
+ * any reason, this will allow the ability to trigger again.
+ * @param {Abilities} ability The ability to check if it's already been applied
+ * @returns {AbAttrCondition} The condition
+ */
+function getOncePerSwitchInCondition(ability: Abilities): AbAttrCondition {
+  return (pokemon: Pokemon) => {
+    return !pokemon.summonData?.abilitiesApplied.includes(ability);
+  };
+}
+
 export class ForewarnAbAttr extends PostSummonAbAttr {
   constructor() {
     super(true);
@@ -3158,6 +3204,9 @@ function applyAbAttrsInternal<TAttr extends AbAttr>(attrType: { new(...args: any
       }
       pokemon.scene.setPhaseQueueSplice();
       const onApplySuccess = () => {
+        if (pokemon.summonData && !pokemon.summonData.abilitiesApplied.includes(ability.id)) {
+          pokemon.summonData.abilitiesApplied.push(ability.id);
+        }
         if (pokemon.battleData && !pokemon.battleData.abilitiesApplied.includes(ability.id)) {
           pokemon.battleData.abilitiesApplied.push(ability.id);
         }
@@ -3317,6 +3366,20 @@ export function applyPostBattleAbAttrs(attrType: { new(...args: any[]): PostBatt
 export function applyPostFaintAbAttrs(attrType: { new(...args: any[]): PostFaintAbAttr },
   pokemon: Pokemon, attacker: Pokemon, move: PokemonMove, hitResult: HitResult, ...args: any[]): Promise<void> {
   return applyAbAttrsInternal<PostFaintAbAttr>(attrType, pokemon, (attr, passive) => attr.applyPostFaint(pokemon, passive, attacker, move, hitResult, args), args);
+}
+
+/**
+ * Utility function to apply {@link UserTypeChangeToMoveTypeAbAttr} for certain edge cases:
+ *    if defender uses protect-like move
+ *    if user misses
+ * Also applies {@link VariableMoveTypeAttr} to activate for the correct type when moves that call other moves (ex: {@link Moves.NATURE_POWER}) and moves that change type (ex: {@link Moves.HIDDEN_POWER})
+ * @param {Pokemon} user the pokemon that used the move
+ * @param {PokemonMove} move the move used
+ */
+export function applyUserTypeChangeToMoveTypeAbAttr(user: Pokemon, move: PokemonMove) {
+  const variableType = new Utils.IntegerHolder(move.getMove().type);
+  applyMoveAttrs(VariableMoveTypeAttr, user, null, move.getMove(), variableType);
+  applyPreAttackAbAttrs(UserTypeChangeToMoveTypeAbAttr, user, null, move, variableType.value);
 }
 
 function canApplyAttr(pokemon: Pokemon, attr: AbAttr): boolean {
@@ -3831,7 +3894,9 @@ export function initAbilities() {
       .attr(HealFromBerryUseAbAttr, 1/3)
       .partial(), // Healing not blocked by Heal Block
     new Ability(Abilities.PROTEAN, 6)
-      .unimplemented(),
+      .attr(UserTypeChangeToMoveTypeAbAttr, (user, target, move) => (move.type !== user.getTypes()[0] || user.getTypes().length > 1) && move.id !== Moves.STRUGGLE && !move.callsAnotherMove()) // should not trigger if user is already the same type as move or if the used move is struggle or a move that calls another move like nature power (since they queue another move instead of replacing the current one)
+      .condition(getOncePerSwitchInCondition(Abilities.PROTEAN))
+      .partial(), // does not activate if user uses Roar or Whirlwind and fails
     new Ability(Abilities.FUR_COAT, 6)
       .attr(ReceivedMoveDamageMultiplierAbAttr, (target, user, move) => move.category === MoveCategory.PHYSICAL, 0.5)
       .ignorable(),
@@ -4057,7 +4122,9 @@ export function initAbilities() {
       .attr(PostSummonStatChangeAbAttr, BattleStat.DEF, 1, true)
       .condition(getOncePerBattleCondition(Abilities.DAUNTLESS_SHIELD)),
     new Ability(Abilities.LIBERO, 8)
-      .unimplemented(),
+      .attr(UserTypeChangeToMoveTypeAbAttr, (user, target, move) => (move.type !== user.getTypes()[0] || user.getTypes().length > 1) && move.id !== Moves.STRUGGLE && !move.callsAnotherMove()) // should not trigger if user is already the same type as move or if the used move is struggle or a move that calls another move like nature power (since they queue another move instead of replacing the current one)
+      .condition(getOncePerSwitchInCondition(Abilities.LIBERO))
+      .partial(), // does not activate if user uses Roar or Whirlwind and fails
     new Ability(Abilities.BALL_FETCH, 8)
       .attr(FetchBallAbAttr)
       .condition(getOncePerBattleCondition(Abilities.BALL_FETCH)),
