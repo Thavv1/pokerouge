@@ -108,6 +108,7 @@ export default class Move implements Localizable {
   private conditions: MoveCondition[];
   private flags: integer;
   private nameAppend: string;
+  private implemented: boolean = true;
 
   constructor(id: Moves, type: Type, category: MoveCategory, defaultMoveTarget: MoveTarget, power: integer, accuracy: integer, pp: integer, chance: integer, priority: integer, generation: integer) {
     this.id = id;
@@ -204,6 +205,10 @@ export default class Move implements Localizable {
     return false;
   }
 
+  isImplemented(): boolean {
+    return this.implemented;
+  }
+
   isAllyTarget(): boolean {
     switch (this.moveTarget) {
     case MoveTarget.USER:
@@ -244,6 +249,7 @@ export default class Move implements Localizable {
 
   unimplemented(): this {
     this.nameAppend += " (N)";
+    this.implemented = false;
     return this;
   }
 
