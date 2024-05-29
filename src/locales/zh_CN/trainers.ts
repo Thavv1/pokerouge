@@ -12,7 +12,22 @@ export const titles: SimpleTranslationEntries = {
   "champion_double": "冠军搭档",
   "rival": "劲敌",
   "professor": "博士",
+  "professor_female": "Professor",
   "frontier_brain": "开拓头脑",
+
+  // Special Trainers
+  "pkm_trainer": "Pokémon Trainer",
+  "pkm_trainer_female": "Pokémon Trainer",
+  "pkm_wielder": "Pokémon Wielder",
+  "pkm_wielder_female": "Pokémon Wielder",
+
+  // Double Names
+  "timespace_double": "Timespace Duo",
+  "sibling_double": "Sibling Duo",
+  "ninja_double": "Ninja Duo",
+  "dragon_tamer_double": "Dragon Tamer Duo",
+  "kalos_legends_double": "Kalos Legends Duo",
+  "alola_legends_double": "Alola Legends Duo",
   // Maybe if we add the evil teams we can add "Team Rocket" and "Team Aqua" etc. here as well as "Team Rocket Boss" and "Team Aqua Admin" etc.
 } as const;
 
@@ -302,6 +317,10 @@ export const trainerNames: SimpleTranslationEntries = {
   "rival": "芬恩",
   "rival_female": "艾薇",
 
+  "volo": "Volo",
+  "hop": "Hop",
+  "kukui": "Kukui",
+  "carmine": "Carmine",
 
   // Double Names
   "blue_red_double": "青绿 & 赤红",
@@ -314,4 +333,24 @@ export const trainerNames: SimpleTranslationEntries = {
   "iris_alder_double": "艾莉丝 & 阿戴克",
   "marnie_piers_double": "玛俐 & 聂梓",
   "piers_marnie_double": "聂梓 & 玛俐",
+  "volo_cynthia_double": "Volo & Cynthia",
+  "cynthia_volo_double": "Cynthia & Volo",
+  "hop_leon_double": "Hop & Leon",
+  "leon_hop_double": "Leon & Hop",
+  "opal_bede_double": "Opal & Bede",
+  "bede_opal_double": "Bede & Opal",
+  "nemona_geeta_double": "Nemona & Geeta",
+  "geeta_nemona_double": "Geeta & Nemona",
+  "janine_koga_double": "Janine & Koga",
+  "koga_janine_double": "Koga & Janine",
+  "lance_clair_double": "Lance & Clair",
+  "clair_lance_double": "Clair & Lance",
+  "kieran_carmine_double": "Kieran & Carmine",
+  "carmine_kieran_double": "Carmine & Kieran",
+  "hau_kukui_double": "Hau & Kukui",
+  "kukui_hau_double": "Kukui & Hau",
+  "diantha_korrina_double": "Diantha & Korrina",
+  "korrina_diantha_double": "Korrina & Diantha",
+  "roark_byron_double": "Roark & Byron",
+  "byron_roark_double": "Byron & Roark",
 } as const;

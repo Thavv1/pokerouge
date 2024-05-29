@@ -185,5 +185,10 @@ export enum TrainerType {
   RIVAL_3,
   RIVAL_4,
   RIVAL_5,
-  RIVAL_6
+  RIVAL_6,
+  // Trainers that are only double partners for now
+  HOP = 400,
+  VOLO,
+  CARMINE,
+  KUKUI,
 }

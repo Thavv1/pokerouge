@@ -11,8 +11,23 @@ export const titles: SimpleTranslationEntries = {
   "champion_female": "Maitresse",
   "champion_double": "Duo de Maitres",
   "rival": "Rival·e", //Written in gender-inclusive language in wait of a potential split of the entry
-  "professor": "Professeur·e", //Written in gender-inclusive language in wait of a potential split of the entry
+  "professor": "Professeur",
+  "professor_female": "Professeure",
   "frontier_brain": "Meneur·euse de Zone", //Written in gender-inclusive language in wait of a potential split of the entry
+
+  // Special Trainers
+  "pkm_trainer": "Dresseur Pokémon",
+  "pkm_trainer_female": "Dresseuse Pokémon",
+  "pkm_wielder": "Expert en Pokémon",
+  "pkm_wielder_female": "Experte en Pokémon",
+
+  // Double Names
+  "timespace_double": "Duo Spatio-Temporel",
+  "sibling_double": "Fratrie",
+  "ninja_double": "Duo de Ninjas",
+  "dragon_tamer_double": "Duo de Dracologues",
+  "kalos_legends_double": "Légendes de Kalos",
+  "alola_legends_double": "Légendes d’Alola",
   // Maybe if we add the evil teams we can add "Team Rocket" and "Team Aqua" etc. here as well as "Team Rocket Boss" and "Team Aqua Admin" etc.
 } as const;
 
@@ -30,7 +45,7 @@ export const trainerClasses: SimpleTranslationEntries = {
   "baker": "Boulangère",
   "battle_girl": "Combattante",
   "beauty": "Canon",
-  "beginners": "Beginners",
+  "beginners": "Novices",
   "biker": "Motard",
   "black_belt": "Karatéka",
   "breeder": "Éleveur",
@@ -246,6 +261,10 @@ export const trainerNames: SimpleTranslationEntries = {
   "rival": "Gwenaël", //Male breton name, a celtic language spoken in  Brittany (France) and related to the word for "white" (gwenn). Finn meaning is also "white" in irish/goidelic which are also celtic languages.
   "rival_female": "Papina", //Litteral translation of ivy, also used as Female name in a North-American indigenous language
 
+  "volo": "Percupio",
+  "hop": "Nabil",
+  "kukui": "Euphorbe",
+  "carmine": "Roseille",
 
   // Double Names
   "blue_red_double": "Blue & Red",
@@ -258,4 +277,24 @@ export const trainerNames: SimpleTranslationEntries = {
   "iris_alder_double": "Iris & Goyah",
   "marnie_piers_double": "Rosemary & Peterson",
   "piers_marnie_double": "Peterson & Rosemary",
+  "volo_cynthia_double": "Percupio & Cynthia",
+  "cynthia_volo_double": "Cynthia & Percupio",
+  "hop_leon_double": "Nabil & Tarak",
+  "leon_hop_double": "Tarak & Nabil",
+  "opal_bede_double": "Sally & Travis",
+  "bede_opal_double": "Travis & Sally",
+  "nemona_geeta_double": "Menzi & Alisma",
+  "geeta_nemona_double": "Alisma & Menzi",
+  "janine_koga_double": "Jeannine & Koga",
+  "koga_janine_double": "Koga & Jeannine",
+  "lance_clair_double": "Peter & Sandra",
+  "clair_lance_double": "Sandra & Peter",
+  "kieran_carmine_double": "Kass & Roseille",
+  "carmine_kieran_double": "Roseille & Kass",
+  "hau_kukui_double": "Tili & Euphorbe",
+  "kukui_hau_double": "Euphorbe & Tili",
+  "diantha_korrina_double": "Dianthéa & Cornélia",
+  "korrina_diantha_double": "Cornélia & Dianthéa",
+  "roark_byron_double": "Pierrick & Charles",
+  "byron_roark_double": "Charles & Pierrick",
 } as const;

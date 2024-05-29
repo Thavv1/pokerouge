@@ -516,7 +516,7 @@ export const PGMdialogue: DialogueTranslationEntries = {
     },
     "victory": {
       1: "Oh, es scheint, als hätte ich verloren.",
-      2: "Es scheint, als hätte ich noch so viel mehr zu lernen, wenn es um den Kämpfe geht.",
+      2: "Es scheint, als hätte ich noch so viel mehr zu lernen, wenn es um Kämpfe geht.",
       3: "Ich werde mir zu Herzen nehmen, was ich heute gelernt habe."
     },
     "defeat": {
@@ -775,7 +775,7 @@ export const PGMdialogue: DialogueTranslationEntries = {
   },
   "marshal": {
     "encounter": {
-      1: `Mein Mentor, Lauro, sieht sieht Potential in dir. Ich werde dich testen,
+      1: `Mein Mentor, Lauro, sieht Potential in dir. Ich werde dich testen,
           $dich an die Grenzen deiner Stärke bringen. Kiai!`,
       2: "Ein Sieg, ein entscheidender Sieg, das ist mein Ziel! Herausforderer, hier komme ich!",
       3: "Ich selber suche die Stärke eines Kämpfers zu entwickeln und jede Schwäche in mir zu brechen!"
@@ -930,7 +930,7 @@ export const PGMdialogue: DialogueTranslationEntries = {
   },
   "lacey": {
     "encounter": {
-      1: "Ich werde dir mit meiner gewohnten Team, als Mitglied der Top Vier gegenüberstehen."
+      1: "Ich werde dir mit meinem gewohnten Team, als Mitglied der Top Vier gegenüberstehen."
     },
     "victory": {
       1: "Das war ein großartiger Kampf!"
@@ -1025,7 +1025,7 @@ export const PGMdialogue: DialogueTranslationEntries = {
   },
   "cress": {
     "encounter": {
-      1: "Das ist korrekt! Ich und meine geschätzten Wasser-Typen werden deine Gegner im Kampf sein!"
+      1: "Das ist korrekt! Ich und meine geschätzten Wasser-Pokémon werden deine Gegner im Kampf sein!"
     },
     "victory": {
       1: "Verlieren? Ich? Das glaube ich nicht."
@@ -1234,8 +1234,7 @@ export const PGMdialogue: DialogueTranslationEntries = {
   },
   "bugsy": {
     "encounter": {
-      1: `Wow, erstaunlich! Du bist ein Experte für Pokémon!
-                $Meine Forschung ist noch nicht abgeschlossen. OK, du gewinnst.`,
+      1: "Ich bin Kai, der Arenaleiter von Azalea City. Ich bin ein großer Fan von Käfer-Pokémon.",
     },
     "victory": {
       1: `Wow, erstaunlich! Du bist ein Experte für Pokémon!
@@ -1950,7 +1949,7 @@ export const PGMdialogue: DialogueTranslationEntries = {
       1: "Lass mich sehen, wie du und dein Partner-Pokémon euch verhalten!"
     },
     "victory": {
-      1: "Dein Rosa fehlt noch, aber du bist ein ausgezeichneter Trainer mit ausgezeichneten Pokémon."
+      1: "Dein Pink fehlt noch, aber du bist ein ausgezeichneter Trainer mit ausgezeichneten Pokémon."
     },
     "defeat": {
       1: "Schade für dich, denke ich."
@@ -2131,7 +2130,51 @@ export const PGMdialogue: DialogueTranslationEntries = {
       2: "Du bist in meinen Sturm geraten! Viel Glück beim nächsten Mal!"
     }
   },
-
+  "volo": {
+    "encounter": {
+      1: `Ich bin Volo und ich will Arceus sehen, den Gott aller Pokémon.
+          $Ich werde dich besiegen, um meinem Ziel näher zu kommen.`,
+    },
+    "victory": {
+      1: "Warum? Warum wurdest DU von Arceus auserwählt?"
+    },
+    "defeat": {
+      1: "Ja! Ja! Arceus, gib mir Kraft!"
+    }
+  },
+  "hop": {
+    "encounter": {
+      1: "Ich bin hier, um zu sehen, ob du bereit bist, dem Champion gegenüberzutreten! Los geht's!"
+    },
+    "victory": {
+      1: "Es sieht so aus, als hätte ich noch einen langen Weg vor mir, bevor ich Delion gegenübertreten kann."
+    },
+    "defeat": {
+      1: "Ja! Ich habe gewonnen! Ich komme meinem Ziel näher!"
+    }
+  },
+  "carmine": {
+    "encounter": {
+      1: "Ich bin Hana, von der Blaubeer-Akademie. Ich bin hier, um deine Fähigkeiten zu testen."
+    },
+    "victory": {
+      1: "Du bist ein würdiger Gegner. Ich bin froh, gegen dich gekämpft zu haben."
+    },
+    "defeat": {
+      1: "Ja! Die Blaubeer-Akademie wird stolz auf mich sein!"
+    }
+  },
+  "kukui": {
+    "encounter": {
+      1: "Hast du von den Pokémon aus Alola gehört? Sie sind alle so einzigartig und interessant!"
+    },
+    "victory": {
+      1: "Es scheint, du kennst dich mit Pokémon aus Alola aus! Ich bin beeindruckt!"
+    },
+    "defeat": {
+      1: "Vielleicht solltest du nach Alola kommen und mehr über unsere Pokémon lernen!"
+    }
+  },
   "rival": {
     "encounter": {
       1: `@c{smile}Hey, ich habe dich gesucht! Ich weiß, dass du es nicht erwarten konntest loszugehen,
@@ -2505,6 +2548,220 @@ export const PGMdoubleBattleDialogue: DialogueTranslationEntries = {
                     $Marnie: Bruder...`,
     },
   },
+  "volo_cynthia_double": {
+    "encounter": {
+      1: `Volo: Ein Team, das die Macht von Heute und der Vergangenheit vereint!
+          $Cynthia: Ein Team, das eine Verbindung über Raum und Zeit repräsentiert!
+          $Volo: Du wirst uns nicht besiegen können!`,
+    },
+    "victory": {
+      1: `Cynthia: Gibt es wirklich so einen starken Trainer auf dieser Welt?
+          $Volo: Es scheint, die Zukunft ist in guten Händen...`,
+    },
+  },
+  "cynthia_volo_double": {
+    "encounter": {
+      1: `Cynthia: Ich repräsentiere die Macht von Sinnoh!
+          $Volo: Und ich repräsentiere die Macht von Hisui!
+          $Cynthia: Zusammen sind wir unschlagbar!`,
+    },
+    "victory": {
+      1: `Volo: Wir wurden besiegt?
+          $Cynthia: Sogar unsere vereinte Kraft war nicht genug...`,
+    },
+  },
+  "hop_leon_double": {
+    "encounter": {
+      1: `Hop: Bruder, lass uns ihnen die Kraft der Galar-Region zeigen!
+          $Delion: Ich bin der unbesiegte Champion von Galar!
+          $Delion: Du hast keine Chance!`,
+    },
+    "victory": {
+      1: `Hop: Nicht mehr unbesiegt...!
+          $Delion: Hop...Wirklich? Jetzt?`,
+    },
+  },
+  "leon_hop_double": {
+    "encounter": {
+      1: `Delion: Euer Champ Delion ist hier!
+          $Hop: Und ich bin sein Bruder!
+          $Delion: Die Leute nennen mich "Delion, der Unbesiegbare"!`,
+    },
+    "victory": {
+      1: `Hop: Es tut mir so leid, Bruder...
+          $Delion: Ich bin nicht sauer, wir werden das nächste Mal gewinnen!`,
+    },
+  },
+  "opal_bede_double": {
+    "encounter": {
+      1: `Papella: DAS ist ein schönes Pink!
+          $Betys: W-Was?
+          $Papella: Pink von Kopf bis Fuß!`,
+    },
+    "victory": {
+      1: `Papella: Siehst du jetzt das Pink?
+          $Betys: Natürlich. Es ist fantastisch!`,
+    },
+  },
+  "bede_opal_double": {
+    "encounter": {
+      1: `Betys: Wir sind die Arenaleiter von Fairballey!
+          $Papella: Und wir sind hier, um euch die Kraft von Pink zu zeigen!`,
+    },
+    "victory": {
+      1: `Betys: Dir und deinen Pokémon fehlt es noch etwas an Pink...
+          $Papella: Aber du bist ein großartiger Trainer!`,
+    },
+  },
+  "nemona_geeta_double": {
+    "encounter": {
+      1: `Nemila: Hallihallo, wir kennen uns noch nicht, aber hast du Interesse an einem Kampf?
+          $Sagaria: Nemila, du bist so direkt!`,
+    },
+    "victory": {
+      1: `Nemila: Lass uns gleich nochmal kämpfen!
+          $Sagaria: Wir haben keine Pokémon mehr...`,
+    },
+  },
+  "geeta_nemona_double": {
+    "encounter": {
+      1: `Sagaria: Wir sind die besten Trainer von Paldea!
+          $Nemila: Und wir werden euch unsere Macht zeigen!`,
+    },
+    "victory": {
+      1: `Sagaria: Wir werden nächstes Mal gewinnen!
+          $Nemila: Bye! Ich muss trainieren gehen!
+          $Sagaria: Nun...Schon ist sie weg...`,
+    },
+  },
+  "janine_koga_double": {
+    "encounter": {
+      1: `Janina: Wir sind die Ninja-Meister von Kanto!
+          $Koga: Unser Gift wird euch besiegen!`,
+    },
+    "victory": {
+      1: `Janina: Vielleicht hätten wir mehr Ninja-Taktiken anwenden sollen...
+          $Koga: Nein, wir müssen mehr Gift einsetzen!`,
+    },
+  },
+  "koga_janine_double": {
+    "encounter": {
+      1: `Koga: Ich bin Koga von den Top Vier! Ehemaliger Arenaleiter von Fuchsania City!
+          $Janina: Ich bin Janina, die aktuelle Arenaleiterin von Fuchsania City!
+          $Koga: Meine Tochter ist eine großartige Ninja!
+          $Janina: Und mein Vater ist ein großartiger Giftmeister!
+          $Koga: Du wirst um Gnade flehen!`,
+    },
+    "victory": {
+      1: `Koga: Vielleicht sollten wir stattdessen um Gnade bitten!
+          $Janina: Vielleicht...Oder Rauchbomben einsetzen!`,
+    },
+  },
+  "lance_clair_double": {
+    "encounter": {
+      1: `Siegfried: Wir sind die besten Drachen-Trainer der Welt!
+          $Sandra: Naja...Zumindest in Kanto und Johto!`,
+    },
+    "victory": {
+      1: `Siegfried: Sag Dragan und Lillia nicht das wir hier verloren haben...
+          $Sandra: Keine Sorge, ich werde es nicht!`,
+    },
+  },
+  "clair_lance_double": {
+    "encounter": {
+      1: `Sandra: Ich bin die Drachenmeisterin von Ebenholz City!
+          $Siegfried: Und ich bin der Champion der Indigo Plateau!
+          $Sandra: Mein Cousin und ich werden euch zeigen, warum Drachen die besten sind!`,
+    },
+    "victory": {
+      1: `Sandra: Drachen sind immer noch die besten!
+          $Siegfried: Und so majestätisch!`,
+    },
+  },
+  "kieran_carmine_double": {
+    "encounter": {
+      1: `Jo: Hana, schau mal. Ein neues Gesicht.
+          $Hana: Bist du ein neuer Herausforderer? Wenn du an uns vorbei willst, musst du uns zuerst besiegen!
+          $Jo: Hana, du bist zu direkt.`,
+    },
+    "victory": {
+      1: `Jo: Wie haben wir verloren? Was ist dein Geheimnis?
+          $Hana: Das war ein schöner Kampf. Hoffentlich sehen wir uns wieder!`,
+    },
+  },
+  "carmine_kieran_double": {
+    "encounter": {
+      1: `Hana: Hallo, wir sind Hana und Jo.
+          $Jo: Von der Blaubeer-Akademie. Willkommen in Kitakami`,
+    },
+    "victory": {
+      1: `Hana: Du solltest uns an der Akademie besuchen.
+          $Jo: Und dann werden wir dich besiegen!`,
+    },
+  },
+  "hau_kukui_double": {
+    "encounter": {
+      1: `Tali: Der Professor und ich sind bereit für einen Kampf!
+          $Kukui: Lass uns ihnen die Kraft von Alola zeigen!`,
+    },
+    "victory": {
+      1: `Tali: Wir haben verloren, aber mach dir keine Sorgen. Man kann keinen Regenbogen ohne ein wenig Regen haben.
+          $Kukui: Lass uns surfen gehen! Nach einem Kampf gibt es nichts Besseres als ein zu surfen!`,
+    },
+  },
+  "kukui_hau_double": {
+    "encounter": {
+      1: `Kukui: Ich bin der Professor von Alola. Und das ist mein Schüler Tali.
+          $Tali: Und ich bin der zukünftige Champion von Alola!`,
+    },
+    "victory": {
+      1: `Kukui: Ich bin stolz auf dich, Tali. Du hast einen großartigen Job gemacht.
+          $Tali: Danke, Professor. Aber wir werden das nächste Mal gewinnen!`,
+    },
+  },
+  "diantha_korrina_double": {
+    "encounter": {
+      1: `Diantha: Willkommen, ich bin Diantha, die Kalos Champion.
+          $Connie: Und ich bin Connie, die Arenaleiterin von Yantara City.`,
+    },
+    "victory": {
+      1: `Diantha: Das war ein großartiger Kampf. Du bist ein starker Trainer.
+          $Connie: Wir werden das nächste Mal gewinnen!`,
+    }
+  },
+  "korrina_diantha_double": {
+    "encounter": {
+      1: `Connie: Lady Diantha, ich bin bereit für einen Kampf.
+          $Diantha: Dann zeig ihnen die Kraft unserer großartigen Pokémon!`,
+    },
+    "victory": {
+      1: `Connie: Hast du meine Bewegungen gesehen? Ich bin die Beste!
+          $Diantha: Nun, wir haben verloren, also lass uns tranieren gehen!`,
+    }
+  },
+  "roark_byron_double": {
+    "encounter": {
+      1: `Veit: Lass uns ihnen die Kraft unserer Pokémon zeigen!
+          $Adam: Wir werden euch die Macht des Untergrunds zeigen!
+          $Veit: Los, gehen wir unter die Erde!`,
+    },
+    "victory": {
+      1: `Veit: Wie habe ich mich gemacht, Vater?
+          $Adam: Du warst großartig, Sohn! Aber wir haben trotzdem verloren...
+          $Also zurück in den Untergrund! Lass uns mehr trainieren`,
+    }
+  },
+  "byron_roark_double": {
+    "encounter": {
+      1: `Adam: Ich bin der Arenaleiter von Fleetburg!
+          $Veit: Und ich bin der Arenaleiter von Erzlingen!
+          $Adam: Wir werden euch die Macht des Untergrunds zeigen!`,
+    },
+    "victory": {
+      1: `Adam: Das war fast so hart wie mein Stahlos!
+          $Veit: Und auch so schwer wie mein Rameidon!`,
+    }
+  }
 };
 
 // Dialogue of the named double battles in the game. For when the player is female. For languages that do not have gendered pronouns, this can be set to PGMdoubleBattleDialogue.

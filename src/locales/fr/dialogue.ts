@@ -4362,6 +4362,50 @@ export const PGFdialogue: DialogueTranslationEntries = {
       2: "You got caught in my storm! Better luck next time!"
     }
   },
+  "volo": {
+    "encounter": {
+      1: "I am Volo, i want to see Arceus, the god of all Pokémon. I will defeat you to get closer to my goal."
+    },
+    "victory": {
+      1: "Why? Why are YOU chosen by Arceus?"
+    },
+    "defeat": {
+      1: "Yes! Yes! Arceus, give me strength!"
+    }
+  },
+  "hop": {
+    "encounter": {
+      1: "I'm here to see if you're ready to face the Champion! Well, i am still working on it."
+    },
+    "victory": {
+      1: "Looks like i still have a long way to go before i can face the Champion.",
+    },
+    "defeat": {
+      1: "Yes! I won! I'm getting closer to my goal!"
+    }
+  },
+  "carmine": {
+    "encounter": {
+      1: "I am Carmine, from the Blueberry Academy. I am here to test your skills.",
+    },
+    "victory": {
+      1: "You are a worthy opponent. I am glad to have battled you."
+    },
+    "defeat": {
+      1: "Yes! The Blueberry Academy will be proud of me!"
+    }
+  },
+  "kukui": {
+    "encounter": {
+      1: "Did you hear about the Pokémon of Alola? They're all so unique and interesting!"
+    },
+    "victory": {
+      1: "It seems you know the Aloha spirit well!"
+    },
+    "defeat": {
+      1: "Maybe you should come to Alola and learn more about our Pokémon!"
+    }
+  },
   "rival": {
     "encounter": {
 	  1: `@c{smile}Ah, je te cherchais ! Je savais que t’étais pressée de partir, mais je m’attendais quand même à un au revoir…
@@ -4835,4 +4879,217 @@ export const PGFdoubleBattleDialogue: DialogueTranslationEntries = {
                     $Rosemary : Frérot…`,
     },
   },
+  "volo_cynthia_double": {
+    "encounter": {
+      1: `Percupio : A team that united the power of today and the past!
+          $Cynthia : A Team that represents a bond across space and time!
+          $Percupio : You will not be able to defeat us!`,
+    },
+    "victory": {
+      1: `Cynthia: Such a strong trainer exists in this world?
+          $Percupio : It seems the future is in good hands...`,
+    },
+  },
+  "cynthia_volo_double": {
+    "encounter": {
+      1: `Cynthia : I represent the power of Sinnoh!
+            $Percupio : And I represent the power of Hisui!
+            $Cynthia : Together we are unbeatable!`,
+    },
+    "victory": {
+      1: `Percupio : We were defeated?
+            $Cynthia: Even our combined power was not enough...`,
+    },
+  },
+  "hop_leon_double": {
+    "encounter": {
+      1: `Nabil : Brother, let's show them the power of the Galar region!
+            $Tarak : I am the undefeated champion of Galar!
+            $Tarak : You dont have a chance!`,
+    },
+    "victory": {
+      1: `Nabil : Not undefeated anymore...!
+          $Tarak : Hop..Really? Right now?`,
+    },
+  },
+  "leon_hop_double": {
+    "encounter": {
+      1: `Tarak : Your Champ Leon is here!
+            $Nabil : And I am his brother!
+            $Tarak : People call me "Leon, The Unbeatable"!`,
+    },
+    "victory": {
+      1: `Nabil : I am so sorry, brother...
+          $Tarak : I am not mad, we will win next time!`,
+    },
+  },
+  "opal_bede_double": {
+    "encounter": {
+      1: `Sally : THIS is a pretty pink!
+            $Travis : W-What?
+            $Sally : Pink from head to toe!`,
+    },
+    "victory": {
+      1: `Sally : Do you see the pink now?
+          $Travis : Of course. Its fabulous!`,
+    },
+  },
+  "bede_opal_double": {
+    "encounter": {
+      1: `Travis : We are the gym leaders of Ballonlea!
+          $Sally : And we are here to show you the power of pink!`,
+    },
+    "victory": {
+      1: `Travis : You and your pokémon are still lacking pink...
+          $Sally : But you are a great trainer!`,
+    },
+  },
+  "nemona_geeta_double": {
+    "encounter": {
+      1: `Menzi : Hi there, we don´t know each other yet, but we are you interested in a battle?
+          $Alisma : Nemona, you are so direct!`,
+    },
+    "victory": {
+      1: `Menzi : Let us battle again right away!
+          $Alisma : We don´t have Pokémons left...`,
+    },
+  },
+  "geeta_nemona_double": {
+    "encounter": {
+      1: `Alisma : We are the best trainers of Paldea!
+          $Menzi : And we will show you our power!`,
+    },
+    "victory": {
+      1: `Geeta: We will win next time!
+            $Menzi : Bye, I need to go train!
+            $Alisma : Well...There she goes...`,
+    },
+  },
+  "janine_koga_double": {
+    "encounter": {
+      1: `Jeannine : We are the ninja masters of Kanto!
+          $Koga : Our poison will defeat you!`,
+    },
+    "victory": {
+      1: `Jeannine : Maybe we should have used more ninja tactics...
+          $Koga : No, we need to use more poison!`,
+    },
+  },
+  "koga_janine_double": {
+    "encounter": {
+      1: `Koga : I am Koga of the Elite Four! Former Gym Leader of Fuchsia City!
+          $Jeannine : I am Janine, the current Gym Leader of Fuchsia City!
+            $Koga : My daughter is a great ninja!
+            $Jeannine : And my father is a great poison master!
+            $Koga : You will ask for mercy!`,
+    },
+    "victory": {
+      1: `Koga : Well maybe we should ask for mercy instead!
+          $Jeannine : Maybe...Or use smokebombs!`,
+    },
+  },
+  "lance_clair_double": {
+    "encounter": {
+      1: `Peter : We are the best dragon trainers in the world!
+            $Sandra : Well...At least in Kanto and Johto!`,
+    },
+    "victory": {
+      1: `Peter : Dont tell Drake and Iris about this...
+            $Sandra : Dont worry, I will not!`,
+    },
+  },
+  "clair_lance_double": {
+    "encounter": {
+      1: `Sandra : I am the Dragon Master of Blackthorn City!
+            $Peter : And I am the Champion of the Indigo Plateau!
+            $Sandra : My cousin and I will show you why dragons are the best!`,
+    },
+    "victory": {
+      1: `Sandra : Dragons are still the best!
+            $Peter : And so majestic!`,
+    },
+  },
+  "kieran_carmine_double": {
+    "encounter": {
+      1: `Kass : Carmine, look. A new face.
+            $Roseille : Are you a new challenger? If you want to go through us, you have to defeat us first!
+            $Kass : Carmine, you are too direct.`,
+    },
+    "victory": {
+      1: `Kass : How did we lose? What is your secret?
+          $Roseille : That was a nice battle. Hope to see you again!`,
+    },
+  },
+  "carmine_kieran_double": {
+    "encounter": {
+      1: `Roseille : Hello, we are Carmine and Kieran. 
+            $Kass : From the Blueberry Academy. Welcome to Kitakami`,
+    },
+    "victory": {
+      1: `Roseille : You should come visit us at the academy. 
+            $Kass : And then we will beat you!`,
+    },
+  },
+  "hau_kukui_double": {
+    "encounter": {
+      1: `Tili : The Professor and I are ready for a battle!
+            $Kukui: Let´s show them the power of Alola!`,
+    },
+    "victory": {
+      1: `Tili : We lost, but dont worry. You can´t have a rainbow without a little rain.
+            $Euphorbe : Let´s go surfing! After a battle, there is nothing better than a good surf!`,
+    },
+  },
+  "kukui_hau_double": {
+    "encounter": {
+      1: `Euphorbe : I am the professor of Alola. And this is my student Hau.
+            $Tili : And I am the future champion of Alola!`,
+    },
+    "victory": {
+      1: `Euphorbe : I am proud of you, Hau. You did a great job.
+            $Tili : Thanks, Professor. But we will win next time!`,
+    },
+  },
+  "diantha_korrina_double": {
+    "encounter": {
+      1: `Dianthéa : Welcome, I am Diantha, the Kalos Champion.
+            $Cornélia : And I am Korrina, the Shalour City Gym Leader.`,
+    },
+    "victory": {
+      1: `Dianthéa : That was a great battle. You are a strong trainer.
+         $Cornélia : We will win next time!`,
+    }
+  },
+  "korrina_diantha_double": {
+    "encounter": {
+      1: `Cornélia : Lady Diantha, I am ready for a battle.
+         $Dianthéa : Then show them the power of our magnificent pokémon!`,
+    },
+    "victory": {
+      1: `Cornélia : Did you see my moves? I am the best!
+         $Dianthéa : Well, we lost, so lets go back to training!`,
+    }
+  },
+  "roark_byron_double": {
+    "encounter": {
+      1: `Pierrick : Let´s show them the power of our Pokémon!
+          $Charles : We will show you the power of the underground!
+          $Pierrick : Let´s go under!`,
+    },
+    "victory": {
+      1: `Pierrick : How did I do dad?
+          $Charles : You did great son! But we still lost... So back to the underground! Let´s train more`,
+    }
+  },
+  "byron_roark_double": {
+    "encounter": {
+      1: `Charles : I am the Canalave City Gym Leader!
+          $Pierrick : And I am the Oreburgh City Gym Leader!
+          $Charles : We will show you the power of the underground!`,
+    },
+    "victory": {
+      1: `Charles : That was nearly as hard as my Steelix!
+            $Pierrick : And also as heavy as my Rampardos!`,
+    }
+  }
 };
