@@ -187,7 +187,12 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
   private statsContainer: StatsContainer;
   private pokemonFormText: Phaser.GameObjects.Text;
 
+  private starterRandomizeText: Phaser.GameObjects.Text;
+  // Of the format [species, gen, speciesID]
+  private possibleStarterPokemon: {[key: integer]: [species: PokemonSpecies, gen: integer, speciesId: integer][]};
+
   private genMode: boolean;
+  private randomizeMode: boolean;
   private statsMode: boolean;
   private dexAttrCursor: bigint = 0n;
   private abilityCursor: integer = -1;
@@ -220,6 +225,7 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
   private assetLoadCancelled: Utils.BooleanHolder;
   private cursorObj: Phaser.GameObjects.Image;
   private starterCursorObjs: Phaser.GameObjects.Image[];
+  private starterRandomizeCursorObj: Phaser.GameObjects.NineSlice;
   private pokerusCursorObjs: Phaser.GameObjects.Image[];
   private starterIcons: Phaser.GameObjects.Sprite[];
   private genCursorObj: Phaser.GameObjects.Image;
@@ -272,11 +278,30 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
     this.starterSelectContainer.add(addWindow(this.scene, 107, 1, 34, 58));
     this.starterSelectContainer.add(addWindow(this.scene, 107, 59, 34, 91));
     this.starterSelectContainer.add(addWindow(this.scene, 107, 145, 34, 34, true));
+    this.starterSelectContainer.add(addWindow(this.scene, 20, 158, 70, 20));
     this.starterSelectContainer.add(starterContainerWindow);
 
     if (!this.scene.uiTheme) {
       starterContainerWindow.setVisible(false);
     }
+
+    this.starterRandomizeText = addTextObject(this.scene, 55, 163, i18next.t("starterSelectUiHandler:randomize"), TextStyle.TOOLTIP_CONTENT);
+    this.starterRandomizeText.setOrigin(0.5, 0);
+    this.starterSelectContainer.add(this.starterRandomizeText);
+
+    this.starterRandomizeCursorObj = this.scene.add.nineslice(30, 162, "select_cursor", null, 50, 12, 6, 6, 6, 6);
+    this.starterRandomizeCursorObj.setVisible(false);
+    this.starterRandomizeCursorObj.setOrigin(0, 0);
+    this.starterSelectContainer.add(this.starterRandomizeCursorObj);
+
+    this.starterRandomizeText = addTextObject(this.scene, 55, 163, i18next.t("starterSelectUiHandler:randomize"), TextStyle.TOOLTIP_CONTENT);
+    this.starterRandomizeText.setOrigin(0.5, 0);
+    this.starterSelectContainer.add(this.starterRandomizeText);
+
+    this.starterRandomizeCursorObj = this.scene.add.nineslice(30, 162, "select_cursor", null, 50, 12, 6, 6, 6, 6);
+    this.starterRandomizeCursorObj.setVisible(false);
+    this.starterRandomizeCursorObj.setOrigin(0, 0);
+    this.starterSelectContainer.add(this.starterRandomizeCursorObj);
 
     this.iconAnimHandler = new PokemonIconAnimHandler();
     this.iconAnimHandler.setup(this.scene);
@@ -717,6 +742,7 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
       this.setGenMode(true);
       this.setCursor(0);
       this.tryUpdateValue(0);
+      this.setRandomizeMode(false);
 
       for (let g = 0; g < this.genSpecies.length; g++) {
         this.genSpecies[g].forEach((species, s) => {
@@ -957,8 +983,11 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
         break;
       case Button.LEFT:
         this.startCursorObj.setVisible(false);
+
+        this.setRandomizeMode(true);
         this.setGenMode(false);
         this.setCursor(this.cursor + 8);
+
         success = true;
         break;
       case Button.RIGHT:
@@ -991,6 +1020,58 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
         success = this.setGenMode(false);
         break;
       }
+    } else if (this.randomizeMode) {
+      switch (button) {
+      case Button.UP:
+        this.startCursorObj.setVisible(false);
+        this.setGenMode(true);
+        this.setRandomizeMode(false);
+        success = true;
+        break;
+      case Button.LEFT:
+        this.startCursorObj.setVisible(false);
+        this.setGenMode(false);
+        this.setRandomizeMode(false);
+        this.setCursor(this.cursor + 8);
+        success = true;
+        break;
+      case Button.RIGHT:
+        this.startCursorObj.setVisible(true);
+        this.setGenMode(false);
+        this.setRandomizeMode(false);
+        success = true;
+        break;
+      case Button.ACTION:
+        this.generateRandomStarterTeam();
+        success = true;
+        break;
+      }
+    } else if (this.randomizeMode) {
+      switch (button) {
+      case Button.UP:
+        this.startCursorObj.setVisible(false);
+        this.setGenMode(true);
+        this.setRandomizeMode(false);
+        success = true;
+        break;
+      case Button.LEFT:
+        this.startCursorObj.setVisible(false);
+        this.setGenMode(false);
+        this.setRandomizeMode(false);
+        this.setCursor(this.cursor + 8);
+        success = true;
+        break;
+      case Button.RIGHT:
+        this.startCursorObj.setVisible(true);
+        this.setGenMode(false);
+        this.setRandomizeMode(false);
+        success = true;
+        break;
+      case Button.ACTION:
+        this.generateRandomStarterTeam();
+        success = true;
+        break;
+      }
     } else {
       if (button === Button.ACTION) {
         if (!this.speciesStarterDexEntry?.caughtAttr) {
@@ -1001,6 +1082,7 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
               label: i18next.t("starterSelectUiHandler:addToParty"),
               handler: () => {
                 ui.setMode(Mode.STARTER_SELECT);
+
                 let isDupe = false;
                 for (let s = 0; s < this.starterCursors.length; s++) {
                   if (this.starterGens[s] === this.getGenCursorWithScroll() && this.starterCursors[s] === this.cursor) {
@@ -1008,6 +1090,8 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
                     break;
                   }
                 }
+
+
                 const species = this.genSpecies[this.getGenCursorWithScroll()][this.cursor];
                 if (!isDupe && this.tryUpdateValue(this.scene.gameData.getSpeciesStarterValue(species.speciesId))) {
                   const cursorObj = this.starterCursorObjs[this.starterCursors.length];
@@ -1538,6 +1622,9 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
           this.candyUpgradeOverlayIcon[s].setVisible(false);
         }
       }
+    } else if (this.randomizeMode) {
+      changed = super.setCursor(cursor);
+      this.updateInstructions();
     } else {
       changed = super.setCursor(cursor);
 
@@ -1573,9 +1660,24 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
     this.genOptionsText.setText(text);
   }
 
+  setRandomizeMode(randomizeMode: boolean): boolean {
+    this.starterRandomizeCursorObj.setVisible(randomizeMode);
+    this.cursorObj.setVisible(!randomizeMode && !this.startCursorObj.visible && !this.genCursorObj.visible);
+
+    if (randomizeMode !== this.randomizeMode) {
+      this.randomizeMode = randomizeMode;
+
+      if (randomizeMode) {
+        this.setSpecies(null);
+      }
+
+      return true;
+    }
+  }
+
   setGenMode(genMode: boolean): boolean {
     this.genCursorObj.setVisible(genMode && !this.startCursorObj.visible);
-    this.cursorObj.setVisible(!genMode && !this.startCursorObj.visible);
+    this.cursorObj.setVisible(!genMode && !this.startCursorObj.visible && !this.starterRandomizeCursorObj.visible);
 
     if (genMode !== this.genMode) {
       this.genMode = genMode;
@@ -2087,6 +2189,208 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
     return true;
   }
 
+  clearCurrentStarterTeam(): void {
+    this.starterGens = [];
+    this.starterCursors = [];
+    this.starterAttr = [];
+    this.starterAbilityIndexes = [];
+    this.starterNatures = [];
+    this.starterMovesets = [];
+    this.starterCursorObjs.forEach(cursor => cursor.setVisible(false));
+    this.starterIcons.forEach(icon => icon.setTexture("pokemon_icons_0").setFrame("unknown"));
+    this.value = 0;
+    this.tryUpdateValue();
+  }
+
+  generateRandomStarterTeam(): void {
+    this.prepopulateRandomStarterPokemonDictionary();
+    this.clearCurrentStarterTeam();
+    while (this.generateRandomStarter()) {
+
+    }
+  }
+
+  // Using a list of all possible starters, generates a dictionary of all possible owned starters by point value
+  // {value: [[speciesA, gen, species], ...]}
+  prepopulateRandomStarterPokemonDictionary(): void {
+    this.possibleStarterPokemon = {};
+    for (let g = 0; g < this.genSpecies.length; g++) {
+      for (let s = 0; s < this.genSpecies[g].length; s++) {
+        const speciesId = this.genSpecies[g][s].speciesId;
+        const value = this.scene.gameData.getSpeciesStarterValue(speciesId);
+        // console.log(speciesId, value);
+        if (this.isValidStarter(this.genSpecies[g][s]) && value > 0) {
+          if (!this.possibleStarterPokemon[value]) {
+            this.possibleStarterPokemon[value] = [];
+          }
+          this.possibleStarterPokemon[value].push([this.genSpecies[g][s], g, s]);
+        }
+      }
+    }
+  }
+
+  // Using possibleStarterPokemon
+  // Grabs a random starter from the dictionary and adds it to the team
+  // Ignores starters that would put the team over the value limit
+  generateRandomStarter(): boolean {
+    if (this.starterGens.length >= 6) {
+      return false;
+    }
+
+    // Check if there are any valid pokemon to generate
+    // The available point values are all the keys that are less than the value limit - the current value
+    const availablePointValues = Object.keys(this.possibleStarterPokemon).filter(value => parseInt(value) <= this.getValueLimit() - this.value);
+    if (availablePointValues.length === 0) { // No more valid pokemon to generate
+      return false;
+    }
+
+    // Randomly select a point value from the available point values
+    // Construct an array with the point values repeated based on the number of pokemon with that point value
+    // This array is used to randomly select a point value with bias
+    const pointValueArray = availablePointValues.reduce((acc, value) => {
+      const numPokemon = this.possibleStarterPokemon[value].length;
+      for (let i = 0; i < numPokemon; i++) {
+        acc.push(value);
+      }
+      return acc;
+    }, []);
+    const randomPointValue = pointValueArray[Utils.randInt(pointValueArray.length, 0)];
+
+    // Randomly select a pokemon from the list of pokemon with the selected point value
+    const speciesInf = this.possibleStarterPokemon[randomPointValue][Utils.randInt(this.possibleStarterPokemon[randomPointValue].length, 0)];
+    const species = speciesInf[0];
+    const gen = speciesInf[1];
+    const speciesId = speciesInf[2];
+
+    // The value is guaranteed to be less than the value limit so no need to check, simple call suffices
+    this.tryUpdateValue(this.scene.gameData.getSpeciesStarterValue(species.speciesId));
+
+    this.setSpecies(species);
+    // set cursor position for selected pokemon
+    const cursorObj = this.starterCursorObjs[this.starterCursors.length];
+    // set's the cursor off screen
+    cursorObj.setPosition(-100, -100);
+
+
+    // Generate the nature, ability, and moveset for the pokemon
+    // TODO: Add support for more than the default ability, natures, etc.
+    this.speciesStarterDexEntry = species ? this.scene.gameData.dexData[species.speciesId] : null;
+    this.dexAttrCursor = species ? this.scene.gameData.getSpeciesDefaultDexAttr(species, false, true) : 0n;
+    this.abilityCursor = species ? this.scene.gameData.getStarterSpeciesDefaultAbilityIndex(species) : 0;
+    this.natureCursor = species ? this.scene.gameData.getSpeciesDefaultNature(species) : 0;
+
+    const props = this.scene.gameData.getSpeciesDexAttrProps(species, this.dexAttrCursor);
+
+    this.starterAttr.push(this.dexAttrCursor);
+    this.starterAbilityIndexes.push(this.abilityCursor);
+    this.starterNatures.push(this.natureCursor as unknown as Nature);
+    this.starterMovesets.push(this.starterMoveset.slice(0) as StarterMoveset);
+
+    this.starterIcons[this.starterCursors.length].setTexture(species.getIconAtlasKey(props.formIndex, props.shiny, props.variant));
+    this.starterIcons[this.starterCursors.length].setFrame(species.getIconId(props.female, props.formIndex, props.shiny, props.variant));
+
+    this.starterGens.push(gen);
+    this.starterCursors.push(speciesId);
+
+    // Remove the selected pokemon from the dictionary
+    this.possibleStarterPokemon[randomPointValue].splice(this.possibleStarterPokemon[randomPointValue].indexOf(speciesInf), 1);
+
+    // If there is no more pokemon for this key, remove the key
+    if (this.possibleStarterPokemon[randomPointValue].length === 0) {
+      delete this.possibleStarterPokemon[randomPointValue];
+    }
+    return true;
+
+  }
+
+
+  // Deprecated function for less efficient random starter generation
+  _generateRandomStarter(): boolean {
+    let generatedValidPokemon:boolean = false;
+    let hasValidPokemon:boolean = false;
+
+    // Checking if there are still valid pokemon to generate
+    for (let g = 0; g < this.genSpecies.length; g++) {
+      for (let s = 0; s < this.genSpecies[g].length; s++) {
+        if (this.isValidStarter(this.genSpecies[g][s])) {
+          if (this.value + this.scene.gameData.getSpeciesStarterValue(this.genSpecies[g][s].speciesId) <= this.getValueLimit()) {
+            hasValidPokemon = true;
+            break;
+          }
+        }
+      }
+      if (hasValidPokemon) {
+        break;
+      }
+    }
+
+    if (!hasValidPokemon) {
+      return false;
+    }
+
+    while (!generatedValidPokemon) {
+      // Create a random number for gens 0 - 8
+      const gen = Utils.randInt(8, 0);
+      // Create a random pokemon id based off of how many pokemon are in the gen
+      const speciesId = Utils.randInt(this.genSpecies[gen].length - 1, 0);
+      const species = this.genSpecies[gen][speciesId];
+
+      // Ownership check
+      if (!this.isValidStarter(species)) {
+        continue;
+      }
+      // Dupe check
+      let isDupe = false;
+      for (let s = 0; s < this.starterCursors.length; s++) {
+        if (this.starterGens[s] === gen && this.starterCursors[s] === speciesId) {
+          isDupe = true;
+          break;
+        }
+      }
+
+      // Update value
+      if (!isDupe && this.tryUpdateValue(this.scene.gameData.getSpeciesStarterValue(species.speciesId))) {
+        // < 6 pokemon and the value is less than the limit check
+        if (this.starterGens.length < 6 && this.value <= this.getValueLimit()) {
+          this.setSpecies(species);
+
+          this.speciesStarterDexEntry = species ? this.scene.gameData.dexData[species.speciesId] : null;
+          this.dexAttrCursor = species ? this.scene.gameData.getSpeciesDefaultDexAttr(species, false, true) : 0n;
+          this.abilityCursor = species ? this.scene.gameData.getStarterSpeciesDefaultAbilityIndex(species) : 0;
+          this.natureCursor = species ? this.scene.gameData.getSpeciesDefaultNature(species) : 0;
+
+          const props = this.scene.gameData.getSpeciesDexAttrProps(species, this.dexAttrCursor);
+
+          this.starterAttr.push(this.dexAttrCursor);
+          this.starterAbilityIndexes.push(this.abilityCursor);
+          this.starterNatures.push(this.natureCursor as unknown as Nature);
+          this.starterMovesets.push(this.starterMoveset.slice(0) as StarterMoveset);
+          console.log(this.starterMovesets);
+
+          this.starterIcons[this.starterCursors.length].setTexture(species.getIconAtlasKey(props.formIndex, props.shiny, props.variant));
+          this.starterIcons[this.starterCursors.length].setFrame(species.getIconId(props.female, props.formIndex, props.shiny, props.variant));
+
+          this.starterGens.push(gen);
+          this.starterCursors.push(speciesId);
+
+          generatedValidPokemon = true;
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+
+  isValidStarter(species): bigint {
+    const useOnlyOwnedPokemon:boolean = true;
+    if (useOnlyOwnedPokemon) {
+      return this.scene.gameData.dexData[species.speciesId].caughtAttr;
+    }
+    return 1n;
+  }
+
+
   tryStart(manualTrigger: boolean = false): boolean {
     if (!this.starterGens.length) {
       return false;
@@ -2105,6 +2409,10 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
     ui.showText(i18next.t("starterSelectUiHandler:confirmStartTeam"), null, () => {
       ui.setModeWithoutClear(Mode.CONFIRM, () => {
         const startRun = (gameMode: GameModes) => {
+          // const dexEntry = this.scene.gameData.dexData[species.speciesId];
+
+          // this.starterCursors = [10];
+          // this.starterGens = [1];
           this.scene.gameMode = gameModes[gameMode];
           this.scene.money = this.scene.gameMode.getStartingMoney();
           ui.setMode(Mode.STARTER_SELECT);
@@ -2113,6 +2421,7 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
           this.starterSelectCallback = null;
           originalStarterSelectCallback(new Array(this.starterGens.length).fill(0).map(function (_, i) {
             const starterSpecies = thisObj.genSpecies[thisObj.starterGens[i]][thisObj.starterCursors[i]];
+            console.log(thisObj.starterMovesets[i]);
             return {
               species: starterSpecies,
               dexAttr: thisObj.starterAttr[i],
@@ -2156,7 +2465,6 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
 
     this.statsContainer.updateIvs(this.speciesStarterDexEntry.ivs);
   }
-
   clearText() {
     this.starterSelectMessageBoxContainer.setVisible(false);
     super.clearText();
