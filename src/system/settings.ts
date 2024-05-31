@@ -7,6 +7,7 @@ import { updateWindowType } from "../ui/ui-theme";
 import { PlayerGender } from "./game-data";
 import { CandyUpgradeNotificationChangedEvent } from "#app/battle-scene-events.js";
 import { MoneyFormat } from "../enums/money-format";
+import { CursorMemory } from "#app/enums/cursor";
 
 export enum Setting {
   Game_Speed = "GAME_SPEED",
@@ -25,6 +26,7 @@ export enum Setting {
   Sprite_Set = "SPRITE_SET",
   Move_Animations = "MOVE_ANIMATIONS",
   Show_Moveset_Flyout = "SHOW_MOVESET_FLYOUT",
+  Cursor_Memory = "CURSOR_MEMORY",
   Show_Stats_on_Level_Up = "SHOW_LEVEL_UP_STATS",
   EXP_Gains_Speed = "EXP_GAINS_SPEED",
   EXP_Party_Display = "EXP_PARTY_DISPLAY",
@@ -62,6 +64,7 @@ export const settingOptions: SettingOptions = {
   [Setting.Sprite_Set]: ["Consistent", "Mixed Animated"],
   [Setting.Move_Animations]: ["Off", "On"],
   [Setting.Show_Moveset_Flyout]: ["Off", "On"],
+  [Setting.Cursor_Memory]: ["Off", "Commands", "Moves", "Both"],
   [Setting.Show_Stats_on_Level_Up]: ["Off", "On"],
   [Setting.EXP_Gains_Speed]: ["Normal", "Fast", "Faster", "Skip"],
   [Setting.EXP_Party_Display]: ["Normal", "Level Up Notification", "Skip"],
@@ -91,6 +94,7 @@ export const settingDefaults: SettingDefaults = {
   [Setting.Sprite_Set]: 0,
   [Setting.Move_Animations]: 1,
   [Setting.Show_Moveset_Flyout]: 1,
+  [Setting.Cursor_Memory]: 3,
   [Setting.Show_Stats_on_Level_Up]: 1,
   [Setting.EXP_Gains_Speed]: 0,
   [Setting.EXP_Party_Display]: 0,
@@ -169,6 +173,22 @@ export function setSetting(scene: BattleScene, setting: Setting, value: integer)
     break;
   case Setting.Show_Moveset_Flyout:
     scene.showMovesetFlyout = settingOptions[setting][value] === "On";
+    break;
+  case Setting.Cursor_Memory:
+    switch (settingOptions[setting][value]) {
+    case "Off":
+      scene.cursorMemory = CursorMemory.Off;
+      break;
+    case "Commands":
+      scene.cursorMemory = CursorMemory.Command;
+      break;
+    case "Moves":
+      scene.cursorMemory = CursorMemory.Move;
+      break;
+    case "Both":
+      scene.cursorMemory = CursorMemory.Both;
+      break;
+    }
     break;
   case Setting.Show_Stats_on_Level_Up:
     scene.showLevelUpStats = settingOptions[setting][value] === "On";
