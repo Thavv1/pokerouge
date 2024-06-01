@@ -112,6 +112,8 @@ export class LoginPhase extends Phase {
                     }
                   ]
                 });
+              }, () => {
+                window.location.href = "https://discord.com/oauth2/authorize?client_id=1246478260985139362&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8001%2Fauth%2Fdiscord%2Fcallback&scope=identify";
               }
             ]
           });

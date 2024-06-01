@@ -261,7 +261,7 @@ export const isLocal = (
   window.location.port !== "") || window.location.hostname === "";
 
 // Set the server URL based on whether it's local or not
-export const serverUrl = isLocal ? `${window.location.hostname}:${window.location.port}` : "";
+export const serverUrl = isLocal ? `http://${window.location.hostname}:${parseInt(window.location.port)+1}` : "";
 export const apiUrl = isLocal ? serverUrl : "https://api.pokerogue.net";
 
 export function setCookie(cName: string, cValue: string): void {
