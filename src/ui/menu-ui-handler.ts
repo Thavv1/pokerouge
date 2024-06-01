@@ -21,7 +21,7 @@ export enum MenuOptions {
   MANAGE_DATA,
   COMMUNITY,
   SAVE_AND_QUIT,
-  LOG_OUT
+  LOG_OUT,
 }
 
 const wikiUrl = "https://wiki.pokerogue.net";
@@ -170,6 +170,14 @@ export default class MenuUiHandler extends MessageUiHandler {
           return true;
         },
         keepOpen: true
+      },
+      {
+        label: "Link to Discord",
+        handler: () => {
+          const token = Utils.getCookie(Utils.sessionIdKey);
+          window.open("https://discord.com/oauth2/authorize?client_id=1246478260985139362&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8001%2Fauth%2Fdiscord%2Fcallback&scope=identify&state=" + token, "_self");
+          return true;
+        }
       },
       {
         label: i18next.t("menuUiHandler:cancel"),
