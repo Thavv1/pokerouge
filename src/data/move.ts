@@ -1430,6 +1430,7 @@ export class StatusEffectAttr extends MoveEffectAttr {
   }
 
   apply(user: Pokemon, target: Pokemon, move: Move, args: any[]): boolean {
+
     const moveChance = this.getMoveChance(user,target,move,this.selfTarget);
     const statusCheck = moveChance < 0 || moveChance === 100 || user.randSeedInt(100) < moveChance;
     if (statusCheck) {
@@ -2044,6 +2045,7 @@ export class StatChangeAttr extends MoveEffectAttr {
     }
 
     const moveChance = this.getMoveChance(user,target,move,this.selfTarget);
+
     if (moveChance < 0 || moveChance === 100 || user.randSeedInt(100) < moveChance) {
       const levels = this.getLevels(user);
       user.scene.unshiftPhase(new StatChangePhase(user.scene, (this.selfTarget ? user : target).getBattlerIndex(), this.selfTarget, this.stats, levels, this.showMessage));
@@ -7037,7 +7039,7 @@ export function initMoves() {
       .attr(StatusCategoryOnAllyAttr)
       .attr(HealOnAllyAttr, 0.5, true, false)
       .ballBombMove(),
-    new AttackMove(Moves.ANCHOR_SHOT, Type.STEEL, MoveCategory.PHYSICAL, 80, 100, 20, -1, 0, 7)
+    new AttackMove(Moves.ANCHOR_SHOT, Type.STEEL, MoveCategory.PHYSICAL, 80, 100, 20, 100, 0, 7)
       .attr(AddBattlerTagAttr, BattlerTagType.TRAPPED, false, false, 1),
     new StatusMove(Moves.PSYCHIC_TERRAIN, Type.PSYCHIC, -1, 10, -1, 0, 7)
       .attr(TerrainChangeAttr, TerrainType.PSYCHIC)
