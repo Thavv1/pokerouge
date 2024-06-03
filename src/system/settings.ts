@@ -1,4 +1,3 @@
-import SettingsUiHandler from "#app/ui/settings-ui-handler";
 import { Mode } from "#app/ui/ui";
 import i18next from "i18next";
 import BattleScene from "../battle-scene";
@@ -7,6 +6,7 @@ import { updateWindowType } from "../ui/ui-theme";
 import { PlayerGender } from "./game-data";
 import { CandyUpgradeNotificationChangedEvent } from "#app/battle-scene-events.js";
 import { MoneyFormat } from "../enums/money-format";
+import SettingsUiHandler from "#app/ui/settings/settings-ui-handler";
 
 export enum Setting {
   Game_Speed = "GAME_SPEED",
@@ -19,19 +19,19 @@ export enum Setting {
   Window_Type = "WINDOW_TYPE",
   Tutorials = "TUTORIALS",
   Enable_Retries = "ENABLE_RETRIES",
+  Skip_Seen_Dialogues = "SKIP_SEEN_DIALOGUES",
   Candy_Upgrade_Notification = "CANDY_UPGRADE_NOTIFICATION",
   Candy_Upgrade_Display = "CANDY_UPGRADE_DISPLAY",
   Money_Format = "MONEY_FORMAT",
   Sprite_Set = "SPRITE_SET",
   Move_Animations = "MOVE_ANIMATIONS",
+  Show_Moveset_Flyout = "SHOW_MOVESET_FLYOUT",
   Show_Stats_on_Level_Up = "SHOW_LEVEL_UP_STATS",
   EXP_Gains_Speed = "EXP_GAINS_SPEED",
   EXP_Party_Display = "EXP_PARTY_DISPLAY",
   HP_Bar_Speed = "HP_BAR_SPEED",
   Fusion_Palette_Swaps = "FUSION_PALETTE_SWAPS",
   Player_Gender = "PLAYER_GENDER",
-  Gamepad_Support = "GAMEPAD_SUPPORT",
-  Swap_A_and_B = "SWAP_A_B", // Swaps which gamepad button handles ACTION and CANCEL
   Touch_Controls = "TOUCH_CONTROLS",
   Vibration = "VIBRATION"
 }
@@ -55,19 +55,19 @@ export const settingOptions: SettingOptions = {
   [Setting.Window_Type]: new Array(5).fill(null).map((_, i) => (i + 1).toString()),
   [Setting.Tutorials]: ["Off", "On"],
   [Setting.Enable_Retries]: ["Off", "On"],
+  [Setting.Skip_Seen_Dialogues]: ["Off", "On"],
   [Setting.Candy_Upgrade_Notification]: ["Off", "Passives Only", "On"],
   [Setting.Candy_Upgrade_Display]: ["Icon", "Animation"],
   [Setting.Money_Format]: ["Normal", "Abbreviated"],
   [Setting.Sprite_Set]: ["Consistent", "Mixed Animated"],
   [Setting.Move_Animations]: ["Off", "On"],
+  [Setting.Show_Moveset_Flyout]: ["Off", "On"],
   [Setting.Show_Stats_on_Level_Up]: ["Off", "On"],
   [Setting.EXP_Gains_Speed]: ["Normal", "Fast", "Faster", "Skip"],
   [Setting.EXP_Party_Display]: ["Normal", "Level Up Notification", "Skip"],
   [Setting.HP_Bar_Speed]: ["Normal", "Fast", "Faster", "Instant"],
   [Setting.Fusion_Palette_Swaps]: ["Off", "On"],
   [Setting.Player_Gender]: ["Boy", "Girl"],
-  [Setting.Gamepad_Support]: ["Auto", "Disabled"],
-  [Setting.Swap_A_and_B]: ["Enabled", "Disabled"],
   [Setting.Touch_Controls]: ["Auto", "Disabled"],
   [Setting.Vibration]: ["Auto", "Disabled"]
 };
@@ -83,19 +83,19 @@ export const settingDefaults: SettingDefaults = {
   [Setting.Window_Type]: 0,
   [Setting.Tutorials]: 1,
   [Setting.Enable_Retries]: 0,
+  [Setting.Skip_Seen_Dialogues]: 0,
   [Setting.Candy_Upgrade_Notification]: 0,
   [Setting.Candy_Upgrade_Display]: 0,
   [Setting.Money_Format]: 0,
   [Setting.Sprite_Set]: 0,
   [Setting.Move_Animations]: 1,
+  [Setting.Show_Moveset_Flyout]: 1,
   [Setting.Show_Stats_on_Level_Up]: 1,
   [Setting.EXP_Gains_Speed]: 0,
   [Setting.EXP_Party_Display]: 0,
   [Setting.HP_Bar_Speed]: 0,
   [Setting.Fusion_Palette_Swaps]: 1,
   [Setting.Player_Gender]: 0,
-  [Setting.Gamepad_Support]: 0,
-  [Setting.Swap_A_and_B]: 1, // Set to 'Disabled' by default
   [Setting.Touch_Controls]: 0,
   [Setting.Vibration]: 0
 };
@@ -164,6 +164,9 @@ export function setSetting(scene: BattleScene, setting: Setting, value: integer)
   case Setting.Move_Animations:
     scene.moveAnimations = settingOptions[setting][value] === "On";
     break;
+  case Setting.Show_Moveset_Flyout:
+    scene.showMovesetFlyout = settingOptions[setting][value] === "On";
+    break;
   case Setting.Show_Stats_on_Level_Up:
     scene.showLevelUpStats = settingOptions[setting][value] === "On";
     break;
@@ -188,14 +191,6 @@ export function setSetting(scene: BattleScene, setting: Setting, value: integer)
       return false;
     }
     break;
-  case Setting.Gamepad_Support:
-    // if we change the value of the gamepad support, we call a method in the inputController to
-    // activate or deactivate the controller listener
-    scene.inputController.setGamepadSupport(settingOptions[setting][value] !== "Disabled");
-    break;
-  case Setting.Swap_A_and_B:
-    scene.abSwapped = settingOptions[setting][value] !== "Disabled";
-    break;
   case Setting.Touch_Controls:
     scene.enableTouchControls = settingOptions[setting][value] !== "Disabled" && hasTouchscreen();
     const touchControls = document.getElementById("touchControls");
@@ -205,6 +200,9 @@ export function setSetting(scene: BattleScene, setting: Setting, value: integer)
     break;
   case Setting.Vibration:
     scene.enableVibration = settingOptions[setting][value] !== "Disabled" && hasTouchscreen();
+    break;
+  case Setting.Skip_Seen_Dialogues:
+    scene.skipSeenDialogues = settingOptions[setting][value] === "On";
     break;
   case Setting.Language:
     if (value) {
