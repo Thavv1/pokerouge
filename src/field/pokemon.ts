@@ -3738,6 +3738,7 @@ export class PokemonTurnData {
   public currDamageDealt: integer = 0;
   public damageTaken: integer = 0;
   public attacksReceived: AttackMoveResult[] = [];
+  public order: integer;
 }
 
 export enum AiType {
