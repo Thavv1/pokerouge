@@ -30,6 +30,7 @@ import { allMoves } from "../data/move";
 import { TrainerVariant } from "../field/trainer";
 import { OutdatedPhase, ReloadSessionPhase } from "#app/phases";
 import { Variant, variantData } from "#app/data/variant";
+import { Prestige } from "./prestige";
 import {setSettingGamepad, SettingGamepad, settingGamepadDefaults} from "./settings-gamepad";
 import {setSettingKeyboard, SettingKeyboard, settingKeyboardDefaults} from "#app/system/settings-keyboard";
 import { TerrainChangedEvent, WeatherChangedEvent } from "#app/field/arena-events.js";
@@ -94,6 +95,7 @@ interface SystemSaveData {
   starterData: StarterData;
   gameStats: GameStats;
   unlocks: Unlocks;
+  prestigeLevel: integer;
   achvUnlocks: AchvUnlocks;
   voucherUnlocks: VoucherUnlocks;
   voucherCounts: VoucherCounts;
@@ -108,6 +110,7 @@ export interface SessionSaveData {
   seed: string;
   playTime: integer;
   gameMode: GameModes;
+  prestigeLevel: integer;
   party: PokemonData[];
   enemyParty: PokemonData[];
   modifiers: PersistentModifierData[];
@@ -245,6 +248,8 @@ export class GameData {
 
   public unlocks: Unlocks;
 
+  public prestigeLevel: integer;
+
   public achvUnlocks: AchvUnlocks;
 
   public voucherUnlocks: VoucherUnlocks;
@@ -265,8 +270,10 @@ export class GameData {
     this.unlocks = {
       [Unlockables.ENDLESS_MODE]: false,
       [Unlockables.MINI_BLACK_HOLE]: false,
-      [Unlockables.SPLICED_ENDLESS_MODE]: false
+      [Unlockables.SPLICED_ENDLESS_MODE]: false,
+      [Unlockables.PRESTIGE_MODE]: false
     };
+    this.prestigeLevel = 0;
     this.achvUnlocks = {};
     this.voucherUnlocks = {};
     this.voucherCounts = {
@@ -291,6 +298,7 @@ export class GameData {
       starterData: this.starterData,
       gameStats: this.gameStats,
       unlocks: this.unlocks,
+      prestigeLevel: this.prestigeLevel,
       achvUnlocks: this.achvUnlocks,
       voucherUnlocks: this.voucherUnlocks,
       voucherCounts: this.voucherCounts,
@@ -452,6 +460,10 @@ export class GameData {
               this.unlocks[key] = systemData.unlocks[key];
             }
           }
+        }
+
+        if (systemData.prestigeLevel) {
+          this.prestigeLevel = systemData.prestigeLevel;
         }
 
         if (systemData.achvUnlocks) {
@@ -805,6 +817,7 @@ export class GameData {
       seed: scene.seed,
       playTime: scene.sessionPlayTime,
       gameMode: scene.gameMode.modeId,
+      prestigeLevel: scene.prestigeLevel,
       party: scene.getParty().map(p => new PokemonData(p)),
       enemyParty: scene.getEnemyParty().map(p => new PokemonData(p)),
       modifiers: scene.findModifiers(() => true).map(m => new PersistentModifierData(m, true)),
@@ -867,6 +880,7 @@ export class GameData {
           console.debug(sessionData);
 
           scene.gameMode = gameModes[sessionData.gameMode || GameModes.CLASSIC];
+          scene.prestigeLevel = sessionData.prestigeLevel || 0;
 
           scene.setSeed(sessionData.seed || scene.game.config.seed[0]);
           scene.resetSeed();
@@ -1542,6 +1556,12 @@ export class GameData {
         this.scene.validateAchv(achvs.PERFECT_IVS);
       }
     } while (pokemonPrevolutions.hasOwnProperty(speciesId) && (speciesId = pokemonPrevolutions[speciesId]));
+  }
+
+  increasePrestigeLevel(): void {
+    if (this.scene.gameData.prestigeLevel <= Prestige.MAX_LEVEL) {
+      this.scene.gameData.prestigeLevel++;
+    }
   }
 
   getSpeciesCount(dexEntryPredicate: (entry: DexEntry) => boolean): integer {

@@ -18,7 +18,7 @@ import { TextStyle, addTextObject } from "./text";
 import AchvBar from "./achv-bar";
 import MenuUiHandler from "./menu-ui-handler";
 import AchvsUiHandler from "./achvs-ui-handler";
-import OptionSelectUiHandler from "./settings/option-select-ui-handler";
+import OptionSelectUiHandler from "./option-select-ui-handler";
 import EggHatchSceneHandler from "./egg-hatch-scene-handler";
 import EggListUiHandler from "./egg-list-ui-handler";
 import EggGachaUiHandler from "./egg-gacha-ui-handler";
@@ -39,6 +39,7 @@ import SessionReloadModalUiHandler from "./session-reload-modal-ui-handler";
 import {Button} from "../enums/buttons";
 import i18next, {ParseKeys} from "i18next";
 import {PlayerGender} from "#app/system/game-data";
+import PrestigeLevelSelectUiHandler from "./prestige-level-select-ui-handler";
 import GamepadBindingUiHandler from "./settings/gamepad-binding-ui-handler";
 import SettingsKeyboardUiHandler from "#app/ui/settings/settings-keyboard-ui-handler";
 import KeyboardBindingUiHandler from "#app/ui/settings/keyboard-binding-ui-handler";
@@ -59,6 +60,7 @@ export enum Mode {
   EGG_HATCH_SCENE,
   CONFIRM,
   OPTION_SELECT,
+  PRESTIGE_LEVEL_SELECT,
   MENU,
   MENU_OPTION_SELECT,
   SETTINGS,
@@ -94,6 +96,7 @@ const noTransitionModes = [
   Mode.TITLE,
   Mode.CONFIRM,
   Mode.OPTION_SELECT,
+  Mode.PRESTIGE_LEVEL_SELECT,
   Mode.MENU,
   Mode.MENU_OPTION_SELECT,
   Mode.GAMEPAD_BINDING,
@@ -148,6 +151,7 @@ export default class UI extends Phaser.GameObjects.Container {
       new EggHatchSceneHandler(scene),
       new ConfirmUiHandler(scene),
       new OptionSelectUiHandler(scene),
+      new PrestigeLevelSelectUiHandler(scene),
       new MenuUiHandler(scene),
       new OptionSelectUiHandler(scene, Mode.MENU_OPTION_SELECT),
       new SettingsUiHandler(scene),

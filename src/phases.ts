@@ -62,6 +62,7 @@ import * as Overrides from "./overrides";
 import { TextStyle, addTextObject } from "./ui/text";
 import { Type } from "./data/type";
 import { MoveUsedEvent, TurnEndEvent, TurnInitEvent } from "./battle-scene-events";
+import { Prestige, PrestigeModifierAttribute } from "./system/prestige";
 
 
 export class LoginPhase extends Phase {
@@ -190,57 +191,7 @@ export class TitlePhase extends Phase {
     }
     options.push({
       label: i18next.t("menu:newGame"),
-      handler: () => {
-        const setModeAndEnd = (gameMode: GameModes) => {
-          this.gameMode = gameMode;
-          this.scene.ui.setMode(Mode.MESSAGE);
-          this.scene.ui.clearText();
-          this.end();
-        };
-        if (this.scene.gameData.unlocks[Unlockables.ENDLESS_MODE]) {
-          const options: OptionSelectItem[] = [
-            {
-              label: gameModes[GameModes.CLASSIC].getName(),
-              handler: () => {
-                setModeAndEnd(GameModes.CLASSIC);
-                return true;
-              }
-            },
-            {
-              label: gameModes[GameModes.ENDLESS].getName(),
-              handler: () => {
-                setModeAndEnd(GameModes.ENDLESS);
-                return true;
-              }
-            }
-          ];
-          if (this.scene.gameData.unlocks[Unlockables.SPLICED_ENDLESS_MODE]) {
-            options.push({
-              label: gameModes[GameModes.SPLICED_ENDLESS].getName(),
-              handler: () => {
-                setModeAndEnd(GameModes.SPLICED_ENDLESS);
-                return true;
-              }
-            });
-          }
-          options.push({
-            label: i18next.t("menu:cancel"),
-            handler: () => {
-              this.scene.clearPhaseQueue();
-              this.scene.pushPhase(new TitlePhase(this.scene));
-              super.end();
-              return true;
-            }
-          });
-          this.scene.ui.showText(i18next.t("menu:selectGameMode"), null, () => this.scene.ui.setOverlayMode(Mode.OPTION_SELECT, { options: options }));
-        } else {
-          this.gameMode = GameModes.CLASSIC;
-          this.scene.ui.setMode(Mode.MESSAGE);
-          this.scene.ui.clearText();
-          this.end();
-        }
-        return true;
-      }
+      handler: this.handlerNewGame.bind(this)
     },
     {
       label: i18next.t("menu:loadGame"),
@@ -277,6 +228,92 @@ export class TitlePhase extends Phase {
       yOffset: 47
     };
     this.scene.ui.setMode(Mode.TITLE, config);
+  }
+
+  private handlerNewGame(): boolean {
+    const setModeAndEnd = (gameMode: GameModes) => {
+      this.gameMode = gameMode;
+      this.scene.ui.setMode(Mode.MESSAGE);
+      this.scene.ui.clearText();
+      this.end();
+    };
+    const hasUnlockedOptions = this.scene.gameData.unlocks[Unlockables.ENDLESS_MODE] || this.scene.gameData.unlocks[Unlockables.SPLICED_ENDLESS_MODE] || (this.scene.gameData.unlocks[Unlockables.PRESTIGE_MODE]);
+    if (hasUnlockedOptions) {
+      const options: OptionSelectItem[] = [
+        {
+          label: gameModes[GameModes.CLASSIC].getName(),
+          handler: () => {
+            if (this.scene.gameData.unlocks[Unlockables.PRESTIGE_MODE]) {
+              const maxPrestigeLevel = this.scene.gameData.prestigeLevel;
+              const prestigeLevels = [...Array(Math.min(maxPrestigeLevel, Prestige.MAX_LEVEL)).keys()].map(i => i + 1);
+              const prestigeOptions: OptionSelectItem[] = prestigeLevels.map(prestigeLevel => ({
+                label: i18next.t("menu:prestige", { level: prestigeLevel}),
+                value: prestigeLevel,
+                handler: () => {
+                  this.scene.prestigeLevel = prestigeLevel;
+                  setModeAndEnd(GameModes.CLASSIC);
+                  return true;
+                }
+              }));
+              prestigeOptions.unshift({
+                label: i18next.t("menu:normal"),
+                value: 0,
+                handler: () => {
+                  this.scene.prestigeLevel = 0;
+                  setModeAndEnd(GameModes.CLASSIC);
+                  return true;
+                }
+              });
+              prestigeOptions.push({
+                label: i18next.t("menu:cancel"),
+                handler: this.handlerNewGame.bind(this)
+              });
+              this.scene.ui.setMode(Mode.MESSAGE);
+              this.scene.ui.showText(i18next.t("menu:select_prestige"), null, () => this.scene.ui.setOverlayMode(Mode.PRESTIGE_LEVEL_SELECT, { options: prestigeOptions, maxOptions: 7 }));
+            } else {
+              this.scene.prestigeLevel = 0;
+              setModeAndEnd(GameModes.CLASSIC);
+            }
+            return true;
+          }
+        }
+      ];
+      if (this.scene.gameData.unlocks[Unlockables.ENDLESS_MODE]) {
+        options.push(
+          {
+            label: gameModes[GameModes.ENDLESS].getName(),
+            handler: () => {
+              setModeAndEnd(GameModes.ENDLESS);
+              return true;
+            }
+          }
+        );
+      }
+      if (this.scene.gameData.unlocks[Unlockables.SPLICED_ENDLESS_MODE]) {
+        options.push(
+          {
+            label: gameModes[GameModes.SPLICED_ENDLESS].getName(),
+            handler: () => {
+              setModeAndEnd(GameModes.SPLICED_ENDLESS);
+              return true;
+            }
+          }
+        );
+      }
+      options.push({
+        label: i18next.t("menu:cancel"),
+        handler: () => {
+          this.scene.clearPhaseQueue();
+          this.scene.pushPhase(new TitlePhase(this.scene));
+          super.end();
+          return true;
+        }
+      });
+      this.scene.ui.showText(i18next.t("menu:selectGameMode"), null, () => this.scene.ui.setOverlayMode(Mode.OPTION_SELECT, { options: options }));
+    } else {
+      setModeAndEnd(GameModes.CLASSIC);
+    }
+    return true;
   }
 
   loadSaveSlot(slotId: integer): void {
@@ -3973,6 +4010,11 @@ export class GameOverPhase extends BattlePhase {
         if (this.victory && newClear) {
           if (this.scene.gameMode.isClassic) {
             firstClear = this.scene.validateAchv(achvs.CLASSIC_VICTORY);
+            if (this.scene.prestigeLevel) {
+              [...Array(this.scene.prestigeLevel).keys()].forEach(i => {
+                this.scene.validateAchv(achvs[`PRESTIGE_${i + 1}_VICTORY`]);
+              });
+            }
             this.scene.gameData.gameStats.sessionsWon++;
             for (const pokemon of this.scene.getParty()) {
               this.awardRibbon(pokemon);
@@ -4061,13 +4103,16 @@ export class GameOverPhase extends BattlePhase {
   handleUnlocks(): void {
     if (this.victory && this.scene.gameMode.isClassic) {
       if (!this.scene.gameData.unlocks[Unlockables.ENDLESS_MODE]) {
-        this.scene.unshiftPhase(new UnlockPhase(this.scene, Unlockables.ENDLESS_MODE));
+        this.scene.unshiftPhase(UnlockPhaseFactory.get(this.scene, Unlockables.ENDLESS_MODE));
       }
       if (this.scene.getParty().filter(p => p.fusionSpecies).length && !this.scene.gameData.unlocks[Unlockables.SPLICED_ENDLESS_MODE]) {
-        this.scene.unshiftPhase(new UnlockPhase(this.scene, Unlockables.SPLICED_ENDLESS_MODE));
+        this.scene.unshiftPhase(UnlockPhaseFactory.get(this.scene, Unlockables.SPLICED_ENDLESS_MODE));
       }
       if (!this.scene.gameData.unlocks[Unlockables.MINI_BLACK_HOLE]) {
-        this.scene.unshiftPhase(new UnlockPhase(this.scene, Unlockables.MINI_BLACK_HOLE));
+        this.scene.unshiftPhase(UnlockPhaseFactory.get(this.scene, Unlockables.MINI_BLACK_HOLE));
+      }
+      if (this.scene.gameData.prestigeLevel < Prestige.MAX_LEVEL) {
+        this.scene.unshiftPhase(UnlockPhaseFactory.get(this.scene, Unlockables.PRESTIGE_MODE));
       }
     }
   }
@@ -4117,6 +4162,24 @@ export class EndCardPhase extends Phase {
   }
 }
 
+export abstract class UnlockPhaseFactory {
+  /**
+   * Get the unlock phase for the specified unlockable
+   *
+   * @param scene
+   * @param unlockable
+   * @returns the unlock phase
+   */
+  public static get(scene: BattleScene, unlockable: Unlockables): UnlockPhase {
+    switch (unlockable) {
+    case Unlockables.PRESTIGE_MODE:
+      return new UnlockPrestigePhase(scene, unlockable);
+    default:
+      return new UnlockPhase(scene, unlockable);
+    }
+  }
+}
+
 export class UnlockPhase extends Phase {
   private unlockable: Unlockables;
 
@@ -4136,6 +4199,35 @@ export class UnlockPhase extends Phase {
         this.end();
       }, null, true, 1500);
     });
+  }
+}
+
+export class UnlockPrestigePhase extends UnlockPhase {
+  /**
+   * Start the unlock phase for PRESTIGE_MODE
+   */
+  start(): void {
+    if (this.scene.gameData.prestigeLevel === Prestige.MAX_LEVEL) {
+      return;
+    }
+    const prestigeAlreadyUnlocked = this.scene.gameData.unlocks[Unlockables.PRESTIGE_MODE];
+    const isLastPrestigeLevelSelected = this.scene.prestigeLevel === this.scene.gameData.prestigeLevel;
+    if (prestigeAlreadyUnlocked) {
+      if (isLastPrestigeLevelSelected) {
+        this.scene.time.delayedCall(2000, () => {
+          this.scene.gameData.increasePrestigeLevel();
+          this.scene.playSound("level_up_fanfare");
+          this.scene.ui.setMode(Mode.MESSAGE);
+          this.scene.ui.showText(`Prestige ${this.scene.gameData.prestigeLevel} has been unlocked.`, null, () => {
+            this.scene.time.delayedCall(1500, () => this.scene.arenaBg.setVisible(true));
+            this.end();
+          }, null, true, 1500);
+        });
+      }
+    } else {
+      this.scene.gameData.increasePrestigeLevel();
+      super.start();
+    }
   }
 }
 
@@ -4232,7 +4324,8 @@ export class ExpPhase extends PlayerPartyMemberPokemonPhase {
     super.start();
 
     const pokemon = this.getPokemon();
-    const exp = new Utils.NumberHolder(this.expValue);
+    const rawExp = Prestige.getModifiedValue(this.scene.prestigeLevel, PrestigeModifierAttribute.POKEMON_EXP_GAIN, this.expValue);
+    const exp = new Utils.NumberHolder(rawExp);
     this.scene.applyModifiers(ExpBoosterModifier, true, exp);
     exp.value = Math.floor(exp.value);
     this.scene.ui.showText(i18next.t("battle:expGain", { pokemonName: pokemon.name, exp: exp.value }), null, () => {
@@ -4932,7 +5025,7 @@ export class SelectModifierPhase extends BattlePhase {
         modifierType = typeOptions[cursor].type;
         break;
       default:
-        const shopOptions = getPlayerShopModifierTypeOptionsForWave(this.scene.currentBattle.waveIndex, this.scene.getWaveMoneyAmount(1));
+        const shopOptions = getPlayerShopModifierTypeOptionsForWave(this.scene.currentBattle.waveIndex, this.scene.getWaveMoneyAmount(1), this.scene.prestigeLevel);
         const shopOption = shopOptions[rowCursor > 2 || shopOptions.length <= SHOP_OPTIONS_ROW_LIMIT ? cursor : cursor + SHOP_OPTIONS_ROW_LIMIT];
         modifierType = shopOption.type;
         cost = shopOption.cost;

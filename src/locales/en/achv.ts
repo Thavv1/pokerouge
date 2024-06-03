@@ -168,4 +168,33 @@ export const achv: AchievementTranslationEntries = {
     name: "Undefeated",
     description: "Beat the game in classic mode",
   },
+
+
+  "prestigeVictory": {
+    description: "Complete the game in classic mode with prestige {{level}}",
+  },
+  "PRESTIGE_1_VICTORY": {
+    name: "Prestige 1",
+  },
+  "PRESTIGE_2_VICTORY": {
+    name: "Prestige 2",
+  },
+  "PRESTIGE_3_VICTORY": {
+    name: "Prestige 3",
+  },
+  "PRESTIGE_4_VICTORY": {
+    name: "Prestige 4",
+  },
+  "PRESTIGE_5_VICTORY": {
+    name: "Prestige 5",
+  },
+  "PRESTIGE_6_VICTORY": {
+    name: "Prestige 6",
+  },
+  "PRESTIGE_7_VICTORY": {
+    name: "Prestige 7",
+  },
+  "PRESTIGE_8_VICTORY": {
+    name: "Prestige 8",
+  }
 } as const;

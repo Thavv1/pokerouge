@@ -1,5 +1,5 @@
 import BattleScene from "../battle-scene";
-import { gameModes } from "../game-mode";
+import { GameModes, gameModes } from "../game-mode";
 import { SessionSaveData } from "../system/game-data";
 import { TextStyle, addTextObject } from "./text";
 import { Mode } from "./ui";
@@ -266,7 +266,8 @@ class SessionSlot extends Phaser.GameObjects.Container {
   async setupWithData(data: SessionSaveData) {
     this.remove(this.loadingLabel, true);
 
-    const gameModeLabel = addTextObject(this.scene, 8, 5, `${gameModes[data.gameMode]?.getName() || "Unknown"} - Wave ${data.waveIndex}`, TextStyle.WINDOW);
+    const gameModeLabelText = `${gameModes[data.gameMode]?.getName() || "Unknown"}${data.gameMode === GameModes.CLASSIC && data.prestigeLevel ? ` P.${data.prestigeLevel}` : ""} - Wave ${data.waveIndex}`;
+    const gameModeLabel = addTextObject(this.scene, 8, 5, gameModeLabelText, TextStyle.WINDOW);
     this.add(gameModeLabel);
 
     const timestampLabel = addTextObject(this.scene, 8, 19, new Date(data.timestamp).toLocaleString(), TextStyle.WINDOW);

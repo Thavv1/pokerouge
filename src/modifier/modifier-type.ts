@@ -22,6 +22,7 @@ import { ModifierTier } from "./modifier-tier";
 import { Nature, getNatureName, getNatureStatMultiplier } from "#app/data/nature";
 import i18next from "#app/plugins/i18n";
 import { getModifierTierTextTint } from "#app/ui/text";
+import { Prestige, PrestigeModifierAttribute } from "#app/system/prestige";
 
 const outputModifierData = false;
 const useMaxWeightForOutput = false;
@@ -1678,38 +1679,40 @@ export function getPlayerModifierTypeOptions(count: integer, party: PlayerPokemo
   return options;
 }
 
-export function getPlayerShopModifierTypeOptionsForWave(waveIndex: integer, baseCost: integer): ModifierTypeOption[] {
+export function getPlayerShopModifierTypeOptionsForWave(waveIndex: integer, baseCost: integer, prestigeLevel: integer): ModifierTypeOption[] {
   if (!(waveIndex % 10)) {
     return [];
   }
 
+  const cost = Prestige.getModifiedValue(prestigeLevel, PrestigeModifierAttribute.SHOP_ITEM_PRICES, baseCost);
+
   const options = [
     [
-      new ModifierTypeOption(modifierTypes.POTION(), 0, baseCost * 0.2),
-      new ModifierTypeOption(modifierTypes.ETHER(), 0, baseCost * 0.4),
-      new ModifierTypeOption(modifierTypes.REVIVE(), 0, baseCost * 2)
+      new ModifierTypeOption(modifierTypes.POTION(), 0, cost * 0.2),
+      new ModifierTypeOption(modifierTypes.ETHER(), 0, cost * 0.4),
+      new ModifierTypeOption(modifierTypes.REVIVE(), 0, cost * 2)
     ],
     [
-      new ModifierTypeOption(modifierTypes.SUPER_POTION(), 0, baseCost * 0.45),
-      new ModifierTypeOption(modifierTypes.FULL_HEAL(), 0, baseCost),
+      new ModifierTypeOption(modifierTypes.SUPER_POTION(), 0, cost * 0.45),
+      new ModifierTypeOption(modifierTypes.FULL_HEAL(), 0, cost),
     ],
     [
-      new ModifierTypeOption(modifierTypes.ELIXIR(), 0, baseCost),
-      new ModifierTypeOption(modifierTypes.MAX_ETHER(), 0, baseCost)
+      new ModifierTypeOption(modifierTypes.ELIXIR(), 0, cost),
+      new ModifierTypeOption(modifierTypes.MAX_ETHER(), 0, cost)
     ],
     [
-      new ModifierTypeOption(modifierTypes.HYPER_POTION(), 0, baseCost * 0.8),
-      new ModifierTypeOption(modifierTypes.MAX_REVIVE(), 0, baseCost * 2.75)
+      new ModifierTypeOption(modifierTypes.HYPER_POTION(), 0, cost * 0.8),
+      new ModifierTypeOption(modifierTypes.MAX_REVIVE(), 0, cost * 2.75)
     ],
     [
-      new ModifierTypeOption(modifierTypes.MAX_POTION(), 0, baseCost * 1.5),
-      new ModifierTypeOption(modifierTypes.MAX_ELIXIR(), 0, baseCost * 2.5)
+      new ModifierTypeOption(modifierTypes.MAX_POTION(), 0, cost * 1.5),
+      new ModifierTypeOption(modifierTypes.MAX_ELIXIR(), 0, cost * 2.5)
     ],
     [
-      new ModifierTypeOption(modifierTypes.FULL_RESTORE(), 0, baseCost * 2.25)
+      new ModifierTypeOption(modifierTypes.FULL_RESTORE(), 0, cost * 2.25)
     ],
     [
-      new ModifierTypeOption(modifierTypes.SACRED_ASH(), 0, baseCost * 10)
+      new ModifierTypeOption(modifierTypes.SACRED_ASH(), 0, cost * 10)
     ]
   ];
   return options.slice(0, Math.ceil(Math.max(waveIndex + 10, 0) / 30)).flat();
@@ -1877,8 +1880,9 @@ export class ModifierTypeOption {
 }
 
 export function getPartyLuckValue(party: Pokemon[]): integer {
-  return Phaser.Math.Clamp(party.map(p => p.isFainted() ? 0 : p.getLuck())
-    .reduce((total: integer, value: integer) => total += value, 0), 0, 14);
+  const basePartyLuck = party.map(p => p.isFainted() ? 0 : p.getLuck()).reduce((total: integer, value: integer) => total += value, 0);
+  const partyLuck = Prestige.getModifiedValue(party[0].scene.prestigeLevel, PrestigeModifierAttribute.PARTY_LUCK, basePartyLuck);
+  return Phaser.Math.Clamp(Math.round(partyLuck), 0, 14);
 }
 
 export function getLuckString(luckValue: integer): string {

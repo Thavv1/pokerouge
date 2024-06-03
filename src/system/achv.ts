@@ -123,6 +123,19 @@ export class ModifierAchv extends Achv {
 }
 
 
+export class PrestigeAchv extends Achv {
+  constructor(prestigeLevel: integer, score: integer) {
+    if (prestigeLevel < 1) {
+      throw new Error("Prestige level must be at least 1");
+    }
+    const iconBadgeNumber = ((prestigeLevel - 1) % 8) + 1;
+    const iconBadgeGen = Math.floor((prestigeLevel - 1) / 8) + 1;
+    const iconImage = `badge_gen${iconBadgeGen}_${iconBadgeNumber}`;
+
+    super(`PRESTIGE_${prestigeLevel}_VICTORY`, "", "", iconImage, score, (scene: BattleScene, _args: any[]) => scene.prestigeLevel >= prestigeLevel);
+  }
+}
+
 /**
  * Get the description of an achievement from the localization file with all the necessary variables filled in
  * @param localizationKey The localization key of the achievement
@@ -210,6 +223,22 @@ export function getAchievementDescription(localizationKey: string): string {
     return i18next.t("achv:PERFECT_IVS.description");
   case "CLASSIC_VICTORY":
     return i18next.t("achv:CLASSIC_VICTORY.description");
+  case "PRESTIGE_1_VICTORY":
+    return i18next.t("achv:prestigeVictory.description", { level: 1 });
+  case "PRESTIGE_2_VICTORY":
+    return i18next.t("achv:prestigeVictory.description", { level: 2 });
+  case "PRESTIGE_3_VICTORY":
+    return i18next.t("achv:prestigeVictory.description", { level: 3 });
+  case "PRESTIGE_4_VICTORY":
+    return i18next.t("achv:prestigeVictory.description", { level: 4 });
+  case "PRESTIGE_5_VICTORY":
+    return i18next.t("achv:prestigeVictory.description", { level: 5 });
+  case "PRESTIGE_6_VICTORY":
+    return i18next.t("achv:prestigeVictory.description", { level: 6 });
+  case "PRESTIGE_7_VICTORY":
+    return i18next.t("achv:prestigeVictory.description", { level: 7 });
+  case "PRESTIGE_8_VICTORY":
+    return i18next.t("achv:prestigeVictory.description", { level: 8 });
   default:
     return "";
   }
@@ -257,6 +286,14 @@ export const achvs = {
   HIDDEN_ABILITY: new Achv("HIDDEN_ABILITY","",  "HIDDEN_ABILITY.description", "ability_charm", 75),
   PERFECT_IVS: new Achv("PERFECT_IVS","",  "PERFECT_IVS.description", "blunder_policy", 100),
   CLASSIC_VICTORY: new Achv("CLASSIC_VICTORY","",  "CLASSIC_VICTORY.description", "relic_crown", 150),
+  PRESTIGE_1_VICTORY: new PrestigeAchv(1, 100).setSecret(true),
+  PRESTIGE_2_VICTORY: new PrestigeAchv(2, 100).setSecret(true),
+  PRESTIGE_3_VICTORY: new PrestigeAchv(3, 100).setSecret(true),
+  PRESTIGE_4_VICTORY: new PrestigeAchv(4, 100).setSecret(true),
+  PRESTIGE_5_VICTORY: new PrestigeAchv(5, 100).setSecret(true),
+  PRESTIGE_6_VICTORY: new PrestigeAchv(6, 100).setSecret(true),
+  PRESTIGE_7_VICTORY: new PrestigeAchv(7, 100).setSecret(true),
+  PRESTIGE_8_VICTORY: new PrestigeAchv(8, 150).setSecret(true)
 };
 
 {

@@ -58,6 +58,7 @@ import {InputsController} from "./inputs-controller";
 import {UiInputs} from "./ui-inputs";
 import { MoneyFormat } from "./enums/money-format";
 import { NewArenaEvent } from "./battle-scene-events";
+import { Prestige } from "./system/prestige";
 
 export const bypassLogin = import.meta.env.VITE_BYPASS_LOGIN === "1";
 
@@ -161,6 +162,7 @@ export default class BattleScene extends SceneBase {
   public arenaNextEnemy: ArenaBase;
   public arena: Arena;
   public gameMode: GameMode;
+  public prestigeLevel: integer;
   public score: integer;
   public lockModifierTiers: boolean;
   public trainer: Phaser.GameObjects.Sprite;
@@ -172,6 +174,7 @@ export default class BattleScene extends SceneBase {
   private party: PlayerPokemon[];
   /** Combined Biome and Wave count text */
   private biomeWaveText: Phaser.GameObjects.Text;
+  private prestigeLevelText: Phaser.GameObjects.Text;
   private moneyText: Phaser.GameObjects.Text;
   private scoreText: Phaser.GameObjects.Text;
   private luckLabelText: Phaser.GameObjects.Text;
@@ -389,6 +392,13 @@ export default class BattleScene extends SceneBase {
     this.biomeWaveText.setOrigin(1, 0);
     this.fieldUI.add(this.biomeWaveText);
 
+    this.prestigeLevelText = addTextObject(this, (this.game.canvas.width / 6) - 2, 0, "", TextStyle.BATTLE_INFO);
+    this.prestigeLevelText.setOrigin(1, 0);
+    this.prestigeLevelText.setInteractive();
+    this.prestigeLevelText.on("pointerover", () => this.ui.showTooltip(null, Prestige.getLevelDescriptionsForLevel(this.prestigeLevel).join("\n")));
+    this.prestigeLevelText.on("pointerout", () => this.ui.hideTooltip());
+    this.fieldUI.add(this.prestigeLevelText);
+
     this.moneyText = addTextObject(this, (this.game.canvas.width / 6) - 2, 0, "", TextStyle.MONEY);
     this.moneyText.setName("text-money");
     this.moneyText.setOrigin(1, 0);
@@ -519,6 +529,7 @@ export default class BattleScene extends SceneBase {
       }
     });
 
+    this.updatePrestigeLevelText();
     this.updateBiomeWaveText();
     this.updateMoneyText();
     this.updateScoreText();
@@ -839,6 +850,10 @@ export default class BattleScene extends SceneBase {
     }
 
     this.currentBattle = null;
+
+    this.prestigeLevelText.setText(`Prestige ${this.prestigeLevel}`);
+    this.prestigeLevelText.setVisible(false);
+
 
     this.biomeWaveText.setText(startingWave.toString());
     this.biomeWaveText.setVisible(false);
@@ -1296,6 +1311,15 @@ export default class BattleScene extends SceneBase {
     });
   }
 
+  updatePrestigeLevelText(): void {
+    if (!this.prestigeLevel || this.gameMode.modeId !== GameModes.CLASSIC) {
+      this.prestigeLevelText.setVisible(false);
+      return;
+    }
+    this.prestigeLevelText.setText(`Prestige ${this.prestigeLevel}`);
+    this.prestigeLevelText.setVisible(true);
+  }
+
   updateBiomeWaveText(): void {
     const isBoss = !(this.currentBattle.waveIndex % 10);
     const biomeString: string = getBiomeName(this.arena.biomeType);
@@ -1360,8 +1384,16 @@ export default class BattleScene extends SceneBase {
   }
 
   updateUIPositions(): void {
+    const baseY = -(this.game.canvas.height / 6);
     const enemyModifierCount = this.enemyModifiers.filter(m => m.isIconVisible(this)).length;
-    this.biomeWaveText.setY(-(this.game.canvas.height / 6) + (enemyModifierCount ? enemyModifierCount <= 12 ? 15 : 24 : 0));
+    const offsetEnemyModifier = (enemyModifierCount ? enemyModifierCount <= 12 ? 15 : 24 : 0);
+    if (this.gameMode?.modeId === GameModes.CLASSIC && this.prestigeLevel) {
+      this.prestigeLevelText.setY(baseY + offsetEnemyModifier);
+      this.biomeWaveText.setY(this.prestigeLevelText.y + 10);
+    } else {
+      this.biomeWaveText.setY(baseY + offsetEnemyModifier);
+    }
+
     this.moneyText.setY(this.biomeWaveText.y + 10);
     this.scoreText.setY(this.moneyText.y + 10);
     [ this.luckLabelText, this.luckText ].map(l => l.setY((this.scoreText.visible ? this.scoreText : this.moneyText).y + 10));
