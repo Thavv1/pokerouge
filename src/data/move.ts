@@ -629,7 +629,6 @@ export class MoveEffectAttr extends MoveAttr {
     applyPreDefendAbAttrs(IgnoreMoveEffectsAbAttr,target,user,null,null, moveChance);
     return moveChance.value;
   }
-
 }
 
 export class PreMoveMessageAttr extends MoveAttr {
@@ -1473,7 +1472,8 @@ export class MultiStatusEffectAttr extends StatusEffectAttr {
   }
 
   getTargetBenefitScore(user: Pokemon, target: Pokemon, move: Move): number {
-    return !(this.selfTarget ? user : target).status && (this.selfTarget ? user : target).canSetStatus(this.effect, true, false, user) ? Math.floor(move.chance * -0.1) : 0;
+    const moveChance = this.getMoveChance(user,target,move,this.selfTarget);
+    return !(this.selfTarget ? user : target).status && (this.selfTarget ? user : target).canSetStatus(this.effect, true, false, user) ? Math.floor(moveChance * -0.1) : 0;
   }
 }
 
@@ -3967,6 +3967,7 @@ export class AddArenaTrapTagAttr extends AddArenaTagAttr {
           return true;
         }
       }
+
       const tag = user.scene.arena.getTagOnSide(this.tagType, side) as ArenaTrapTag;
       return tag.layers < tag.maxLayers;
     };
@@ -6212,9 +6213,9 @@ export function initMoves() {
     new SelfStatusMove(Moves.COPYCAT, Type.NORMAL, -1, 20, -1, 0, 4)
       .attr(CopyMoveAttr)
       .ignoresVirtual(),
-    new StatusMove(Moves.POWER_SWAP, Type.PSYCHIC, -1, 10, 100, 0, 4)
+    new StatusMove(Moves.POWER_SWAP, Type.PSYCHIC, -1, 10, -1, 0, 4)
       .unimplemented(),
-    new StatusMove(Moves.GUARD_SWAP, Type.PSYCHIC, -1, 10, 100, 0, 4)
+    new StatusMove(Moves.GUARD_SWAP, Type.PSYCHIC, -1, 10, -1, 0, 4)
       .unimplemented(),
     new AttackMove(Moves.PUNISHMENT, Type.DARK, MoveCategory.PHYSICAL, -1, 100, 5, -1, 0, 4)
       .makesContact(true)

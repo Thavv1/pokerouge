@@ -1003,7 +1003,6 @@ export class PreAttackAbAttr extends AbAttr {
   }
 }
 
-
 /**
  * Modifies moves additional effects with multipliers, ie. Sheer Force, Serene Grace.
  * @extends AbAttr
