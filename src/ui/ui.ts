@@ -1,4 +1,4 @@
-import { default as BattleScene } from "../battle-scene";
+import {default as BattleScene} from "../battle-scene";
 import UiHandler from "./ui-handler";
 import BattleMessageUiHandler from "./battle-message-ui-handler";
 import CommandUiHandler from "./command-ui-handler";
@@ -12,17 +12,18 @@ import SummaryUiHandler from "./summary-ui-handler";
 import StarterSelectUiHandler from "./starter-select-ui-handler";
 import EvolutionSceneHandler from "./evolution-scene-handler";
 import TargetSelectUiHandler from "./target-select-ui-handler";
-import SettingsUiHandler from "./settings-ui-handler";
+import SettingsUiHandler from "./settings/settings-ui-handler";
+import SettingsGamepadUiHandler from "./settings/settings-gamepad-ui-handler";
 import { TextStyle, addTextObject } from "./text";
 import AchvBar from "./achv-bar";
 import MenuUiHandler from "./menu-ui-handler";
 import AchvsUiHandler from "./achvs-ui-handler";
-import OptionSelectUiHandler from "./option-select-ui-handler";
+import OptionSelectUiHandler from "./settings/option-select-ui-handler";
 import EggHatchSceneHandler from "./egg-hatch-scene-handler";
 import EggListUiHandler from "./egg-list-ui-handler";
 import EggGachaUiHandler from "./egg-gacha-ui-handler";
 import VouchersUiHandler from "./vouchers-ui-handler";
-import { addWindow } from "./ui-theme";
+import {addWindow} from "./ui-theme";
 import LoginFormUiHandler from "./login-form-ui-handler";
 import RegistrationFormUiHandler from "./registration-form-ui-handler";
 import LoadingModalUiHandler from "./loading-modal-ui-handler";
@@ -36,6 +37,11 @@ import UnavailableModalUiHandler from "./unavailable-modal-ui-handler";
 import OutdatedModalUiHandler from "./outdated-modal-ui-handler";
 import SessionReloadModalUiHandler from "./session-reload-modal-ui-handler";
 import {Button} from "../enums/buttons";
+import i18next, {ParseKeys} from "i18next";
+import {PlayerGender} from "#app/system/game-data";
+import GamepadBindingUiHandler from "./settings/gamepad-binding-ui-handler";
+import SettingsKeyboardUiHandler from "#app/ui/settings/settings-keyboard-ui-handler";
+import KeyboardBindingUiHandler from "#app/ui/settings/keyboard-binding-ui-handler";
 
 export enum Mode {
   MESSAGE,
@@ -56,6 +62,10 @@ export enum Mode {
   MENU,
   MENU_OPTION_SELECT,
   SETTINGS,
+  SETTINGS_GAMEPAD,
+  GAMEPAD_BINDING,
+  SETTINGS_KEYBOARD,
+  KEYBOARD_BINDING,
   ACHIEVEMENTS,
   GAME_STATS,
   VOUCHERS,
@@ -86,7 +96,11 @@ const noTransitionModes = [
   Mode.OPTION_SELECT,
   Mode.MENU,
   Mode.MENU_OPTION_SELECT,
+  Mode.GAMEPAD_BINDING,
+  Mode.KEYBOARD_BINDING,
   Mode.SETTINGS,
+  Mode.SETTINGS_GAMEPAD,
+  Mode.SETTINGS_KEYBOARD,
   Mode.ACHIEVEMENTS,
   Mode.GAME_STATS,
   Mode.VOUCHERS,
@@ -101,7 +115,7 @@ const noTransitionModes = [
 export default class UI extends Phaser.GameObjects.Container {
   private mode: Mode;
   private modeChain: Mode[];
-  private handlers: UiHandler[];
+  public handlers: UiHandler[];
   private overlay: Phaser.GameObjects.Rectangle;
   public achvBar: AchvBar;
   public savingIcon: SavingIconHandler;
@@ -137,6 +151,10 @@ export default class UI extends Phaser.GameObjects.Container {
       new MenuUiHandler(scene),
       new OptionSelectUiHandler(scene, Mode.MENU_OPTION_SELECT),
       new SettingsUiHandler(scene),
+      new SettingsGamepadUiHandler(scene),
+      new GamepadBindingUiHandler(scene),
+      new SettingsKeyboardUiHandler(scene),
+      new KeyboardBindingUiHandler(scene),
       new AchvsUiHandler(scene),
       new GameStatsUiHandler(scene),
       new VouchersUiHandler(scene),
@@ -234,6 +252,19 @@ export default class UI extends Phaser.GameObjects.Container {
   }
 
   showDialogue(text: string, name: string, delay: integer = 0, callback: Function, callbackDelay?: integer, promptDelay?: integer): void {
+    // First get the gender of the player (default male) (also used if UNSET)
+    let playerGenderPrefix = "PGM";
+    if ((this.scene as BattleScene).gameData.gender === PlayerGender.FEMALE) {
+      playerGenderPrefix = "PGF";
+    }
+    // Add the prefix to the text
+    const localizationKey = playerGenderPrefix + text;
+    // Get localized dialogue (if available)
+    if (i18next.exists(localizationKey as ParseKeys) ) {
+
+
+      text = i18next.t(localizationKey as ParseKeys);
+    }
     if (text.indexOf("$") > -1) {
       const messagePages = text.split(/\$/g).map(m => m.trim());
       let showMessageAndCallback = () => callback();

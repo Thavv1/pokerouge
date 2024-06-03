@@ -5,7 +5,7 @@ import * as Utils from "../utils";
 import PokemonSpecies, { getPokemonSpecies } from "../data/pokemon-species";
 import { Species } from "../data/enums/species";
 import { Weather, WeatherType, getTerrainClearMessage, getTerrainStartMessage, getWeatherClearMessage, getWeatherStartMessage } from "../data/weather";
-import { CommonAnimPhase, WeatherEffectPhase } from "../phases";
+import { CommonAnimPhase } from "../phases";
 import { CommonAnim } from "../data/battle-anims";
 import { Type } from "../data/type";
 import Move from "../data/move";
@@ -19,6 +19,7 @@ import { Terrain, TerrainType } from "../data/terrain";
 import { PostTerrainChangeAbAttr, PostWeatherChangeAbAttr, applyPostTerrainChangeAbAttrs, applyPostWeatherChangeAbAttrs } from "../data/ability";
 import Pokemon from "./pokemon";
 import * as Overrides from "../overrides";
+import { WeatherChangedEvent, TerrainChangedEvent, TagChangedEvent } from "./arena-events";
 
 export class Arena {
   public scene: BattleScene;
@@ -33,6 +34,8 @@ export class Arena {
 
   private pokemonPool: PokemonPools;
   private trainerPool: BiomeTierTrainerPools;
+
+  public readonly eventTarget: EventTarget = new EventTarget();
 
   constructor(scene: BattleScene, biome: Biome, bgm: string) {
     this.scene = scene;
@@ -300,13 +303,12 @@ export class Arena {
     const oldWeatherType = this.weather?.weatherType || WeatherType.NONE;
 
     this.weather = weather ? new Weather(weather, hasPokemonSource ? 5 : 0) : null;
+    this.eventTarget.dispatchEvent(new WeatherChangedEvent(oldWeatherType, this.weather?.weatherType, this.weather?.turnsLeft));
 
     if (this.weather) {
-      this.scene.tryReplacePhase(phase => phase instanceof WeatherEffectPhase && phase.weather.weatherType === oldWeatherType, new WeatherEffectPhase(this.scene, this.weather));
       this.scene.unshiftPhase(new CommonAnimPhase(this.scene, undefined, undefined, CommonAnim.SUNNY + (weather - 1)));
       this.scene.queueMessage(getWeatherStartMessage(weather));
     } else {
-      this.scene.tryRemovePhase(phase => phase instanceof WeatherEffectPhase && phase.weather.weatherType === oldWeatherType);
       this.scene.queueMessage(getWeatherClearMessage(oldWeatherType));
     }
 
@@ -326,6 +328,7 @@ export class Arena {
     const oldTerrainType = this.terrain?.terrainType || TerrainType.NONE;
 
     this.terrain = terrain ? new Terrain(terrain, hasPokemonSource ? 5 : 0) : null;
+    this.eventTarget.dispatchEvent(new TerrainChangedEvent(oldTerrainType,this.terrain?.terrainType, this.terrain?.turnsLeft));
 
     if (this.terrain) {
       if (!ignoreAnim) {
@@ -455,7 +458,26 @@ export class Arena {
     }
   }
 
+  overrideTint(): [integer, integer, integer] {
+    switch (Overrides.ARENA_TINT_OVERRIDE) {
+    case TimeOfDay.DUSK:
+      return [ 98, 48, 73 ].map(c => Math.round((c + 128) / 2)) as [integer, integer, integer];
+      break;
+    case (TimeOfDay.NIGHT):
+      return [ 64, 64, 64 ];
+      break;
+    case TimeOfDay.DAWN:
+    case TimeOfDay.DAY:
+    default:
+      return [ 128, 128, 128 ];
+      break;
+    }
+  }
+
   getDayTint(): [integer, integer, integer] {
+    if (Overrides.ARENA_TINT_OVERRIDE !== null) {
+      return this.overrideTint();
+    }
     switch (this.biomeType) {
     case Biome.ABYSS:
       return [ 64, 64, 64 ];
@@ -465,6 +487,9 @@ export class Arena {
   }
 
   getDuskTint(): [integer, integer, integer] {
+    if (Overrides.ARENA_TINT_OVERRIDE) {
+      return this.overrideTint();
+    }
     if (!this.isOutside()) {
       return [ 0, 0, 0 ];
     }
@@ -476,6 +501,9 @@ export class Arena {
   }
 
   getNightTint(): [integer, integer, integer] {
+    if (Overrides.ARENA_TINT_OVERRIDE) {
+      return this.overrideTint();
+    }
     switch (this.biomeType) {
     case Biome.ABYSS:
     case Biome.SPACE:
@@ -521,6 +549,8 @@ export class Arena {
     const newTag = getArenaTag(tagType, turnCount || 0, sourceMove, sourceId, targetIndex, side);
     this.tags.push(newTag);
     newTag.onAdd(this);
+
+    this.eventTarget.dispatchEvent(new TagChangedEvent(newTag.tagType, newTag.side, newTag.turnCount));
 
     return true;
   }
