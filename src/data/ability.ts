@@ -3202,16 +3202,6 @@ export class AlwaysHitAbAttr extends AbAttr { }
 /** Attribute for abilities that allow moves that make contact to ignore protection (i.e. Unseen Fist) */
 export class IgnoreProtectOnContactAbAttr extends AbAttr { }
 
-/**
- * Checks if a user can apply {@linkcode IgnoreProtectOnContactAbAttr} to ignore protection.
- * @param user {@linkcode Pokemon} The Pokemon that may apply the attribute.
- * @param move {@linkcode Move} The Move used by `user` in the current action phase.
- * @returns `true` if an {@linkcode IgnoreProtectOnContactAbAttr} can be applied, `false` otherwise.
- */
-export function canApplyIgnoreProtectOnContact(user: Pokemon, move: Move): boolean {
-  return user.hasAbilityWithAttr(IgnoreProtectOnContactAbAttr) && move.checkFlag(MoveFlags.MAKES_CONTACT, user, null);
-}
-
 export class UncopiableAbilityAbAttr extends AbAttr {
   constructor() {
     super(false);
