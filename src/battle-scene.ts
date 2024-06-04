@@ -1687,16 +1687,10 @@ export default class BattleScene extends SceneBase {
     } else {
       // .splice(index, num elements to remove, what to add)
       // modifies array by inserting at index, removing num of elements after index
+      // each phase can be debugged via "phase.constructor.name"
+
       this.phaseQueuePrepend.splice(this.phaseQueuePrependSpliceIndex, 0, phase);
     }
-    /**
-		 * debugging queues via printing, may be helpful in the future
-		console.log(`State of the phaseQueuePrepend (will be moved over to phaseQeueu)`)
-		this.phaseQueuePrepend.forEach(p => console.log(p.constructor.name));
-
-		console.log(`State of the phaseQueue, what is going to be called next `)
-		this.phaseQueue.forEach(p => console.log(p.constructor.name));
-		 */
   }
 
   /**
@@ -1732,7 +1726,7 @@ export default class BattleScene extends SceneBase {
       return;
     }
 
-    // shifting phase (with no standby phase) will move everything from prepend to actual PhaseQueue?
+    // shifting phase (with no standby phase) will move everything from Prepend to PhaseQueue
     // resets the index, if it was changed via setPhaseQueueSplice()
     if (this.phaseQueuePrependSpliceIndex > -1) {
       this.clearPhaseQueueSplice();
@@ -1750,11 +1744,8 @@ export default class BattleScene extends SceneBase {
     if (!this.phaseQueue.length) {
       this.populatePhaseQueue();
     }
+    // front of phaseQueue will be next to start
     this.currentPhase = this.phaseQueue.shift();
-    /** debugging
-		console.log(`SHIFT PHASE: State of the phaseQueue, what is going to be called next`)
-		this.phaseQueue.forEach(p => console.log(p.constructor.name));
-		 */
     this.currentPhase.start();
   }
 
