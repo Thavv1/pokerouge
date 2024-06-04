@@ -2486,7 +2486,6 @@ export class MovePhase extends BattlePhase {
       return false;
     });
 
-    // Readability?: this function declaration honestly gets in the way of readability of what start() is doing , move either to beginning or end
     const doMove = () => {
       this.pokemon.turnData.acted = true; // Record that the move was attempted, even if it fails
 
@@ -2821,8 +2820,6 @@ export class MoveEffectPhase extends PokemonPhase {
         this.scene.unshiftPhase(this.getNewHitPhase());
       } else {
         // queue message for number of hits made by multi-move
-        // BUG: when fainting occurs, the resulting message isn't rendered - has to do with FaintPhase
-        // temp fix in pokemon.ts apply() that checks, but ideally want to fix it here at the source
         const hitsTotal = user.turnData.hitCount - Math.max(user.turnData.hitsLeft, 0);
         if (hitsTotal > 1) {
           this.scene.queueMessage(i18next.t("battle:attackHitsCount", { count: hitsTotal }));
