@@ -58,6 +58,7 @@ import {InputsController} from "./inputs-controller";
 import {UiInputs} from "./ui-inputs";
 import { MoneyFormat } from "./enums/money-format";
 import { NewArenaEvent } from "./battle-scene-events";
+import ArenaFlyout from "./ui/arena-flyout";
 
 export const bypassLogin = import.meta.env.VITE_BYPASS_LOGIN === "1";
 
@@ -92,6 +93,7 @@ export default class BattleScene extends SceneBase {
   public damageNumbersMode: integer = 0;
   public reroll: boolean = false;
   public showMovesetFlyout: boolean = true;
+  public showArenaFlyout: boolean = true;
   public showLevelUpStats: boolean = true;
   public enableTutorials: boolean = import.meta.env.VITE_BYPASS_TUTORIAL === "1";
   public enableRetries: boolean = false;
@@ -178,6 +180,8 @@ export default class BattleScene extends SceneBase {
   private luckText: Phaser.GameObjects.Text;
   private modifierBar: ModifierBar;
   private enemyModifierBar: ModifierBar;
+  public arenaFlyout: ArenaFlyout;
+
   private fieldOverlay: Phaser.GameObjects.Rectangle;
   private modifiers: PersistentModifier[];
   private enemyModifiers: PersistentModifier[];
@@ -410,6 +414,10 @@ export default class BattleScene extends SceneBase {
     this.luckLabelText.setOrigin(1, 0);
     this.luckLabelText.setVisible(false);
     this.fieldUI.add(this.luckLabelText);
+
+    this.arenaFlyout = new ArenaFlyout(this);
+    this.fieldUI.add(this.arenaFlyout);
+    this.fieldUI.moveBelow<Phaser.GameObjects.GameObject>(this.arenaFlyout, this.fieldOverlay);
 
     this.updateUIPositions();
 
@@ -1103,6 +1111,8 @@ export default class BattleScene extends SceneBase {
     case Species.FLOETTE:
     case Species.FLORGES:
     case Species.FURFROU:
+    case Species.PUMPKABOO:
+    case Species.GOURGEIST:
     case Species.ORICORIO:
     case Species.MAGEARNA:
     case Species.ZARUDE:
@@ -1272,6 +1282,13 @@ export default class BattleScene extends SceneBase {
     return sprite;
   }
 
+  moveBelowOverlay<T extends Phaser.GameObjects.GameObject>(gameObject: T) {
+    this.fieldUI.moveBelow<any>(gameObject, this.fieldOverlay);
+  }
+  processInfoButton(pressed: boolean): void {
+    this.arenaFlyout.toggleFlyout(pressed);
+  }
+
   showFieldOverlay(duration: integer): Promise<void> {
     return new Promise(resolve => {
       this.tweens.add({
@@ -1294,6 +1311,14 @@ export default class BattleScene extends SceneBase {
         onComplete: () => resolve()
       });
     });
+  }
+
+  showEnemyModifierBar(): void {
+    this.enemyModifierBar.setVisible(true);
+  }
+
+  hideEnemyModifierBar(): void {
+    this.enemyModifierBar.setVisible(false);
   }
 
   updateBiomeWaveText(): void {
@@ -1401,7 +1426,7 @@ export default class BattleScene extends SceneBase {
 
   randomSpecies(waveIndex: integer, level: integer, fromArenaPool?: boolean, speciesFilter?: PokemonSpeciesFilter, filterAllEvolutions?: boolean): PokemonSpecies {
     if (fromArenaPool) {
-      return this.arena.randomSpecies(waveIndex, level);
+      return this.arena.randomSpecies(waveIndex, level,null , getPartyLuckValue(this.party));
     }
     const filteredSpecies = speciesFilter ? [...new Set(allSpecies.filter(s => s.isCatchable()).filter(speciesFilter).map(s => {
       if (!filterAllEvolutions) {
