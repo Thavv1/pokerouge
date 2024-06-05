@@ -113,7 +113,15 @@ export class LoginPhase extends Phase {
                   ]
                 });
               }, () => {
-                window.location.href = "https://discord.com/oauth2/authorize?client_id=1246478260985139362&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8001%2Fauth%2Fdiscord%2Fcallback&scope=identify";
+                const redirectUri = encodeURIComponent(`${Utils.serverUrl}/auth/discord/callback`);
+                const discordId = import.meta.env.DISCORD_CLIENT_ID;
+                const discordUrl = `https://discord.com/api/oauth2/authorize?client_id=${discordId}&redirect_uri=${redirectUri}&response_type=code&scope=identify`;
+                window.open(discordUrl, "_self");
+              }, () => {
+                const redirectUri = encodeURIComponent(`${Utils.serverUrl}/auth/google/callback`);
+                const googleId = import.meta.env.GOOGLE_CLIENT_ID;
+                const googleUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${googleId}&redirect_uri=${redirectUri}&response_type=code&scope=openid`;
+                window.open(googleUrl, "_self");
               }
             ]
           });

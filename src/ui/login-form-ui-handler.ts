@@ -22,7 +22,7 @@ export default class LoginFormUiHandler extends FormModalUiHandler {
   }
 
   getButtonLabels(config?: ModalConfig): string[] {
-    return [ i18next.t("menu:login"), i18next.t("menu:register"), "Login with Discord" ];
+    return [ i18next.t("menu:login"), i18next.t("menu:register"), i18next.t("menu:loginDiscord"), i18next.t("menu:loginGoogle") ];
   }
 
   getReadableErrorMessage(error: string): string {
