@@ -34,6 +34,116 @@ interface BiomeDepths {
   [key: integer]: [integer, integer]
 }
 
+interface BiomeConditions {
+  [key: integer]: (p: any) => boolean;
+}
+
+export const biomeConditions: BiomeConditions = {
+  [Biome.TOWN]: () => {
+    return false;
+  },
+  [Biome.PLAINS]: () => {
+    return false;
+  },
+  [Biome.GRASS]: () => {
+    return false;
+  },
+  [Biome.TALL_GRASS]: () => {
+    return false;
+  },
+  [Biome.SLUM]: () => {
+    return false;
+  },
+  [Biome.FOREST]: () => {
+    return false;
+  },
+  [Biome.SEA]: () => {
+    return false;
+  },
+  [Biome.SWAMP]: () => {
+    return false;
+  },
+  [Biome.BEACH]: () => {
+    return false;
+  },
+  [Biome.LAKE]: () => {
+    return false;
+  },
+  [Biome.SEABED]: () => {
+    return false;
+  },
+  [Biome.MOUNTAIN]: () => {
+    return false;
+  },
+  [Biome.BADLANDS]: () => {
+    return false;
+  },
+  [Biome.CAVE]: () => {
+    return false;
+  },
+  [Biome.DESERT]: () => {
+    return false;
+  },
+  [Biome.ICE_CAVE]: () => {
+    return false;
+  },
+  [Biome.MEADOW]: () => {
+    return false;
+  },
+  [Biome.POWER_PLANT]:() => {
+    return false;
+  },
+  [Biome.VOLCANO]: () => {
+    return false;
+  },
+  [Biome.GRAVEYARD]: () => {
+    return false;
+  },
+  [Biome.DOJO]: () => {
+    return false;
+  },
+  [Biome.FACTORY]: () => {
+    return false;
+  },
+  [Biome.RUINS]: () => {
+    return false;
+  },
+  [Biome.WASTELAND]: () => {
+    return false;
+  },
+  [Biome.ABYSS]: () => {
+    return false;
+  },
+  [Biome.SPACE]: (p) => ( 
+    (!!p.scene.getParty().find(p1 => p1.moveset.find(m1 => m1.getMove().id === 273 || m1.getMove().id === 361))) &&
+    (!!p.scene.getParty().find(p2 => p2.moveset.find(m2 => m2.getMove().id === 47)))
+  ),
+  [Biome.CONSTRUCTION_SITE]:() => {
+    return false;
+  },
+  [Biome.JUNGLE]: () => {
+    return false;
+  },
+  [Biome.FAIRY_CAVE]: () => {
+    return false;
+  },
+  [Biome.TEMPLE]: () => {
+    return false;
+  },
+  [Biome.METROPOLIS]: () => {
+    return false;
+  },
+  [Biome.SNOWY_FOREST]: () => {
+    return false;
+  },
+  [Biome.ISLAND]: () => {
+    return false;
+  },
+  [Biome.LABORATORY]: () => {
+    return false;
+  }
+};
+
 export const biomeLinks: BiomeLinks = {
   [Biome.TOWN]: Biome.PLAINS,
   [Biome.PLAINS]: [ Biome.GRASS, Biome.METROPOLIS, Biome.LAKE ],
@@ -82,7 +192,8 @@ export enum BiomePoolTier {
   BOSS,
   BOSS_RARE,
   BOSS_SUPER_RARE,
-  BOSS_ULTRA_RARE
+  BOSS_ULTRA_RARE,
+  BOSS_CONDITIONAL_ULTRA_RARE
 }
 
 export const uncatchableSpecies: Species[] = [];
@@ -1284,7 +1395,8 @@ export const biomePokemonPools: BiomePokemonPools = {
     [BiomePoolTier.BOSS]: { [TimeOfDay.DAWN]: [], [TimeOfDay.DAY]: [ Species.SOLROCK ], [TimeOfDay.DUSK]: [], [TimeOfDay.NIGHT]: [ Species.LUNATONE ], [TimeOfDay.ALL]: [ Species.CLEFABLE, Species.BRONZONG, Species.MUSHARNA, Species.REUNICLUS, Species.MINIOR ] },
     [BiomePoolTier.BOSS_RARE]: { [TimeOfDay.DAWN]: [], [TimeOfDay.DAY]: [], [TimeOfDay.DUSK]: [], [TimeOfDay.NIGHT]: [], [TimeOfDay.ALL]: [ Species.METAGROSS, Species.PORYGON_Z ] },
     [BiomePoolTier.BOSS_SUPER_RARE]: { [TimeOfDay.DAWN]: [], [TimeOfDay.DAY]: [], [TimeOfDay.DUSK]: [], [TimeOfDay.NIGHT]: [], [TimeOfDay.ALL]: [ Species.CELESTEELA ] },
-    [BiomePoolTier.BOSS_ULTRA_RARE]: { [TimeOfDay.DAWN]: [], [TimeOfDay.DAY]: [ Species.SOLGALEO ], [TimeOfDay.DUSK]: [], [TimeOfDay.NIGHT]: [ Species.LUNALA ], [TimeOfDay.ALL]: [ Species.RAYQUAZA, Species.NECROZMA ] }
+    [BiomePoolTier.BOSS_ULTRA_RARE]: { [TimeOfDay.DAWN]: [], [TimeOfDay.DAY]: [ Species.SOLGALEO ], [TimeOfDay.DUSK]: [], [TimeOfDay.NIGHT]: [ Species.LUNALA ], [TimeOfDay.ALL]: [ Species.RAYQUAZA, Species.NECROZMA ] },
+    [BiomePoolTier.BOSS_CONDITIONAL_ULTRA_RARE]: { [TimeOfDay.DAWN]: [], [TimeOfDay.DAY]: [], [TimeOfDay.DUSK]: [], [TimeOfDay.NIGHT]: [], [TimeOfDay.ALL]: [Species.JIRACHI]}
   },
   [Biome.CONSTRUCTION_SITE]: {
     [BiomePoolTier.COMMON]: {
@@ -3888,7 +4000,9 @@ export function initBiomes() {
       [ Biome.SPACE, BiomePoolTier.BOSS_ULTRA_RARE ]
     ]
     ],
-    [ Species.JIRACHI, Type.STEEL, Type.PSYCHIC, [ ]
+    [ Species.JIRACHI, Type.STEEL, Type.PSYCHIC, [ 
+      [ Biome.SPACE, BiomePoolTier.BOSS_CONDITIONAL_ULTRA_RARE ]
+    ]
     ],
     [ Species.DEOXYS, Type.PSYCHIC, -1, [ ]
     ],
