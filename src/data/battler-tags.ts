@@ -1017,9 +1017,9 @@ export class CenterOfAttentionTag extends BattlerTag {
   }
 
   canAdd(pokemon: Pokemon): boolean {
-    const activeTeam = [ pokemon, pokemon.getAlly() ];
+    const activeTeam = pokemon.isPlayer() ? pokemon.scene.getPlayerField() : pokemon.scene.getEnemyField();
 
-    return !!activeTeam.find(p => p.getTag(BattlerTagType.CENTER_OF_ATTENTION));
+    return !activeTeam.find(p => p.getTag(BattlerTagType.CENTER_OF_ATTENTION));
   }
 
   onAdd(pokemon: Pokemon): void {
