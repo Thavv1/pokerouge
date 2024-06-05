@@ -2951,6 +2951,62 @@ export class DefDefAttr extends VariableDefAttr {
   }
 }
 
+/**
+ * Attribute used for moves that change the stats of the user before dealing damage
+ * @extends MoveAttr
+ */
+export class PreAttackStatChangeAttr extends MoveAttr {
+  apply(user: Pokemon, target: Pokemon, move: Move, args: any[]): boolean {
+    return false;
+  }
+}
+
+/**
+ * Attribute used for moves that steal the enemy's positive stat boosts before dealing damage
+ * @extends PreAttackStatChangeAttr
+ * @param user The {@linkcode Pokemon} that is stealing the boosts
+ * @param target The {@linkcode Pokemon} that is having their positive stat boosts stolen and reset to 0
+ * @param move N/A
+ * @param args [0] {@linkcode boolean} Whether the move could hit the target, if false (immune, dodged...) no stats are stolen
+ * @returns true if stats are stolen, false if move didn't hit or the target had no positive stats to take
+ */
+export class StealStatBoostsAttr extends PreAttackStatChangeAttr {
+  apply(user: Pokemon, target: Pokemon, move: Move, args: any[]): boolean {
+    // Can't steal if the move doesn't land
+    const canHit = args[0] as boolean;
+    if (!user || !target || !canHit) {
+      return false;
+    }
+
+    let stolen = false;
+    const targetStats = target.summonData.battleStats;
+    const targetBoosts: integer[] = [ 0, 0, 0, 0, 0, 0, 0 ];
+
+    // Take positive stat boosts from the target, and reset them to 0
+    targetStats.forEach((stat, index) => {
+      if (stat > 0) {
+        targetBoosts[index] = stat;
+        targetStats[index] = 0;
+        stolen = true;
+      }
+    });
+
+    // If any stats were stolen, announce it and raise the user's stats accordingly
+    if (stolen) {
+      target.updateInfo();
+      user.scene.queueMessage(getPokemonMessage(user, " stole the target's boosted stats!"));
+
+      targetBoosts.forEach((boost, index) => {
+        if (boost > 0) {
+          user.scene.overridePhase(new StatChangePhase(user.scene, user.getBattlerIndex(), true, [index], boost));
+        }
+      });
+    }
+
+    return stolen;
+  }
+}
+
 export class VariableAccuracyAttr extends MoveAttr {
   apply(user: Pokemon, target: Pokemon, move: Move, args: any[]): boolean {
     //const accuracy = args[0] as Utils.NumberHolder;
@@ -7121,7 +7177,7 @@ export function initMoves() {
     new AttackMove(Moves.PRISMATIC_LASER, Type.PSYCHIC, MoveCategory.SPECIAL, 160, 100, 10, -1, 0, 7)
       .attr(RechargeAttr),
     new AttackMove(Moves.SPECTRAL_THIEF, Type.GHOST, MoveCategory.PHYSICAL, 90, 100, 10, -1, 0, 7)
-      .partial(),
+      .attr(StealStatBoostsAttr),
     new AttackMove(Moves.SUNSTEEL_STRIKE, Type.STEEL, MoveCategory.PHYSICAL, 100, 100, 5, -1, 0, 7)
       .ignoresAbilities()
       .partial(),
