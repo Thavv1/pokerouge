@@ -19,6 +19,7 @@ export const menuUiHandler: SimpleTranslationEntries = {
   "importData": "Daten importieren",
   "exportData": "Daten exportieren",
   "linkDiscord": "Link Discord",
+  "unlinkDiscord": "Unlink Discord",
   "linkGoogle": "link Google",
   "cancel": "Abbrechen",
   "losingProgressionWarning": "Du wirst jeglichen Fortschritt seit Anfang dieses Kampfes verlieren. Fortfahren?"

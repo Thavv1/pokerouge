@@ -19,7 +19,9 @@ export const menuUiHandler: SimpleTranslationEntries = {
   "importData": "Importer données",
   "exportData": "Exporter données",
   "linkDiscord": "Link Discord",
+  "unlinkDiscord": "Unlink Discord",
   "linkGoogle": "Link Google",
+  "unlinkGoogle": "Unlink Google",
   "cancel": "Retour",
   "losingProgressionWarning": "Vous allez perdre votre progression depuis le début du combat. Continuer ?"
 } as const;
