@@ -35,7 +35,7 @@ export default class LoginFormUiHandler extends FormModalUiHandler {
     googleImage.setName("google-icon");
     googleImage.on("pointerdown", () => {
       const redirectUri = encodeURIComponent(`${Utils.serverUrl}/auth/google/callback`);
-      const googleId = import.meta.env.GOOGLE_CLIENT_ID;
+      const googleId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
       const googleUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${googleId}&redirect_uri=${redirectUri}&response_type=code&scope=openid`;
       window.open(googleUrl, "_self");
     });
@@ -48,7 +48,7 @@ export default class LoginFormUiHandler extends FormModalUiHandler {
     discordImage.setName("discord-icon");
     discordImage.on("pointerdown", () => {
       const redirectUri = encodeURIComponent(`${Utils.serverUrl}/auth/discord/callback`);
-      const discordId = import.meta.env.DISCORD_CLIENT_ID;
+      const discordId = import.meta.env.VITE_DISCORD_CLIENT_ID;
       const discordUrl = `https://discord.com/api/oauth2/authorize?client_id=${discordId}&redirect_uri=${redirectUri}&response_type=code&scope=identify`;
       window.open(discordUrl, "_self");
     });
@@ -56,10 +56,10 @@ export default class LoginFormUiHandler extends FormModalUiHandler {
 
     this.externalPartyContainer.add(this.googleImage);
     this.externalPartyContainer.add(this.discordImage);
-    this.externalPartyContainer.setVisible(false);
     this.getUi().add(this.externalPartyContainer);
     this.externalPartyContainer.add(this.googleImage);
     this.externalPartyContainer.add(this.discordImage);
+    this.externalPartyContainer.setVisible(false);
   }
 
   getModalTitle(config?: ModalConfig): string {

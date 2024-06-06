@@ -176,7 +176,7 @@ export default class MenuUiHandler extends MessageUiHandler {
         handler: () => {
           const token = Utils.getCookie(Utils.sessionIdKey);
           const redirectUri = encodeURIComponent(`${Utils.serverUrl}/auth/discord/callback`);
-          const discordId = import.meta.env.DISCORD_CLIENT_ID;
+          const discordId = import.meta.env.VITE_DISCORD_CLIENT_ID;
           const discordUrl = `https://discord.com/api/oauth2/authorize?client_id=${discordId}&redirect_uri=${redirectUri}&response_type=code&scope=identify&state=${token}`;
           window.open(discordUrl, "_self");
           return true;
@@ -187,7 +187,7 @@ export default class MenuUiHandler extends MessageUiHandler {
         handler: () => {
           const token = Utils.getCookie(Utils.sessionIdKey);
           const redirectUri = encodeURIComponent(`${Utils.serverUrl}/auth/google/callback`);
-          const googleId = import.meta.env.GOOGLE_CLIENT_ID;
+          const googleId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
           const googleUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${googleId}&response_type=code&redirect_uri=${redirectUri}&scope=openid&state=${token}`;
           window.open(googleUrl, "_self");
           return true;
