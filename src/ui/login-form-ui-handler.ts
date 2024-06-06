@@ -22,7 +22,7 @@ export default class LoginFormUiHandler extends FormModalUiHandler {
     super.setup();
     this.externalPartyContainer = this.scene.add.container(0, 0);
     this.externalPartyContainer.setInteractive(new Phaser.Geom.Rectangle(0, 0, this.scene.game.canvas.width / 12, this.scene.game.canvas.height / 12), Phaser.Geom.Rectangle.Contains);
-    this.externalPartyTitle = addTextObject(this.scene, 0, 4, "Login with", TextStyle.SETTINGS_LABEL);
+    this.externalPartyTitle = addTextObject(this.scene, 0, 4, "", TextStyle.SETTINGS_LABEL);
     this.externalPartyTitle.setOrigin(0.5, 0);
     this.externalPartyBg = addWindow(this.scene, 0, 0, 0, 0);
     this.externalPartyContainer.add(this.externalPartyBg);
@@ -104,15 +104,8 @@ export default class LoginFormUiHandler extends FormModalUiHandler {
   show(args: any[]): boolean {
     if (super.show(args)) {
 
-      this.externalPartyTitle.setText("Or use");
-      this.externalPartyTitle.setX(25);
-      this.externalPartyTitle.setVisible(true);
-      this.externalPartyContainer.setPositionRelative(this.modalContainer, 175, -24);
-      this.externalPartyContainer.setVisible(true);
-      this.externalPartyBg.setSize(50, this.modalBg.height);
-      this.getUi().moveTo(this.externalPartyContainer, this.getUi().length - 1);
-      this.googleImage.setPosition(this.externalPartyBg.width/3.1,this.externalPartyBg.height-60);
-      this.discordImage.setPosition(this.externalPartyBg.width/3.1, this.externalPartyBg.height-40);
+      this.processExternalProvider();
+
       const config = args[0] as ModalConfig;
       const originalLoginAction = this.submitAction;
       this.submitAction = (_) => {
@@ -148,5 +141,34 @@ export default class LoginFormUiHandler extends FormModalUiHandler {
     }
 
     return false;
+  }
+
+  clear() {
+    super.clear();
+    this.externalPartyContainer.setVisible(false);
+
+    this.discordImage.off("pointerdown");
+    this.googleImage.off("pointerdown");
+  }
+
+  processExternalProvider() : void {
+    this.externalPartyTitle.setText(i18next.t("menu:orUse"));
+    this.externalPartyTitle.setX(20+this.externalPartyTitle.text.length);
+    this.externalPartyTitle.setVisible(true);
+    this.externalPartyContainer.setPositionRelative(this.modalContainer, 175, 0);
+    this.externalPartyContainer.setVisible(true);
+    this.externalPartyBg.setSize(this.externalPartyTitle.text.length+50, this.modalBg.height);
+    this.getUi().moveTo(this.externalPartyContainer, this.getUi().length - 1);
+    this.googleImage.setPosition(this.externalPartyBg.width/3.1,this.externalPartyBg.height-60);
+    this.discordImage.setPosition(this.externalPartyBg.width/3.1, this.externalPartyBg.height-40);
+
+    this.externalPartyContainer.setAlpha(0);
+    this.scene.tweens.add({
+      targets: this.externalPartyContainer,
+      duration: Utils.fixedInt(1000),
+      ease: "Sine.easeInOut",
+      y: "-=24",
+      alpha: 1
+    });
   }
 }

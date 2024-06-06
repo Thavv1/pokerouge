@@ -18,6 +18,8 @@ export const menuUiHandler: SimpleTranslationEntries = {
   "exportSlotSelect": "Wähle einen Slot zum Exportieren.",
   "importData": "Daten importieren",
   "exportData": "Daten exportieren",
+  "linkDiscord": "Link Discord",
+  "linkGoogle": "link Google",
   "cancel": "Abbrechen",
   "losingProgressionWarning": "Du wirst jeglichen Fortschritt seit Anfang dieses Kampfes verlieren. Fortfahren?"
 } as const;

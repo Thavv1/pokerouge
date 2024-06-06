@@ -18,6 +18,8 @@ export const menuUiHandler: SimpleTranslationEntries = {
   "exportSlotSelect": "Selecciona una ranura para exportar.",
   "importData": "Importar Datos",
   "exportData": "Exportar Datos",
+  "linkDiscord": "Conectar Discord",
+  "linkGoogle": "Conectar Google",
   "cancel": "Cancelar",
   "losingProgressionWarning": "Perderás cualquier progreso desde el inicio de la batalla. ¿Continuar?"
 } as const;
