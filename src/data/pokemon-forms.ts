@@ -66,7 +66,7 @@ export enum FormChangeItem {
   HARD_METEORITE,
   SMOOTH_METEORITE,
   ADAMANT_CRYSTAL,
-  LUSTROUS_GLOBE,
+  LUSTROUS_ORB,
   GRISEOUS_CORE,
   REVEAL_GLASS,
   GRACIDEA,
@@ -520,7 +520,7 @@ export const pokemonFormChanges: PokemonFormChanges = {
     new SpeciesFormChange(Species.DIALGA, "", SpeciesFormKey.ORIGIN, new SpeciesFormChangeItemTrigger(FormChangeItem.ADAMANT_CRYSTAL))
   ],
   [Species.PALKIA]: [
-    new SpeciesFormChange(Species.PALKIA, "", SpeciesFormKey.ORIGIN, new SpeciesFormChangeItemTrigger(FormChangeItem.LUSTROUS_GLOBE))
+    new SpeciesFormChange(Species.PALKIA, "", SpeciesFormKey.ORIGIN, new SpeciesFormChangeItemTrigger(FormChangeItem.LUSTROUS_ORB))
   ],
   [Species.GIRATINA]: [
     new SpeciesFormChange(Species.GIRATINA, "altered", SpeciesFormKey.ORIGIN, new SpeciesFormChangeItemTrigger(FormChangeItem.GRISEOUS_CORE))
@@ -734,7 +734,13 @@ export const pokemonFormChanges: PokemonFormChanges = {
   [Species.EISCUE]: [
     new SpeciesFormChange(Species.EISCUE, "", "no-ice", new SpeciesFormChangeManualTrigger(), true),
     new SpeciesFormChange(Species.EISCUE, "no-ice", "", new SpeciesFormChangeManualTrigger(), true),
-  ]
+  ],
+  [Species.CRAMORANT]: [
+    new SpeciesFormChange(Species.CRAMORANT, "", "gulping", new SpeciesFormChangeManualTrigger(), true),
+    new SpeciesFormChange(Species.CRAMORANT, "gulping", "", new SpeciesFormChangeManualTrigger(), true),
+    new SpeciesFormChange(Species.CRAMORANT, "", "gorging", new SpeciesFormChangeManualTrigger(), true),
+    new SpeciesFormChange(Species.CRAMORANT, "gorging", "", new SpeciesFormChangeManualTrigger(), true)
+  ],
 };
 
 export function initPokemonForms() {

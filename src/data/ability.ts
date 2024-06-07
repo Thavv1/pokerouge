@@ -23,7 +23,7 @@ import { Command } from "../ui/command-ui-handler";
 import { BerryModifierType } from "#app/modifier/modifier-type";
 import { getPokeballName } from "./pokeball";
 import { Species } from "./enums/species";
-import { BattlerIndex } from "#app/battle";
+import {BattlerIndex} from "#app/battle";
 
 export class Ability implements Localizable {
   public id: Abilities;
@@ -466,6 +466,28 @@ export class PostDefendAbAttr extends AbAttr {
   }
 }
 
+export class PostDefendGulpMissileAbAttr extends PostDefendAbAttr {
+  applyPostDefend(pokemon: Pokemon, passive: boolean, attacker: Pokemon, move: PokemonMove, hitResult: HitResult, args: any[]): boolean {
+    if (hitResult < HitResult.NO_EFFECT && pokemon.hasAbility(Abilities.GULP_MISSILE)) {
+      const damage = Math.ceil(attacker.getMaxHp() / 4);
+      if (pokemon.getTag(BattlerTagType.GULP_MISSILE_ARROKUDA)) {
+        pokemon.removeTag(BattlerTagType.GULP_MISSILE_ARROKUDA);
+        attacker.damageAndUpdate(damage, HitResult.OTHER);
+        attacker.turnData.damageTaken += damage;
+        pokemon.scene.triggerPokemonFormChange(pokemon, SpeciesFormChangeManualTrigger);
+        return true;
+      } else if (pokemon.getTag(BattlerTagType.GULP_MISSILE_PIKACHU)) {
+        pokemon.removeTag(BattlerTagType.GULP_MISSILE_PIKACHU);
+        attacker.trySetStatus(StatusEffect.PARALYSIS, true, pokemon);
+        attacker.damageAndUpdate(damage, HitResult.OTHER);
+        attacker.turnData.damageTaken += damage;
+        pokemon.scene.triggerPokemonFormChange(pokemon, SpeciesFormChangeManualTrigger);
+        return true;
+      }
+      return false;
+    }
+  }
+}
 export class PostDefendDisguiseAbAttr extends PostDefendAbAttr {
 
   applyPostDefend(pokemon: Pokemon, passive: boolean, attacker: Pokemon, move: PokemonMove, hitResult: HitResult, args: any[]): boolean {
@@ -1296,7 +1318,26 @@ export class PostAttackApplyStatusEffectAbAttr extends PostAttackAbAttr {
     return false;
   }
 }
-
+export class PostAttackGulpMissileAbAttr extends PostAttackAbAttr {
+  constructor() {
+    super();
+  }
+  applyPostAttack(pokemon: Pokemon, passive: boolean, defender: Pokemon, move: PokemonMove, hitResult: HitResult, args: any[]): boolean {
+    const lastmove = pokemon.getMoveHistory()[pokemon.getMoveHistory().length - 1];
+    if (lastmove.move === Moves.DIVE || lastmove.move === Moves.SURF) {
+      if (pokemon.hp > pokemon.getMaxHp() * 0.5) {
+        pokemon.addTag(BattlerTagType.GULP_MISSILE_ARROKUDA);
+        pokemon.scene.triggerPokemonFormChange(pokemon, SpeciesFormChangeManualTrigger);
+        return true;
+      } else if (pokemon.hp < pokemon.getMaxHp() * 0.5) {
+        pokemon.addTag(BattlerTagType.GULP_MISSILE_PIKACHU);
+        pokemon.scene.triggerPokemonFormChange(pokemon, SpeciesFormChangeManualTrigger);
+        return true;
+      }
+    }
+    return false;
+  }
+}
 export class PostAttackContactApplyStatusEffectAbAttr extends PostAttackApplyStatusEffectAbAttr {
   constructor(chance: integer, ...effects: StatusEffect[]) {
     super(true, chance, ...effects);
@@ -2462,7 +2503,7 @@ export class PostTurnStatusHealAbAttr extends PostTurnAbAttr {
    * @returns Returns true if healed from status, false if not
    */
   applyPostTurn(pokemon: Pokemon, passive: boolean, args: any[]): boolean | Promise<boolean> {
-    if (this.effects.includes(pokemon.status?.effect)) {
+    if (this.effects.includes(pokemon.status.effect)) {
       if (pokemon.getMaxHp() !== pokemon.hp) {
         const scene = pokemon.scene;
         const abilityName = (!passive ? pokemon.getAbility() : pokemon.getPassiveAbility()).name;
@@ -2764,12 +2805,8 @@ export class PostDancingMoveAbAttr extends PostMoveUsedAbAttr {
    * @return true if the Dancer ability was resolved
    */
   applyPostMoveUsed(dancer: Pokemon, move: PokemonMove, source: Pokemon, targets: BattlerIndex[], args: any[]): boolean | Promise<boolean> {
-    // List of tags that prevent the Dancer from replicating the move
-    const forbiddenTags = [BattlerTagType.FLYING, BattlerTagType.UNDERWATER,
-      BattlerTagType.UNDERGROUND, BattlerTagType.HIDDEN];
     // The move to replicate cannot come from the Dancer
-    if (source.getBattlerIndex() !== dancer.getBattlerIndex()
-        && !dancer.summonData.tags.some(tag => forbiddenTags.includes(tag.tagType))) {
+    if (source.getBattlerIndex() !== dancer.getBattlerIndex()) {
       // If the move is an AttackMove or a StatusMove the Dancer must replicate the move on the source of the Dance
       if (move.getMove() instanceof AttackMove || move.getMove() instanceof StatusMove) {
         const target = this.getTarget(dancer, source, targets);
@@ -2778,9 +2815,8 @@ export class PostDancingMoveAbAttr extends PostMoveUsedAbAttr {
         // If the move is a SelfStatusMove (ie. Swords Dance) the Dancer should replicate it on itself
         dancer.scene.unshiftPhase(new MovePhase(dancer.scene, dancer, [dancer.getBattlerIndex()], move, true));
       }
-      return true;
     }
-    return false;
+    return true;
   }
 
   /**
@@ -4349,8 +4385,8 @@ export function initAbilities() {
     new Ability(Abilities.GULP_MISSILE, 8)
       .attr(UnsuppressableAbilityAbAttr)
       .attr(NoTransformAbilityAbAttr)
-      .attr(NoFusionAbilityAbAttr)
-      .unimplemented(),
+      .attr(PostAttackGulpMissileAbAttr)
+      .attr(PostDefendGulpMissileAbAttr),
     new Ability(Abilities.STALWART, 8)
       .attr(BlockRedirectAbAttr),
     new Ability(Abilities.STEAM_ENGINE, 8)

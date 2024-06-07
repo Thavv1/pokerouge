@@ -62,6 +62,7 @@ import { NewArenaEvent } from "./battle-scene-events";
 import { Abilities } from "./data/enums/abilities";
 import ArenaFlyout from "./ui/arena-flyout";
 import { EaseType } from "./ui/enums/ease-type";
+import { BattlerTagType } from "./data/enums/battler-tag-type";
 
 export const bypassLogin = import.meta.env.VITE_BYPASS_LOGIN === "1";
 
@@ -1053,6 +1054,14 @@ export default class BattleScene extends SceneBase {
         for (const pokemon of this.getParty()) {
           if (pokemon.hasAbility(Abilities.ICE_FACE)) {
             pokemon.formIndex = 0;
+          }
+
+          if (pokemon.getTag(BattlerTagType.GULP_MISSILE_ARROKUDA)) {
+            pokemon.formIndex = 1;
+          }
+
+          if (pokemon.getTag(BattlerTagType.GULP_MISSILE_PIKACHU)) {
+            pokemon.formIndex = 2;
           }
         }
         this.unshiftPhase(new ShowTrainerPhase(this));
