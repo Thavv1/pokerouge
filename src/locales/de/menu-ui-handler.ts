@@ -20,7 +20,8 @@ export const menuUiHandler: SimpleTranslationEntries = {
   "exportData": "Daten exportieren",
   "linkDiscord": "Link Discord",
   "unlinkDiscord": "Unlink Discord",
-  "linkGoogle": "link Google",
+  "linkGoogle": "Link Google",
+  "unlinkGoogle": "Unlink Google",
   "cancel": "Abbrechen",
   "losingProgressionWarning": "Du wirst jeglichen Fortschritt seit Anfang dieses Kampfes verlieren. Fortfahren?"
 } as const;
