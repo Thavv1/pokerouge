@@ -956,15 +956,8 @@ export class PostDefendMoveDisableAbAttr extends PostDefendAbAttr {
   }
 
   applyPostDefend(pokemon: Pokemon, passive: boolean, attacker: Pokemon, move: PokemonMove, hitResult: HitResult, args: any[]): boolean {
-    if (!attacker.summonData.disabledMove) {
-      if (move.getMove().checkFlag(MoveFlags.MAKES_CONTACT, attacker, pokemon) && (this.chance === -1 || pokemon.randSeedInt(100) < this.chance) && !attacker.isMax()) {
-        this.attacker = attacker;
-        this.move = move;
-
-        attacker.summonData.disabledMove = move.moveId;
-        attacker.summonData.disabledTurns = 4;
-        return true;
-      }
+    if (move.getMove().checkFlag(MoveFlags.MAKES_CONTACT, attacker, pokemon) && (this.chance === -1 || pokemon.randSeedInt(100) < this.chance) && !attacker.isMax()) {
+      return attacker.addTag(BattlerTagType.DISABLE);
     }
     return false;
   }
@@ -2018,7 +2011,7 @@ export class BattlerTagImmunityAbAttr extends PreApplyBattlerTagAbAttr {
   }
 
   getTriggerMessage(pokemon: Pokemon, abilityName: string, ...args: any[]): string {
-    return getPokemonMessage(pokemon, `'s ${abilityName}\nprevents ${(args[0] as BattlerTag).getDescriptor()}!`);
+    return getPokemonMessage(pokemon, `'s ${abilityName}\nprevents ${(args[0] as BattlerTag)[0].getDescriptor()}!`);
   }
 }
 
@@ -3634,8 +3627,10 @@ export function initAbilities() {
       .ignorable(),
     new Ability(Abilities.OBLIVIOUS, 3)
       .attr(BattlerTagImmunityAbAttr, BattlerTagType.INFATUATED)
+      .attr(BattlerTagImmunityAbAttr, BattlerTagType.TAUNT)
       .attr(IntimidateImmunityAbAttr)
-      .ignorable(),
+      .ignorable()
+      .partial(),
     new Ability(Abilities.CLOUD_NINE, 3)
       .attr(SuppressWeatherEffectAbAttr, true),
     new Ability(Abilities.COMPOUND_EYES, 3)
@@ -4099,8 +4094,13 @@ export function initAbilities() {
       .attr(PostSummonMessageAbAttr, (pokemon: Pokemon) => getPokemonMessage(pokemon, " is radiating a bursting aura!"))
       .attr(MoveAbilityBypassAbAttr),
     new Ability(Abilities.AROMA_VEIL, 6)
-      .ignorable()
-      .unimplemented(),
+      .attr(BattlerTagImmunityAbAttr, BattlerTagType.TAUNT)
+      .attr(BattlerTagImmunityAbAttr, BattlerTagType.TORMENT)
+      .attr(BattlerTagImmunityAbAttr, BattlerTagType.ENCORE)
+      .attr(BattlerTagImmunityAbAttr, BattlerTagType.DISABLE)
+      .attr(BattlerTagImmunityAbAttr, BattlerTagType.HEAL_BLOCK)
+      .attr(BattlerTagImmunityAbAttr, BattlerTagType.INFATUATED)
+      .ignorable(),
     new Ability(Abilities.FLOWER_VEIL, 6)
       .ignorable()
       .unimplemented(),

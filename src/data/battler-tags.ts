@@ -15,6 +15,7 @@ import { TerrainType } from "./terrain";
 import { WeatherType } from "./weather";
 import { BattleStat } from "./battle-stat";
 import { allAbilities } from "./ability";
+import i18next from "i18next";
 import { SpeciesFormChangeManualTrigger } from "./pokemon-forms";
 import { Species } from "./enums/species";
 
@@ -472,11 +473,37 @@ export class ChargingTag extends BattlerTag {
   }
 }
 
+export class DisableTag extends BattlerTag {
+  public disabledMove: Moves = undefined;
+
+  constructor(sourceId) {
+    super(BattlerTagType.DISABLE, BattlerTagLapseType.TURN_END, 4, sourceId);
+  }
+
+  canAdd(pokemon: Pokemon) {
+    return pokemon.summonData.prevMove !== undefined;
+  }
+
+  onAdd(pokemon: Pokemon) {
+    this.disabledMove = pokemon.summonData.prevMove;
+    pokemon.scene.queueMessage(getPokemonMessage(pokemon, "'s " + allMoves[this.disabledMove].name + " was disabled!"));
+  }
+
+  onRemove(pokemon: Pokemon) {
+    pokemon.scene.queueMessage(i18next.t("battle:notDisabled", { pokemonName: `${getPokemonPrefix(pokemon)}${pokemon.name}`, moveName: allMoves[this.disabledMove].name }));
+  }
+
+  getDescriptor(): string {
+    return "disable";
+  }
+}
+
 export class EncoreTag extends BattlerTag {
   public moveId: Moves;
+  public justEncored: boolean = true;
 
   constructor(sourceId: integer) {
-    super(BattlerTagType.ENCORE, BattlerTagLapseType.AFTER_MOVE, 3, Moves.ENCORE, sourceId);
+    super(BattlerTagType.ENCORE, BattlerTagLapseType.TURN_END, 3, Moves.ENCORE, sourceId);
   }
 
   /**
@@ -544,6 +571,83 @@ export class EncoreTag extends BattlerTag {
     super.onRemove(pokemon);
 
     pokemon.scene.queueMessage(getPokemonMessage(pokemon, "'s Encore\nended!"));
+  }
+
+  lapse(pokemon: Pokemon, lapseType: BattlerTagLapseType) {
+    const ret = super.lapse(pokemon, lapseType);
+    this.justEncored = false;
+    return ret;
+  }
+
+  getDescriptor() {
+    return "encore";
+  }
+}
+
+export class TormentTag extends BattlerTag {
+  constructor() {
+    super(BattlerTagType.TORMENT, BattlerTagLapseType.TURN_END, -1, Moves.TORMENT);
+  }
+
+  canAdd(pokemon: Pokemon) {
+    return !pokemon.isMax();
+  }
+
+  onAdd(pokemon: Pokemon) {
+    pokemon.scene.queueMessage(getPokemonMessage(pokemon, " was subjected to torment!"));
+  }
+
+  lapse(pokemon: Pokemon, lapseType: BattlerTagLapseType) {
+    pokemon.summonData.tormented = true;
+    return true;
+  }
+
+  getDescriptor(): string {
+    return "torment";
+  }
+}
+
+export class TauntTag extends BattlerTag {
+  public justTaunted: boolean = true;
+
+  constructor() {
+    super(BattlerTagType.TAUNT, BattlerTagLapseType.TURN_END, 4, Moves.TAUNT);
+  }
+
+  onAdd(pokemon: Pokemon) {
+    pokemon.scene.queueMessage(getPokemonMessage(pokemon, " fell for the taunt!"));
+  }
+
+  onRemove(pokemon: Pokemon): void {
+    pokemon.scene.queueMessage(getPokemonMessage(pokemon, " shook off the taunt!"));
+  }
+
+  lapse(pokemon: Pokemon, lapseType: BattlerTagLapseType) {
+    const ret = super.lapse(pokemon, lapseType);
+    this.justTaunted = false;
+    return ret;
+  }
+
+  getDescriptor(): string {
+    return "taunt";
+  }
+}
+
+export class HealBlockTag extends BattlerTag {
+  constructor(turnCount: integer, sourceMove: Moves) {
+    super(BattlerTagType.HEAL_BLOCK, BattlerTagLapseType.TURN_END, turnCount, sourceMove);
+  }
+
+  onAdd(pokemon: Pokemon) {
+    pokemon.scene.queueMessage(getPokemonMessage(pokemon, " was prevented from healing!"));
+  }
+
+  onRemove(pokemon: Pokemon): void {
+    pokemon.scene.queueMessage(getPokemonMessage(pokemon, "'s Heal Block wore off!"));
+  }
+
+  getDescriptor(): string {
+    return "heal block";
   }
 }
 
@@ -1427,8 +1531,16 @@ export function getBattlerTag(tagType: BattlerTagType, turnCount: integer, sourc
     return new FrenzyTag(sourceMove, sourceId);
   case BattlerTagType.CHARGING:
     return new ChargingTag(sourceMove, sourceId);
+  case BattlerTagType.DISABLE:
+    return new DisableTag(sourceId);
   case BattlerTagType.ENCORE:
     return new EncoreTag(sourceId);
+  case BattlerTagType.TORMENT:
+    return new TormentTag();
+  case BattlerTagType.TAUNT:
+    return new TauntTag();
+  case BattlerTagType.HEAL_BLOCK:
+    return new HealBlockTag(turnCount, sourceMove);
   case BattlerTagType.HELPING_HAND:
     return new HelpingHandTag(sourceId);
   case BattlerTagType.INGRAIN:
