@@ -22,6 +22,8 @@ import { Nature } from "#app/data/nature";
 import { BattlerTagType } from "#app/data/enums/battler-tag-type";
 import * as Overrides from "../overrides";
 import { ModifierType, modifierTypes } from "./modifier-type";
+import { Abilities } from "#app/data/enums/abilities.js";
+import { allMoves } from "#app/data/move.js";
 import { Command } from "#app/ui/command-ui-handler.js";
 
 export type ModifierPredicate = (modifier: Modifier) => boolean;
@@ -830,8 +832,18 @@ export class FlinchChanceModifier extends PokemonHeldItemModifier {
   apply(args: any[]): boolean {
     const pokemon = args[0] as Pokemon;
     const flinched = args[1] as Utils.BooleanHolder;
+    const flinchChanceMultiplier = new Utils.IntegerHolder(1);
 
-    if (!flinched.value && pokemon.randSeedInt(10) < this.getStackCount()) {
+    //Modify flinch chance based on ability ie. Sheer Force, Serene Grace
+
+    const SheerForceAffected = allMoves[pokemon.getLastXMoves(0)[0].move].chance >= 0 && pokemon.hasAbility(Abilities.SHEER_FORCE);
+    if (SheerForceAffected) {
+      flinchChanceMultiplier.value *= 0;
+    } else if (pokemon.hasAbility(Abilities.SERENE_GRACE)) {
+      flinchChanceMultiplier.value *= 2;
+    }
+
+    if (!flinched.value && pokemon.randSeedInt(10) < (this.getStackCount() * flinchChanceMultiplier.value)) {
       flinched.value = true;
       return true;
     }
