@@ -482,7 +482,7 @@ export class PostDefendAbAttr extends AbAttr {
 }
 
 export class PostDefendGulpMissileAbAttr extends PostDefendAbAttr {
-  applyPostDefend(pokemon: Pokemon, passive: boolean, attacker: Pokemon, move: PokemonMove, hitResult: HitResult, args: any[]): boolean {
+  applyPostDefend(pokemon: Pokemon, passive: boolean, attacker: Pokemon, move: Move, hitResult: HitResult, args: any[]): boolean {
     if (hitResult < HitResult.NO_EFFECT && pokemon.hasAbility(Abilities.GULP_MISSILE)) {
       const damage = Math.ceil(attacker.getMaxHp() / 4);
       if (pokemon.getTag(BattlerTagType.GULP_MISSILE_ARROKUDA)) {
@@ -1305,7 +1305,7 @@ export class PostAttackGulpMissileAbAttr extends PostAttackAbAttr {
   constructor() {
     super();
   }
-  applyPostAttack(pokemon: Pokemon, passive: boolean, defender: Pokemon, move: PokemonMove, hitResult: HitResult, args: any[]): boolean {
+  applyPostAttack(pokemon: Pokemon, passive: boolean, defender: Pokemon, move: Move, hitResult: HitResult, args: any[]): boolean {
     const lastmove = pokemon.getMoveHistory()[pokemon.getMoveHistory().length - 1];
     if (lastmove.move === Moves.DIVE || lastmove.move === Moves.SURF) {
       if (pokemon.hp > pokemon.getMaxHp() * 0.5) {
