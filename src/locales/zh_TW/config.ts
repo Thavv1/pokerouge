@@ -28,6 +28,7 @@ import { move } from "./move";
 import { nature } from "./nature";
 import { pokeball } from "./pokeball";
 import { pokemon } from "./pokemon";
+import { pokemonForm } from "./pokemon-form";
 import { pokemonInfo } from "./pokemon-info";
 import { pokemonInfoContainer } from "./pokemon-info-container";
 import { splashMessages } from "./splash-messages";
@@ -67,6 +68,7 @@ export const zhTwConfig = {
   nature: nature,
   pokeball: pokeball,
   pokemon: pokemon,
+  pokemonForm: pokemonForm,
   pokemonInfo: pokemonInfo,
   pokemonInfoContainer: pokemonInfoContainer,
   splashMessages: splashMessages,
