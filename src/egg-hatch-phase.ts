@@ -13,6 +13,230 @@ import { pokemonPrevolutions } from "./data/pokemon-evolutions";
 import { EggTier } from "./data/enums/egg-type";
 import PokemonInfoContainer from "./ui/pokemon-info-container";
 import EggsToHatchCountContainer from "./ui/eggs-to-hatch-count-container";
+import { Gender } from "./data/gender";
+import { getVariantTint } from "#app/data/variant";
+
+export class EggSkipPhase extends Phase {
+  private eggs: Egg[];
+  private newEggMoves: integer[];
+  private eggsToHatchCount: number;
+  private pokemonHatched: PlayerPokemon[];
+
+  constructor(scene: BattleScene, eggs: Egg[], pokemonHatchedContainer: PlayerPokemon[], eggsToHatchCount: integer) {
+    super(scene);
+
+    this.eggs = eggs;
+    this.newEggMoves = [];
+    this.eggsToHatchCount = eggsToHatchCount;
+    this.pokemonHatched = pokemonHatchedContainer;
+  }
+
+  start() {
+    super.start();
+    console.log(this.eggs);
+    // show prompt for skip
+    this.scene.ui.showText("Skip egg hatch animations?", 0);
+    this.scene.ui.setModeWithoutClear(Mode.CONFIRM, () => {
+      for (const egg of this.eggs) {
+        this.hatchEggSilently(egg);
+      }
+      this.scene.unshiftPhase(new EggSummaryPhase(this.scene, this.pokemonHatched, this.newEggMoves));
+      this.end();
+    }, () => {
+      for (const egg of this.eggs) {
+        this.scene.unshiftPhase(new EggHatchPhase(this.scene, egg, this.pokemonHatched, this.eggsToHatchCount));
+      }
+      this.scene.unshiftPhase(new EggSummaryPhase(this.scene, this.pokemonHatched, this.newEggMoves));
+      this.end();
+    }
+    );this.scene.ui.showText("Skip egg hatch animations?", 0);
+    this.scene.ui.setModeWithoutClear(Mode.CONFIRM, () => {
+      for (const egg of this.eggs) {
+        this.hatchEggSilently(egg);
+      }
+      this.scene.unshiftPhase(new EggSummaryPhase(this.scene, this.pokemonHatched, this.newEggMoves));
+      this.end();
+    }, () => {
+      for (const egg of this.eggs) {
+        this.scene.unshiftPhase(new EggHatchPhase(this.scene, egg, this.pokemonHatched, this.eggsToHatchCount));
+      }
+      this.scene.unshiftPhase(new EggSummaryPhase(this.scene, this.pokemonHatched, this.newEggMoves));
+      this.end();
+    }
+    );
+  }
+
+  end() {
+    super.end();
+  }
+
+  hatchEggSilently(egg: Egg) {
+    const pokemon = this.generatePokemon(egg);
+    if (pokemon.fusionSpecies) {
+      pokemon.clearFusionSpecies();
+    }
+    console.log(pokemon);
+
+    pokemon.loadAssets().then(() => {
+
+      if (pokemon.species.subLegendary) {
+        this.scene.validateAchv(achvs.HATCH_SUB_LEGENDARY);
+      }
+      if (pokemon.species.legendary) {
+        this.scene.validateAchv(achvs.HATCH_LEGENDARY);
+      }
+      if (pokemon.species.mythical) {
+        this.scene.validateAchv(achvs.HATCH_MYTHICAL);
+      }
+      if (pokemon.isShiny()) {
+        this.scene.validateAchv(achvs.HATCH_SHINY);
+      }
+
+    });
+
+  }
+
+  /**
+   * Generates a Pokemon to be hatched by the egg
+   * @returns the hatched PlayerPokemon
+   */
+  generatePokemon(egg: Egg): PlayerPokemon {
+    let ret: PlayerPokemon;
+    let speciesOverride: Species; // SpeciesOverride should probably be a passed in parameter for future species-eggs
+
+    this.scene.executeWithSeedOffset(() => {
+
+      /**
+       * Manaphy eggs have a 1/8 chance of being Manaphy and 7/8 chance of being Phione
+       * Legendary eggs pulled from the legendary gacha have a 50% of being converted into
+       * the species that was the legendary focus at the time
+       */
+      if (egg.isManaphyEgg()) {
+        const rand = Utils.randSeedInt(8);
+
+        speciesOverride = rand ? Species.PHIONE : Species.MANAPHY;
+      } else if (egg.tier === EggTier.MASTER
+        && egg.gachaType === GachaType.LEGENDARY) {
+        if (!Utils.randSeedInt(2)) {
+          speciesOverride = getLegendaryGachaSpeciesForTimestamp(this.scene, egg.timestamp);
+        }
+      }
+
+      if (speciesOverride) {
+        const pokemonSpecies = getPokemonSpecies(speciesOverride);
+        ret = this.scene.addPlayerPokemon(pokemonSpecies, 1, undefined, undefined, undefined, false);
+      } else {
+        let minStarterValue: integer;
+        let maxStarterValue: integer;
+
+        switch (egg.tier) {
+        case EggTier.GREAT:
+          minStarterValue = 4;
+          maxStarterValue = 5;
+          break;
+        case EggTier.ULTRA:
+          minStarterValue = 6;
+          maxStarterValue = 7;
+          break;
+        case EggTier.MASTER:
+          minStarterValue = 8;
+          maxStarterValue = 9;
+          break;
+        default:
+          minStarterValue = 1;
+          maxStarterValue = 3;
+          break;
+        }
+
+        const ignoredSpecies = [ Species.PHIONE, Species.MANAPHY, Species.ETERNATUS ];
+
+        let speciesPool = Object.keys(speciesStarters)
+          .filter(s => speciesStarters[s] >= minStarterValue && speciesStarters[s] <= maxStarterValue)
+          .map(s => parseInt(s) as Species)
+          .filter(s => !pokemonPrevolutions.hasOwnProperty(s) && getPokemonSpecies(s).isObtainable() && ignoredSpecies.indexOf(s) === -1);
+
+        // If this is the 10th egg without unlocking something new, attempt to force it.
+        if (this.scene.gameData.unlockPity[egg.tier] >= 9) {
+          const lockedPool = speciesPool.filter(s => !this.scene.gameData.dexData[s].caughtAttr);
+          if (lockedPool.length) { // Skip this if everything is unlocked
+            speciesPool = lockedPool;
+          }
+        }
+
+        /**
+         * Pokemon that are cheaper in their tier get a weight boost. Regionals get a weight penalty
+         * 1 cost mons get 2x
+         * 2 cost mons get 1.5x
+         * 4, 6, 8 cost mons get 1.75x
+         * 3, 5, 7, 9 cost mons get 1x
+         * Alolan, Galarian, and Paldean mons get 0.5x
+         * Hisui mons get 0.125x
+         *
+         * The total weight is also being calculated EACH time there is an egg hatch instead of being generated once
+         * and being the same each time
+         */
+        let totalWeight = 0;
+        const speciesWeights = [];
+        for (const speciesId of speciesPool) {
+          let weight = Math.floor((((maxStarterValue - speciesStarters[speciesId]) / ((maxStarterValue - minStarterValue) + 1)) * 1.5 + 1) * 100);
+          const species = getPokemonSpecies(speciesId);
+          if (species.isRegional()) {
+            weight = Math.floor(weight / (species.isRareRegional() ? 8 : 2));
+          }
+          speciesWeights.push(totalWeight + weight);
+          totalWeight += weight;
+        }
+
+        let species: Species;
+        console.log(egg);
+        const rand = Utils.randSeedInt(totalWeight);
+        for (let s = 0; s < speciesWeights.length; s++) {
+          if (rand < speciesWeights[s]) {
+            species = speciesPool[s];
+            break;
+          }
+        }
+
+        if (!!this.scene.gameData.dexData[species].caughtAttr) {
+          this.scene.gameData.unlockPity[egg.tier] = Math.min(this.scene.gameData.unlockPity[egg.tier] + 1, 10);
+        } else {
+          this.scene.gameData.unlockPity[egg.tier] = 0;
+        }
+
+        const pokemonSpecies = getPokemonSpecies(species);
+        ret = this.scene.addPlayerPokemon(pokemonSpecies, 1, undefined, undefined, undefined, false);
+      }
+
+      /**
+       * Non Shiny gacha Pokemon have a 1/128 chance of being shiny
+       * Shiny gacha Pokemon have a 1/64 chance of being shiny
+       * IVs are rolled twice and the higher of each stat's IV is taken
+       * The egg move gacha doubles the rate of rare egg moves but the base rates are
+       * Common: 1/48
+       * Rare: 1/24
+       * Epic: 1/12
+       * Legendary: 1/6
+       */
+      ret.trySetShiny(egg.gachaType === GachaType.SHINY ? 1024 : 512);
+      ret.variant = ret.shiny ? ret.generateVariant() : 0;
+
+      const secondaryIvs = Utils.getIvsFromId(Utils.randSeedInt(4294967295));
+
+      for (let s = 0; s < ret.ivs.length; s++) {
+        ret.ivs[s] = Math.max(ret.ivs[s], secondaryIvs[s]);
+      }
+
+      const baseChance = egg.gachaType === GachaType.MOVE ? 3 : 6;
+      const eggMoveIndex = Utils.randSeedInt(baseChance * Math.pow(2, 3 - egg.tier))
+        ? Utils.randSeedInt(3)
+        : 3;
+      this.newEggMoves.push(eggMoveIndex);
+    }, egg.id, EGG_SEED.toString());
+
+    this.pokemonHatched.push(ret);
+    return ret;
+  }
+}
 
 /**
  * Class that represents egg hatching
@@ -20,6 +244,7 @@ import EggsToHatchCountContainer from "./ui/eggs-to-hatch-count-container";
 export class EggHatchPhase extends Phase {
   /** The egg that is hatching */
   private egg: Egg;
+  private pokemonHatched: PlayerPokemon[];
 
   /** The number of eggs that are hatching */
   private eggsToHatchCount: integer;
@@ -61,10 +286,11 @@ export class EggHatchPhase extends Phase {
   /** The sound effect being played when the egg is hatched */
   private evolutionBgm: AnySound;
 
-  constructor(scene: BattleScene, egg: Egg, eggsToHatchCount: integer) {
+  constructor(scene: BattleScene, egg: Egg, pokemonHatchedContainer: PlayerPokemon[], eggsToHatchCount: integer) {
     super(scene);
 
     this.egg = egg;
+    this.pokemonHatched = pokemonHatchedContainer;
     this.eggsToHatchCount = eggsToHatchCount;
   }
 
@@ -551,7 +777,6 @@ export class EggHatchPhase extends Phase {
         }
 
         const pokemonSpecies = getPokemonSpecies(species);
-
         ret = this.scene.addPlayerPokemon(pokemonSpecies, 1, undefined, undefined, undefined, false);
       }
 
@@ -581,6 +806,330 @@ export class EggHatchPhase extends Phase {
 
     }, this.egg.id, EGG_SEED.toString());
 
+    this.pokemonHatched.push(ret);
     return ret;
   }
+
+  //   getNewProperties(pokemon: PlayerPokemon) {
+  //     const speciesId = pokemon.species.speciesId;
+  //     let newProperties = {newEggMove: false, newStarter: false};
+
+  //     if (!this.starterData[speciesId].eggMoves) {
+  //       this.starterData[speciesId].eggMoves = 0;
+  //     }
+
+  //     const value = Math.pow(2, eggMoveIndex);
+
+//     if (this.starterData[speciesId].eggMoves & value) {
+//       resolve(false);
+//       return;
+//     }
+//   }
+}
+
+export class EggSummaryPhase extends Phase {
+  private egg: Egg;
+  private pokemonHatched: PlayerPokemon[];
+  private newEggMoves: integer[];
+  private showMessages: boolean;
+
+  private eggHatchHandler: EggHatchSceneHandler;
+  private eggHatchContainer: Phaser.GameObjects.Container;
+  private eggHatchBg: Phaser.GameObjects.Image;
+  private eggHatchOverlay: Phaser.GameObjects.Rectangle;
+  private pokemonSprite: Phaser.GameObjects.Sprite;
+  private pokemonShinySparkle: Phaser.GameObjects.Sprite;
+
+  private infoContainer: PokemonInfoContainer;
+  private spriteContainers: Phaser.GameObjects.Container[];
+  private shinyIcons: Phaser.GameObjects.Image[];
+  private hiddenAbilityIcons: Phaser.GameObjects.Image[];
+  private pokeballIcons: Phaser.GameObjects.Image[];
+  private eggMoveIcons: Phaser.GameObjects.Image[];
+  constructor(scene: BattleScene, pokemonHatchedContainer: PlayerPokemon[], newEggMoves: integer[]) {
+    super(scene);
+    this.pokemonHatched = pokemonHatchedContainer;
+    this.newEggMoves = newEggMoves;
+  }
+
+  start() {
+    super.start();
+
+    this.scene.ui.setModeForceTransition(Mode.EGG_HATCH_SCENE).then(() => {
+
+      this.scene.fadeOutBgm(null, false);
+
+      this.eggHatchHandler = this.scene.ui.getHandler() as EggHatchSceneHandler;
+
+      this.eggHatchContainer = this.eggHatchHandler.eggHatchContainer;
+
+      this.eggHatchBg = this.scene.add.image(0, 0, "default_bg");
+      this.eggHatchBg.setOrigin(0, 0);
+      this.eggHatchContainer.add(this.eggHatchBg);
+
+      // this.eggContainer = this.scene.add.container(this.eggHatchBg.displayWidth / 2, this.eggHatchBg.displayHeight / 2);
+
+      // this.eggSprite = this.scene.add.sprite(0, 0, "egg", `egg_${this.egg.getKey()}`);
+      // this.eggCrackSprite = this.scene.add.sprite(0, 0, "egg_crack", "0");
+      // this.eggCrackSprite.setVisible(false);
+
+      // this.eggLightraysOverlay = this.scene.add.sprite((-this.eggHatchBg.displayWidth / 2) + 4, -this.eggHatchBg.displayHeight / 2, "egg_lightrays", "3");
+      // this.eggLightraysOverlay.setOrigin(0, 0);
+      // this.eggLightraysOverlay.setVisible(false);
+
+      // this.eggContainer.add(this.eggSprite);
+      // this.eggContainer.add(this.eggCrackSprite);
+      // this.eggContainer.add(this.eggLightraysOverlay);
+      // this.eggHatchContainer.add(this.eggContainer);
+
+      // const getPokemonSprite = () => {
+      //   const ret = this.scene.add.sprite(this.eggHatchBg.displayWidth / 2, this.eggHatchBg.displayHeight / 2, "pkmn__sub");
+      //   ret.setPipeline(this.scene.spritePipeline, { tone: [ 0.0, 0.0, 0.0, 0.0 ], ignoreTimeTint: true });
+      //   return ret;
+      // };
+
+      this.eggHatchOverlay = this.scene.add.rectangle(0, -this.scene.game.canvas.height / 6, this.scene.game.canvas.width / 6, this.scene.game.canvas.height / 6, 0xFFFFFF);
+      this.eggHatchOverlay.setOrigin(0, 0);
+      this.eggHatchOverlay.setAlpha(0);
+      this.scene.fieldUI.add(this.eggHatchOverlay);
+
+      this.infoContainer = new PokemonInfoContainer(this.scene);
+      this.infoContainer.setup();
+      this.eggHatchContainer.add(this.infoContainer);
+
+
+      this.spriteContainers = new Array(this.pokemonHatched.length).fill(null).map((_, i) => {
+        const container = this.scene.add.container(0, 0);
+        if (i) {
+          container.setVisible(false);
+        }
+        this.eggHatchContainer.add(container);
+        return container;
+      });
+
+      let i = 0;
+      let cols = 11;
+      let size = 14;
+      if (this.pokemonHatched.length <= 33) {
+        cols = 8;
+        size = 24;
+      }
+
+      this.shinyIcons = new Array(this.pokemonHatched.length).fill(null).map((_, i) => {
+        const x = (i % cols) * size;
+        const y = Math.floor(i / cols) * size;
+        const ret = this.scene.add.image(x + size / 2, y + size / 2, "shiny_star_small");
+        ret.setOrigin(0, 0);
+        ret.setScale(size / 24);
+        ret.setVisible(true);
+        this.eggHatchContainer.add(ret);
+        return ret;
+      });
+
+      this.hiddenAbilityIcons = new Array(this.pokemonHatched.length).fill(null).map((_, i) => {
+        const x = (i % cols) * size;
+        const y = Math.floor(i / cols) * size;
+        const ret = this.scene.add.image(x + size, y + size / 2, "ha_capsule");
+        ret.setOrigin(0, 0);
+        ret.setScale(size / 24);
+        ret.setVisible(true);
+        this.eggHatchContainer.add(ret);
+        return ret;
+      });
+
+      this.pokeballIcons = new Array(this.pokemonHatched.length).fill(null).map((_, i) => {
+        const x = (i % cols) * size;
+        const y = Math.floor(i / cols) * size;
+        const ret = this.scene.add.image(x + size, y + size, "icon_owned");
+        ret.setOrigin(0, 0);
+        ret.setScale(size / 24);
+        ret.setVisible(true);
+        this.eggHatchContainer.add(ret);
+        return ret;
+      });
+      this.eggMoveIcons = new Array(this.pokemonHatched.length).fill(null).map((_, i) => {
+        const x = (i % cols) * size;
+        const y = Math.floor(i / cols) * size;
+        const ret = this.scene.add.image(x + size / 2, y + size, "icon_owned");
+        ret.setOrigin(0, 0);
+        ret.setScale(size / 24);
+        ret.setVisible(true);
+        ret.setTint(0.5);
+        this.eggHatchContainer.add(ret);
+        return ret;
+      });
+
+      for (const displayPokemon of this.pokemonHatched) {
+        console.log(displayPokemon);
+        const x = (i % cols) * size;
+        const y = Math.floor(i / cols) * size;
+        const icon = this.scene.add.sprite(x, y, displayPokemon.species.getIconAtlasKey(displayPokemon.formIndex, displayPokemon.shiny, displayPokemon.variant));
+        icon.setScale(size / 24);
+        icon.setOrigin(0, 0);
+        icon.setFrame(displayPokemon.species.getIconId(displayPokemon.gender === Gender.FEMALE, displayPokemon.formIndex, displayPokemon.shiny, displayPokemon.variant));
+        // this.checkIconId(icon, displayPokemon.species, displayPokemon.female, displayPokemon.formIndex, displayPokemon.shiny, displayPokemon.variant);
+        this.spriteContainers[i].add(icon);
+        this.spriteContainers[i].setVisible(true);
+
+        // TODO shiny icon funcitonality for variants
+        this.shinyIcons[i].setVisible(displayPokemon.shiny);
+        this.shinyIcons[i].setTint(getVariantTint(displayPokemon.variant));
+        // this.shinyIcons[i].setTint(getVariantTint(speciesVariants[v] === DexAttr.DEFAULT_VARIANT ? 0 : speciesVariants[v] === DexAttr.VARIANT_2 ? 1 : 2));
+        // TODO new pokemon / catch icon functionality
+        const dexEntry = this.scene.gameData.dexData[this.pokemonHatched[i].species.speciesId];
+        const caughtAttr = dexEntry.caughtAttr;
+        this.pokeballIcons[i].setVisible(!caughtAttr);
+        // this.pokeballIcons[i].setVisible(this.scene.gameData.dexData[displayPokemon.species.speciesId].caughtAttr)
+        // TODO hidden ability icon functionality
+        this.hiddenAbilityIcons[i].setVisible((displayPokemon.abilityIndex >= 2));
+
+        // TODO new egg move icon functionality
+        i++;
+      }
+
+
+
+      // for(const ret of this.pokemonHatched) {
+      console.log(this.pokemonHatched);
+      console.log(this.newEggMoves);
+
+      const updateNextPokemon = (i: integer) => {
+        console.log(i);
+        if (i >= this.pokemonHatched.length) {
+          console.log("end");
+          this.scene.ui.showText("x hatched", null, () => {
+            // this.scene.ui.showText(null, 0);
+            // this.scene.tweens.add({
+            //   duration: Utils.fixedInt(3000),
+            //   targets: this.eggHatchOverlay,
+            //   alpha: 0,
+            //   ease: "Cubic.easeOut"
+            this.end();
+            console.log("phase eneded");
+          }, null, true, 1500);
+
+        } else {
+          this.updatePokemon(this.pokemonHatched[i], this.newEggMoves[i]).then(() => {
+            if (i < this.pokemonHatched.length) {
+              console.log("updating next pokemon");
+              updateNextPokemon(i + 1);
+            } else {
+              console.log("updated all pokemon");
+              this.scene.ui.showText(null, 0);
+              this.end();
+            }
+          });
+        }
+      };
+
+      this.scene.ui.showText(`${this.pokemonHatched.length} eggs hatched. Skip messages?`, 0);
+      this.scene.ui.setModeWithoutClear(Mode.CONFIRM, () => {
+        console.log("messages skipped");
+        this.showMessages = false;
+        updateNextPokemon(0);
+      }, () => {
+        console.log("messages shown");
+        this.showMessages = true;
+        updateNextPokemon(0);
+      }
+      );
+    });
+  }
+
+  updatePokemon(pokemon: PlayerPokemon, eggMoveIndex: integer) {
+    console.log(pokemon);
+    return new Promise<void>(resolve => {
+      console.log("set caught");
+      // this.infoContainer.show(pokemon, false, 2);
+      this.scene.gameData.setPokemonCaught(pokemon, true, true, this.showMessages).then(() => {
+        //TODO pass through egg move updates
+        console.log("set IVs");
+        this.scene.gameData.updateSpeciesDexIvs(pokemon.species.speciesId, pokemon.ivs);
+        console.log("set egg moves");
+        this.scene.gameData.setEggMoveUnlocked(pokemon.species, eggMoveIndex, this.showMessages).then(() => {
+          resolve();
+        });
+      });
+    });
+  }
+
+  end() {
+    if (this.scene.findPhase((p) => p instanceof EggHatchPhase)) {
+      this.eggHatchHandler.clear();
+    } else {
+      this.scene.time.delayedCall(250, () => this.scene.setModifiersVisible(true));
+    }
+    super.end();
+  }
+
+  doHatch(): void {
+    this.canSkip = false;
+    this.hatched = true;
+    if (this.evolutionBgm) {
+      SoundFade.fadeOut(this.scene, this.evolutionBgm, Utils.fixedInt(100));
+    }
+    for (let e = 0; e < 5; e++) {
+      this.scene.time.delayedCall(Utils.fixedInt(375 * e), () => this.scene.playSound("egg_hatch", { volume: 1 - (e * 0.2) }));
+    }
+
+    this.doReveal();
+  }
+
+  doReveal(): void {
+    const isShiny = this.pokemon.isShiny();
+    if (this.pokemon.species.subLegendary) {
+      this.scene.validateAchv(achvs.HATCH_SUB_LEGENDARY);
+    }
+    if (this.pokemon.species.legendary) {
+      this.scene.validateAchv(achvs.HATCH_LEGENDARY);
+    }
+    if (this.pokemon.species.mythical) {
+      this.scene.validateAchv(achvs.HATCH_MYTHICAL);
+    }
+    if (isShiny) {
+      this.scene.validateAchv(achvs.HATCH_SHINY);
+    }
+    this.pokemonSprite.play(this.pokemon.getSpriteKey(true));
+    this.pokemonSprite.setPipelineData("ignoreTimeTint", true);
+    this.pokemonSprite.setPipelineData("spriteKey", this.pokemon.getSpriteKey());
+    this.pokemonSprite.setPipelineData("shiny", this.pokemon.shiny);
+    this.pokemonSprite.setPipelineData("variant", this.pokemon.variant);
+    this.pokemonSprite.setVisible(true);
+
+
+    this.scene.time.delayedCall(Utils.fixedInt(250), () => {
+      this.pokemon.cry();
+      if (isShiny) {
+        this.scene.time.delayedCall(Utils.fixedInt(500), () => {
+          this.pokemonShinySparkle.play(`sparkle${this.pokemon.variant ? `_${this.pokemon.variant + 1}` : ""}`);
+          this.scene.playSound("sparkle");
+        });
+      }
+      // this.scene.time.delayedCall(Utils.fixedInt(!this.skipped ? !isShiny ? 1250 : 1750 : !isShiny ? 250 : 750), () => {
+      // TODO
+      //   this.infoContainer.show(this.pokemon, false, this.skipped ? 2 : 1);
+
+      //   this.scene.playSoundWithoutBgm("evolution_fanfare");
+
+      //   this.scene.ui.showText(`${this.pokemon.name} hatched from the egg!`, null, () => {
+      //     this.scene.gameData.updateSpeciesDexIvs(this.pokemon.species.speciesId, this.pokemon.ivs);
+      //     this.scene.gameData.setPokemonCaught(this.pokemon, true, true).then(() => {
+      //       this.scene.gameData.setEggMoveUnlocked(this.pokemon.species, this.eggMoveIndex).then(() => {
+      //         this.scene.ui.showText(null, 0);
+      //         this.end();
+      //       });
+      //     });
+      //   }, null, true, 3000);
+      //   //this.scene.time.delayedCall(Utils.fixedInt(4250), () => this.scene.playBgm());
+      // });
+    });
+    // this.scene.tweens.add({
+    //   duration: Utils.fixedInt(this.skipped ? 500 : 3000),
+    //   targets: this.eggHatchOverlay,
+    //   alpha: 0,
+    //   ease: "Cubic.easeOut"
+    // });
+  }
+
+
 }
