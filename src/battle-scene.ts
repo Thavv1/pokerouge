@@ -62,6 +62,8 @@ import { NewArenaEvent } from "./battle-scene-events";
 import { Abilities } from "./data/enums/abilities";
 import ArenaFlyout from "./ui/arena-flyout";
 import { EaseType } from "./ui/enums/ease-type";
+import { BattlerTagType } from "./data/enums/battler-tag-type";
+import { ExpNotification } from "./enums/exp-notification";
 
 
 export const bypassLogin = import.meta.env.VITE_BYPASS_LOGIN === "1";
