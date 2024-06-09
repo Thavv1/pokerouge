@@ -487,6 +487,7 @@ export class PostDefendGulpMissileAbAttr extends PostDefendAbAttr {
       const damage = Math.ceil(attacker.getMaxHp() / 4);
       if (pokemon.getTag(BattlerTagType.GULP_MISSILE_ARROKUDA)) {
         pokemon.removeTag(BattlerTagType.GULP_MISSILE_ARROKUDA);
+        pokemon.scene.unshiftPhase(new StatChangePhase(pokemon.scene, attacker.getBattlerIndex(), false, [BattleStat.DEF], -1));
         attacker.damageAndUpdate(damage, HitResult.OTHER);
         attacker.turnData.damageTaken += damage;
         pokemon.scene.triggerPokemonFormChange(pokemon, SpeciesFormChangeManualTrigger);
@@ -1308,11 +1309,11 @@ export class PostAttackGulpMissileAbAttr extends PostAttackAbAttr {
   applyPostAttack(pokemon: Pokemon, passive: boolean, defender: Pokemon, move: Move, hitResult: HitResult, args: any[]): boolean {
     const lastmove = pokemon.getMoveHistory()[pokemon.getMoveHistory().length - 1];
     if (lastmove.move === Moves.DIVE || lastmove.move === Moves.SURF) {
-      if (pokemon.hp > pokemon.getMaxHp() * 0.5) {
+      if (pokemon.hp > pokemon.getMaxHp() * 0.5 && pokemon.formIndex === 0) {
         pokemon.addTag(BattlerTagType.GULP_MISSILE_ARROKUDA);
         pokemon.scene.triggerPokemonFormChange(pokemon, SpeciesFormChangeManualTrigger);
         return true;
-      } else if (pokemon.hp < pokemon.getMaxHp() * 0.5) {
+      } else if (pokemon.hp < pokemon.getMaxHp() * 0.5 && pokemon.formIndex === 0) {
         pokemon.addTag(BattlerTagType.GULP_MISSILE_PIKACHU);
         pokemon.scene.triggerPokemonFormChange(pokemon, SpeciesFormChangeManualTrigger);
         return true;
@@ -4472,6 +4473,8 @@ export function initAbilities() {
     new Ability(Abilities.GULP_MISSILE, 8)
       .attr(UnsuppressableAbilityAbAttr)
       .attr(NoTransformAbilityAbAttr)
+      .conditionalAttr(pokemon => pokemon.formIndex === 1, PostSummonAddBattlerTagAbAttr, BattlerTagType.GULP_MISSILE_ARROKUDA, 0, false)
+      .conditionalAttr(pokemon => pokemon.formIndex === 2, PostSummonAddBattlerTagAbAttr, BattlerTagType.GULP_MISSILE_PIKACHU, 0, false)
       .attr(PostAttackGulpMissileAbAttr)
       .attr(PostDefendGulpMissileAbAttr),
     new Ability(Abilities.STALWART, 8)
