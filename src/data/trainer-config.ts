@@ -175,7 +175,7 @@ export class TrainerConfig {
   public trainerType: TrainerType;
   public trainerTypeDouble: TrainerType;
   public name: string;
-  public nameFemale: string;
+  public nameAlt: string;
   public nameDouble: string;
   public title: string;
   public titleDouble: string;
@@ -190,7 +190,7 @@ export class TrainerConfig {
   public mixedBattleBgm: string;
   public battleBgm: string;
   public encounterBgm: string;
-  public femaleEncounterBgm: string;
+  public altEncounterBgm: string;
   public doubleEncounterBgm: string;
   public victoryBgm: string;
   public genModifiersFunc: GenModifiersFunc;
@@ -206,9 +206,9 @@ export class TrainerConfig {
   public victoryMessages: string[] = [];
   public defeatMessages: string[] = [];
 
-  public femaleEncounterMessages: string[];
-  public femaleVictoryMessages: string[];
-  public femaleDefeatMessages: string[];
+  public altEncounterMessages: string[];
+  public altVictoryMessages: string[];
+  public altDefeatMessages: string[];
 
   public doubleEncounterMessages: string[];
   public doubleVictoryMessages: string[];
@@ -688,7 +688,7 @@ export class TrainerConfig {
       // If the name is already set
       if (this.nameFemale) {
         // Check if the variant is either female or this is for the partner in a double battle
-        if (variant === TrainerVariant.FEMALE || (variant === TrainerVariant.DOUBLE && trainerSlot === TrainerSlot.TRAINER_PARTNER)) {
+        if (variant === TrainerVariant.ALTERNATE || (variant === TrainerVariant.DOUBLE && trainerSlot === TrainerSlot.TRAINER_PARTNER)) {
           return this.nameFemale;
         }
       } else
@@ -714,7 +714,7 @@ export class TrainerConfig {
   loadAssets(scene: BattleScene, variant: TrainerVariant): Promise<void> {
     return new Promise(resolve => {
       const isDouble = variant === TrainerVariant.DOUBLE;
-      const trainerKey = this.getSpriteKey(variant === TrainerVariant.FEMALE, false);
+      const trainerKey = this.getSpriteKey(variant === TrainerVariant.ALTERNATE, false);
       const partnerTrainerKey = this.getSpriteKey(true,true);
       scene.loadAtlas(trainerKey, "trainer");
       if (isDouble) {

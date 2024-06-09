@@ -4114,7 +4114,7 @@ export class GameOverPhase extends BattlePhase {
             if (!this.scene.ui.shouldSkipDialogue(message)) {
               this.scene.ui.fadeIn(500).then(() => {
                 this.scene.charSprite.showCharacter(`rival_${this.scene.gameData.gender === PlayerGender.FEMALE ? "m" : "f"}`, getCharVariantFromDialogue(miscDialogue.ending[this.scene.gameData.gender === PlayerGender.FEMALE ? 0 : 1])).then(() => {
-                  this.scene.ui.showDialogue(message, this.scene.gameData.gender === PlayerGender.FEMALE ? trainerConfigs[TrainerType.RIVAL].name : trainerConfigs[TrainerType.RIVAL].nameFemale, null, () => {
+                  this.scene.ui.showDialogue(message, this.scene.gameData.gender === PlayerGender.FEMALE ? trainerConfigs[TrainerType.RIVAL].name : trainerConfigs[TrainerType.RIVAL].nameAlt, null, () => {
                     this.scene.ui.fadeOut(500).then(() => {
                       this.scene.charSprite.hide().then(() => {
                         const endCardPhase = new EndCardPhase(this.scene);
@@ -5358,7 +5358,7 @@ export class TrainerMessageTestPhase extends BattlePhase {
         continue;
       }
       const config = trainerConfigs[type];
-      [ config.encounterMessages, config.femaleEncounterMessages, config.victoryMessages, config.femaleVictoryMessages, config.defeatMessages, config.femaleDefeatMessages ]
+      [ config.encounterMessages, config.altEncounterMessages, config.victoryMessages, config.altVictoryMessages, config.defeatMessages, config.altDefeatMessages ]
         .map(messages => {
           if (messages?.length) {
             testMessages.push(...messages);
