@@ -243,6 +243,20 @@ export class PreDefendAbAttr extends AbAttr {
   }
 }
 
+export class PowerSpotAbAttr extends AbAttr {
+  /**
+   *
+   * @param pokemon N/A
+   * @param passive N/A
+   * @param cancelled N/a
+   * @param args Utils.NumberHolder N/A
+   * @returns true if the function succeeds
+   */
+  apply(pokemon: Pokemon, passive: boolean, cancelled: Utils.BooleanHolder, args: any[]): boolean | Promise<boolean> {
+    return true;
+  }
+}
+
 export class PreDefendFormChangeAbAttr extends PreDefendAbAttr {
   private formFunc: (p: Pokemon) => integer;
 
@@ -4472,7 +4486,7 @@ export function initAbilities() {
       .attr(IceFaceMoveImmunityAbAttr, (target, user, move) => move.category === MoveCategory.PHYSICAL && !!target.getTag(BattlerTagType.ICE_FACE))
       .ignorable(),
     new Ability(Abilities.POWER_SPOT, 8)
-      .unimplemented(),
+      .attr(PowerSpotAbAttr),
     new Ability(Abilities.MIMICRY, 8)
       .unimplemented(),
     new Ability(Abilities.SCREEN_CLEANER, 8)
