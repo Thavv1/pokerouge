@@ -90,11 +90,11 @@ describe("Test Battle Phase", () => {
   }, 20000);
 
   it("do attack wave 3 - single battle - regular - OHKO", async() => {
-    vi.spyOn(overrides, "STARTER_SPECIES_OVERRIDE", "get").mockReturnValue(Species.MEWTWO);
+    vi.spyOn(overrides.STARTER_OVERRIDE[0], "species", "get").mockReturnValue(Species.MEWTWO);
     vi.spyOn(overrides, "OPP_SPECIES_OVERRIDE", "get").mockReturnValue(Species.RATTATA);
     vi.spyOn(overrides, "STARTING_LEVEL_OVERRIDE", "get").mockReturnValue(2000);
     vi.spyOn(overrides, "STARTING_WAVE_OVERRIDE", "get").mockReturnValue(3);
-    vi.spyOn(overrides, "MOVESET_OVERRIDE", "get").mockReturnValue([Moves.TACKLE]);
+    vi.spyOn(overrides.STARTER_OVERRIDE[0], "moveset", "get").mockReturnValue([Moves.TACKLE]);
     vi.spyOn(overrides, "OPP_ABILITY_OVERRIDE", "get").mockReturnValue(Abilities.HYDRATION);
     vi.spyOn(overrides, "OPP_MOVESET_OVERRIDE", "get").mockReturnValue([Moves.TACKLE, Moves.TACKLE, Moves.TACKLE, Moves.TACKLE]);
     vi.spyOn(overrides, "SINGLE_BATTLE_OVERRIDE", "get").mockReturnValue(true);
@@ -112,11 +112,11 @@ describe("Test Battle Phase", () => {
   }, 20000);
 
   it("do attack wave 3 - single battle - regular - NO OHKO with opponent using non damage attack", async() => {
-    vi.spyOn(overrides, "STARTER_SPECIES_OVERRIDE", "get").mockReturnValue(Species.MEWTWO);
+    vi.spyOn(overrides.STARTER_OVERRIDE[0], "species", "get").mockReturnValue(Species.MEWTWO);
     vi.spyOn(overrides, "OPP_SPECIES_OVERRIDE", "get").mockReturnValue(Species.RATTATA);
     vi.spyOn(overrides, "STARTING_LEVEL_OVERRIDE", "get").mockReturnValue(5);
     vi.spyOn(overrides, "STARTING_WAVE_OVERRIDE", "get").mockReturnValue(3);
-    vi.spyOn(overrides, "MOVESET_OVERRIDE", "get").mockReturnValue([Moves.TACKLE]);
+    vi.spyOn(overrides.STARTER_OVERRIDE[0], "moveset", "get").mockReturnValue([Moves.TACKLE]);
     vi.spyOn(overrides, "OPP_ABILITY_OVERRIDE", "get").mockReturnValue(Abilities.HYDRATION);
     vi.spyOn(overrides, "OPP_MOVESET_OVERRIDE", "get").mockReturnValue([Moves.TAIL_WHIP, Moves.TAIL_WHIP, Moves.TAIL_WHIP, Moves.TAIL_WHIP]);
     vi.spyOn(overrides, "SINGLE_BATTLE_OVERRIDE", "get").mockReturnValue(true);
@@ -209,7 +209,8 @@ describe("Test Battle Phase", () => {
     vi.spyOn(overrides, "SINGLE_BATTLE_OVERRIDE", "get").mockReturnValue(true);
     vi.spyOn(overrides, "OPP_SPECIES_OVERRIDE", "get").mockReturnValue(Species.MIGHTYENA);
     vi.spyOn(overrides, "OPP_ABILITY_OVERRIDE", "get").mockReturnValue(Abilities.HYDRATION);
-    vi.spyOn(overrides, "ABILITY_OVERRIDE", "get").mockReturnValue(Abilities.HYDRATION);
+    vi.spyOn(overrides.STARTER_OVERRIDE[0], "ability", "get").mockReturnValue(Abilities.HYDRATION);
+    vi.spyOn(overrides.STARTER_OVERRIDE[1], "ability", "get").mockReturnValue(Abilities.HYDRATION);
     await game.startBattle([
       Species.BLASTOISE,
       Species.CHARIZARD,
@@ -222,7 +223,7 @@ describe("Test Battle Phase", () => {
     vi.spyOn(overrides, "SINGLE_BATTLE_OVERRIDE", "get").mockReturnValue(true);
     vi.spyOn(overrides, "OPP_SPECIES_OVERRIDE", "get").mockReturnValue(Species.MIGHTYENA);
     vi.spyOn(overrides, "OPP_ABILITY_OVERRIDE", "get").mockReturnValue(Abilities.HYDRATION);
-    vi.spyOn(overrides, "ABILITY_OVERRIDE", "get").mockReturnValue(Abilities.HYDRATION);
+    vi.spyOn(overrides.STARTER_OVERRIDE[0], "ability", "get").mockReturnValue(Abilities.HYDRATION);
     await game.startBattle([
       Species.BLASTOISE,
     ]);
@@ -234,7 +235,8 @@ describe("Test Battle Phase", () => {
     vi.spyOn(overrides, "DOUBLE_BATTLE_OVERRIDE", "get").mockReturnValue(true);
     vi.spyOn(overrides, "OPP_SPECIES_OVERRIDE", "get").mockReturnValue(Species.MIGHTYENA);
     vi.spyOn(overrides, "OPP_ABILITY_OVERRIDE", "get").mockReturnValue(Abilities.HYDRATION);
-    vi.spyOn(overrides, "ABILITY_OVERRIDE", "get").mockReturnValue(Abilities.HYDRATION);
+    vi.spyOn(overrides.STARTER_OVERRIDE[0], "ability", "get").mockReturnValue(Abilities.HYDRATION);
+    vi.spyOn(overrides.STARTER_OVERRIDE[1], "ability", "get").mockReturnValue(Abilities.HYDRATION);
     vi.spyOn(overrides, "STARTING_WAVE_OVERRIDE", "get").mockReturnValue(3);
     await game.startBattle([
       Species.BLASTOISE,
@@ -248,7 +250,10 @@ describe("Test Battle Phase", () => {
     vi.spyOn(overrides, "DOUBLE_BATTLE_OVERRIDE", "get").mockReturnValue(true);
     vi.spyOn(overrides, "OPP_SPECIES_OVERRIDE", "get").mockReturnValue(Species.MIGHTYENA);
     vi.spyOn(overrides, "OPP_ABILITY_OVERRIDE", "get").mockReturnValue(Abilities.HYDRATION);
-    vi.spyOn(overrides, "ABILITY_OVERRIDE", "get").mockReturnValue(Abilities.HYDRATION);
+    vi.spyOn(overrides.STARTER_OVERRIDE[0], "ability", "get").mockReturnValue(Abilities.HYDRATION);
+    vi.spyOn(overrides.STARTER_OVERRIDE[1], "ability", "get").mockReturnValue(Abilities.HYDRATION);
+    vi.spyOn(overrides.STARTER_OVERRIDE[2], "ability", "get").mockReturnValue(Abilities.HYDRATION);
+    vi.spyOn(overrides.STARTER_OVERRIDE[3], "ability", "get").mockReturnValue(Abilities.HYDRATION);
     vi.spyOn(overrides, "STARTING_WAVE_OVERRIDE", "get").mockReturnValue(3);
     await game.startBattle([
       Species.BLASTOISE,
