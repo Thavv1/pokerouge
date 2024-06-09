@@ -37,7 +37,7 @@ export const trainerClasses: SimpleTranslationEntries = {
   "breeder_female": "Segretaria",
   "breeders": "Allevatori Pokémon",
   "clerk": "Affarista",
-  "clerk_female": "Clerk",
+  "clerk_female": "Affarista",
   "colleagues": "Soci in affari",
   "crush_kin": "Duo Lotta",
   "cyclist": "Ciclista",
