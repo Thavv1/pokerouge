@@ -18,6 +18,7 @@ import {initMoves} from "#app/data/move";
 import {initAbilities} from "#app/data/ability";
 import {initAchievements} from "#app/system/achv";
 import {initTrainerTypeDialogue} from "#app/data/dialogue";
+import { initChallenges } from "./data/challenge";
 import i18next from "i18next";
 import { initStatsKeys } from "./ui/game-stats-ui-handler";
 import { initVouchers } from "./system/voucher";
@@ -341,6 +342,7 @@ export class LoadingScene extends SceneBase {
     initSpecies();
     initMoves();
     initAbilities();
+    initChallenges();
   }
 
   loadLoadingScreen() {
@@ -434,7 +436,7 @@ export class LoadingScene extends SceneBase {
     });
 
     this.load.on("fileprogress", file => {
-      assetText.setText(`Loading asset: ${file.key}`);
+      assetText.setText(i18next.t("menu:loadingAsset", { assetName: file.key }));
     });
 
     loadingGraphics.push(bg, graphics, progressBar, progressBox, logo, percentText, assetText);
