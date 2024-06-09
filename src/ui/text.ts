@@ -41,6 +41,24 @@ interface LanguageSetting {
   textScale?: number
 }
 
+interface AutoTextInterface {
+  originalFontSize: number,
+  limits: TextLimits,
+  x: number,
+  displayWidth: number
+  style: Phaser.Types.GameObjects.Text.TextStyle,
+  padding: any
+  blockAutoSize: boolean,
+  text: string
+
+  setFontSize: (fontSize: number) => this
+}
+interface TextLimits {
+  left?: number,
+  right?: number,
+  width?: number
+}
+
 const languageSettings: { [key: string]: LanguageSetting } = {
   "en":{},
   "de":{},
@@ -50,15 +68,97 @@ const languageSettings: { [key: string]: LanguageSetting } = {
   "pt_BR":{},
   "zh_CN":{},
 };
+export class AutoBBCodeText extends BBCodeText implements AutoTextInterface {
+  originalFontSize: number;
+  limits: TextLimits;
+  originalY: number;
+  blockAutoSize: boolean = false;
 
-export function addTextObject(scene: Phaser.Scene, x: number, y: number, content: string, style: TextStyle, extraStyleOptions?: Phaser.Types.GameObjects.Text.TextStyle): Phaser.GameObjects.Text {
+  constructor(scene: Phaser.Scene, x: number, y: number, content: string, style: BBCodeText.TextStyle, limits?: TextLimits) {
+    super(scene, x, y, content, style);
+    this.limits = limits;
+    autoSizeText(this);
+  }
+
+  updateText(runWrap?: boolean): this {
+    super.updateText(runWrap);
+    if (!this.blockAutoSize) {
+      autoSizeText(this);
+    }
+    return this;
+  }
+
+  setVisible(value: boolean): this {
+    super.setVisible(value);
+    autoSizeText(this);
+    return this;
+  }
+}
+
+export class AutoText extends Phaser.GameObjects.Text implements AutoTextInterface {
+  originalFontSize: number;
+  limits: TextLimits;
+  originalY: number;
+  blockAutoSize: boolean = false;
+
+  constructor(scene: Phaser.Scene, x: number, y: number, content: string, style: Phaser.Types.GameObjects.Text.TextStyle, limits?: TextLimits) {
+    super(scene, x, y, content, style);
+    this.limits = limits;
+    autoSizeText(this);
+  }
+
+  updateText(): this {
+    super.updateText();
+    if (!this.blockAutoSize) {
+      autoSizeText(this);
+    }
+    return this;
+  }
+
+  setVisible(value: boolean): this {
+    super.setVisible(value);
+    autoSizeText(this);
+    return this;
+  }
+}
+
+function autoSizeText<T extends AutoTextInterface>(obj: T): void {
+  if (!obj.text || !obj.limits) {
+    return;
+  }
+  obj.blockAutoSize = true;
+  if (!obj.originalFontSize) {
+    obj.originalFontSize = parseInt(obj.style.fontSize as any);
+  }
+  obj.padding.top = 0;
+  obj.setFontSize(obj.originalFontSize);
+  const minFontSize = 20;
+  const fontSize = obj.originalFontSize;
+  let f = 1;
+  if (obj.limits?.right) {
+    const maxWidth = obj.limits.right - obj.x;
+    f = obj.displayWidth / maxWidth;
+  } else if (obj.limits?.width) {
+    f = obj.displayWidth / obj.limits.width;
+  }
+  if (f > 1) {
+    const newFontSize = Math.max(Math.floor(fontSize / f), minFontSize);
+    obj.padding.top = (fontSize - newFontSize) / 2;
+    obj.setFontSize(newFontSize);
+  }
+  obj.blockAutoSize = false;
+}
+
+export function addTextObject(scene: Phaser.Scene, x: number, y: number, content: string, style: TextStyle, extraStyleOptions?: Phaser.Types.GameObjects.Text.TextStyle, limits?: TextLimits): Phaser.GameObjects.Text {
   const [ styleOptions, shadowColor, shadowXpos, shadowYpos ] = getTextStyleOptions(style, (scene as BattleScene).uiTheme, extraStyleOptions);
 
-  const ret = scene.add.text(x, y, content, styleOptions);
+  const ret = new AutoText(scene, x, y, content, styleOptions, limits);
+  scene.add.existing(ret);
   ret.setScale(0.1666666667);
   ret.setShadow(shadowXpos, shadowYpos, shadowColor);
   if (!(styleOptions as Phaser.Types.GameObjects.Text.TextStyle).lineSpacing) {
     ret.setLineSpacing(5);
+
   }
 
   return ret;
@@ -73,10 +173,10 @@ export function setTextStyle(obj: Phaser.GameObjects.Text, scene: Phaser.Scene, 
   }
 }
 
-export function addBBCodeTextObject(scene: Phaser.Scene, x: number, y: number, content: string, style: TextStyle, extraStyleOptions?: Phaser.Types.GameObjects.Text.TextStyle): BBCodeText {
+export function addBBCodeTextObject(scene: Phaser.Scene, x: number, y: number, content: string, style: TextStyle, extraStyleOptions?: Phaser.Types.GameObjects.Text.TextStyle, limits?: TextLimits): AutoBBCodeText {
   const [ styleOptions, shadowColor, shadowXpos, shadowYpos ] = getTextStyleOptions(style, (scene as BattleScene).uiTheme, extraStyleOptions);
 
-  const ret = new BBCodeText(scene, x, y, content, styleOptions as BBCodeText.TextStyle);
+  const ret = new AutoBBCodeText(scene, x, y, content, styleOptions as BBCodeText.TextStyle, limits);
   scene.add.existing(ret);
   ret.setScale(0.1666666667);
   ret.setShadow(shadowXpos, shadowYpos, shadowColor);

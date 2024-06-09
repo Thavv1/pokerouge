@@ -137,7 +137,7 @@ export default class PokemonInfoContainer extends Phaser.GameObjects.Container {
     // The font size should be set by language
     const infoContainerTextSize = textSettings?.infoContainerTextSize || "64px";
 
-    this.pokemonGenderLabelText = addTextObject(this.scene, infoContainerLabelXPos, 18, i18next.t("pokemonInfoContainer:gender"), TextStyle.WINDOW, { fontSize: infoContainerTextSize });
+    this.pokemonGenderLabelText = addTextObject(this.scene, infoContainerLabelXPos, 18, i18next.t("pokemonInfoContainer:gender"), TextStyle.WINDOW, { fontSize: infoContainerTextSize }, { width: 29 });
     this.pokemonGenderLabelText.setOrigin(1, 0);
     this.pokemonGenderLabelText.setVisible(false);
     this.pokemonGenderLabelText.setName("text-pkmn-gender-label");
@@ -149,7 +149,7 @@ export default class PokemonInfoContainer extends Phaser.GameObjects.Container {
     this.pokemonGenderText.setName("text-pkmn-gender");
     this.add(this.pokemonGenderText);
 
-    this.pokemonAbilityLabelText = addTextObject(this.scene, infoContainerLabelXPos, 28, i18next.t("pokemonInfoContainer:ability"), TextStyle.WINDOW, { fontSize: infoContainerTextSize });
+    this.pokemonAbilityLabelText = addTextObject(this.scene, infoContainerLabelXPos, 28, i18next.t("pokemonInfoContainer:ability"), TextStyle.WINDOW, { fontSize: infoContainerTextSize }, { width: 29 });
     this.pokemonAbilityLabelText.setOrigin(1, 0);
     this.pokemonAbilityLabelText.setName("text-pkmn-ability-label");
     this.add(this.pokemonAbilityLabelText);
@@ -159,7 +159,7 @@ export default class PokemonInfoContainer extends Phaser.GameObjects.Container {
     this.pokemonAbilityText.setName("text-pkmn-ability");
     this.add(this.pokemonAbilityText);
 
-    this.pokemonNatureLabelText = addTextObject(this.scene, infoContainerLabelXPos, 38, i18next.t("pokemonInfoContainer:nature"), TextStyle.WINDOW, { fontSize: infoContainerTextSize });
+    this.pokemonNatureLabelText = addTextObject(this.scene, infoContainerLabelXPos, 38, i18next.t("pokemonInfoContainer:nature"), TextStyle.WINDOW, { fontSize: infoContainerTextSize }, { width: 29 });
     this.pokemonNatureLabelText.setOrigin(1, 0);
     this.pokemonNatureLabelText.setName("text-pkmn-nature-label");
     this.add(this.pokemonNatureLabelText);

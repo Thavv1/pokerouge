@@ -3,7 +3,6 @@ import { pokemonPrevolutions } from "#app/data/pokemon-evolutions";
 import { Variant, getVariantTint } from "#app/data/variant";
 import { argbFromRgba } from "@material/material-color-utilities";
 import i18next from "i18next";
-import BBCodeText from "phaser3-rex-plugins/plugins/bbcodetext";
 import BattleScene, { starterColors } from "../battle-scene";
 import { allAbilities } from "../data/ability";
 import { speciesEggMoves } from "../data/egg-moves";
@@ -28,7 +27,7 @@ import { OptionSelectItem } from "./abstact-option-select-ui-handler";
 import MessageUiHandler from "./message-ui-handler";
 import PokemonIconAnimHandler, { PokemonIconAnimMode } from "./pokemon-icon-anim-handler";
 import { StatsContainer } from "./stats-container";
-import { TextStyle, addBBCodeTextObject, addTextObject } from "./text";
+import { AutoBBCodeText, TextStyle, addBBCodeTextObject, addTextObject } from "./text";
 import { Mode } from "./ui";
 import { addWindow } from "./ui-theme";
 import {SettingKeyboard} from "#app/system/settings/settings-keyboard";
@@ -64,6 +63,7 @@ const languageSettings: { [key: string]: LanguageSetting } = {
   "de":{
     starterInfoTextSize: "56px",
     instructionTextSize: "35px",
+    starterInfoXPos: 37
   },
   "es":{
     starterInfoTextSize: "56px",
@@ -78,9 +78,9 @@ const languageSettings: { [key: string]: LanguageSetting } = {
     instructionTextSize: "38px",
   },
   "pt_BR":{
-    starterInfoTextSize: "47px",
-    instructionTextSize: "38px",
-    starterInfoXPos: 33,
+    starterInfoTextSize: "56px",
+    instructionTextSize: "35px",
+    starterInfoXPos: 37,
   },
   "zh":{
     starterInfoTextSize: "40px",
@@ -174,7 +174,7 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
   private pokemonPassiveLabelText: Phaser.GameObjects.Text;
   private pokemonPassiveText: Phaser.GameObjects.Text;
   private pokemonNatureLabelText: Phaser.GameObjects.Text;
-  private pokemonNatureText: BBCodeText;
+  private pokemonNatureText: AutoBBCodeText;
   private pokemonMovesContainer: Phaser.GameObjects.Container;
   private pokemonMoveContainers: Phaser.GameObjects.Container[];
   private pokemonMoveBgs: Phaser.GameObjects.NineSlice[];
@@ -356,7 +356,7 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
     this.pokemonNatureLabelText.setVisible(false);
     this.starterSelectContainer.add(this.pokemonNatureLabelText);
 
-    this.pokemonNatureText = addBBCodeTextObject(this.scene, starterInfoXPos, 145 + starterInfoYOffset, "", TextStyle.SUMMARY_ALT, { fontSize: starterInfoTextSize });
+    this.pokemonNatureText = addBBCodeTextObject(this.scene, starterInfoXPos, 145 + starterInfoYOffset, "", TextStyle.SUMMARY_ALT, { fontSize: starterInfoTextSize }, { right: 102 });
     this.pokemonNatureText.setOrigin(0, 0);
     this.starterSelectContainer.add(this.pokemonNatureText);
 
