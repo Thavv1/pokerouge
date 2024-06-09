@@ -301,7 +301,7 @@ export class GameData {
       localStorage.setItem(`data_${loggedInUser.username}`, encrypt(systemData, bypassLogin));
 
       if (!bypassLogin) {
-        Utils.apiPost(`savedata/update?datatype=${GameDataType.SYSTEM}&clientSessionId=${clientSessionId}`, systemData, undefined, true)
+        Utils.apiPut(`savedata/system?clientSessionId=${clientSessionId}`, systemData, undefined)
           .then(response => response.text())
           .then(error => {
             this.scene.ui.savingIcon.hide();
@@ -951,7 +951,7 @@ export class GameData {
         if (success !== null && !success) {
           return resolve(false);
         }
-        Utils.apiFetch(`savedata/delete?datatype=${GameDataType.SESSION}&slot=${slotId}&clientSessionId=${clientSessionId}`, true).then(response => {
+        Utils.apiDelete(`savedata/session?slot=${slotId}&clientSessionId=${clientSessionId}`).then(response => {
           if (response.ok) {
             loggedInUser.lastSessionSlot = -1;
             localStorage.removeItem(`sessionData${this.scene.sessionSlotId ? this.scene.sessionSlotId : ""}_${loggedInUser.username}`);
@@ -1124,7 +1124,7 @@ export class GameData {
         console.debug("Session data saved");
 
         if (!bypassLogin && sync) {
-          Utils.apiPost("savedata/updateall", JSON.stringify(request, (k: any, v: any) => typeof v === "bigint" ? v <= maxIntAttrValue ? Number(v) : v.toString() : v), undefined, true)
+          Utils.apiPut("savedata/updateall", JSON.stringify(request, (k: any, v: any) => typeof v === "bigint" ? v <= maxIntAttrValue ? Number(v) : v.toString() : v), undefined)
             .then(response => response.text())
             .then(error => {
               if (sync) {
@@ -1266,7 +1266,7 @@ export class GameData {
                     if (!success) {
                       return displayError(`Could not contact the server. Your ${dataName} data could not be imported.`);
                     }
-                    Utils.apiPost(`savedata/update?datatype=${dataType}${dataType === GameDataType.SESSION ? `&slot=${slotId}` : ""}&trainerId=${this.trainerId}&secretId=${this.secretId}&clientSessionId=${clientSessionId}`, dataStr, undefined, true)
+                    Utils.apiPut(`savedata/${dataType === GameDataType.SESSION ? `session?slot=${slotId}&` : "system?"}trainerId=${this.trainerId}&secretId=${this.secretId}&clientSessionId=${clientSessionId}`, dataStr, undefined)
                       .then(response => response.text())
                       .then(error => {
                         if (error) {

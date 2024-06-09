@@ -361,6 +361,34 @@ export function apiPost(path: string, data?: any, contentType: string = "applica
   }) : new Promise(() => {});
 }
 
+export function apiPut(path: string, data?: any, contentType: string = "application/json"): Promise<Response> {
+  return (isLocal && isLocalServerConnected) || !isLocal ? new Promise((resolve, reject) => {
+    const headers = {
+      "Content-Type": contentType,
+    };
+    const sId = getCookie(sessionIdKey);
+    if (sId) {
+      headers["Authorization"] = sId;
+    }
+    fetch(`${apiUrl}/${path}`, { method: "PUT", headers: headers, body: data })
+      .then(response => resolve(response))
+      .catch(err => reject(err));
+  }) : new Promise(() => {});
+}
+
+export function apiDelete(path: string): Promise<Response> {
+  return (isLocal && isLocalServerConnected) || !isLocal ? new Promise((resolve, reject) => {
+    const headers = {};
+    const sId = getCookie(sessionIdKey);
+    if (sId) {
+      headers["Authorization"] = sId;
+    }
+    fetch(`${apiUrl}/${path}`, { method: "DELETE", headers: headers})
+      .then(response => resolve(response))
+      .catch(err => reject(err));
+  }) : new Promise(() => {});
+}
+
 export class BooleanHolder {
   public value: boolean;
 
