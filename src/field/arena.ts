@@ -621,6 +621,11 @@ export class Arena {
     }
   }
 
+  resetArenaEffects(): void {
+    this.trySetTerrain(TerrainType.NONE, false, true);
+    this.removeAllTags();
+  }
+
   preloadBgm(): void {
     this.scene.loadBgm(this.bgm);
   }
