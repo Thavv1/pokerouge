@@ -1313,7 +1313,7 @@ export class PostAttackGulpMissileAbAttr extends PostAttackAbAttr {
         pokemon.addTag(BattlerTagType.GULP_MISSILE_ARROKUDA);
         pokemon.scene.triggerPokemonFormChange(pokemon, SpeciesFormChangeManualTrigger);
         return true;
-      } else if (pokemon.hp < pokemon.getMaxHp() * 0.5 && pokemon.formIndex === 0) {
+      } else if (pokemon.hp <= pokemon.getMaxHp() * 0.5 && pokemon.formIndex === 0) {
         pokemon.addTag(BattlerTagType.GULP_MISSILE_PIKACHU);
         pokemon.scene.triggerPokemonFormChange(pokemon, SpeciesFormChangeManualTrigger);
         return true;
