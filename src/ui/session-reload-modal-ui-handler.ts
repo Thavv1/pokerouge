@@ -1,6 +1,7 @@
 import BattleScene from "../battle-scene";
 import { ModalConfig, ModalUiHandler } from "./modal-ui-handler";
-import { addTextObject, TextStyle } from "./text";
+import { addTextObject } from "./text";
+import { TextStyle } from "#enums/text.js";
 import { Mode } from "./ui";
 
 export default class SessionReloadModalUiHandler extends ModalUiHandler {

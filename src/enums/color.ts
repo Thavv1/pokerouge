@@ -1,0 +1,42 @@
+export enum Color {
+    WHITE = "#ffffff",
+    OFF_WHITE = "#f8f8f8",
+    LIGHT_GREY = "#a0a0a0",
+    GREY = "#484848",
+    DARK_GREY = "#404040",
+    PINK = "#f89890",
+    RED = "#e13d3d",
+    RED2 = "#e70808",
+    REDORANGE = "#d64b00",
+    ORANGE = "#f8b050",
+    LIGHT_YELLOW = "#e8e8a8",
+    YELLOW = "#ccbe00",
+    DARK_YELLOW = "#a68e17",
+    GREEN = "#78c850",
+    BLUE = "#40c8f8",
+    COMMON = "#ffffff",
+    GREAT = "#3890f8",
+    ULTRA = "#f8d038",
+    ROGUE = "#d52929",
+    MASTER = "#e020c0",
+    LUXURY = "#e64a18"
+}
+
+
+export enum ShadowColor {
+    GREY = "#636363",
+    PURPLE = "#6b5a73",
+    LIGHT_GREY = "#d0d0c8",
+    BROWN = "#69402a",
+    PINK = "#fca2a2",
+    BRIGHT_RED = "#f83018",
+    RED = "#984038",
+    MAROON = "#632929",
+    GREEN = "#306850",
+    BLUE = "#006090",
+    LIGHT_YELLOW = "#ded6b5",
+    YELLOW = "#ebd773",
+    DARK_YELLOW = "#a0a060",
+    ORANGE = "#c07800",
+    LIGHT_ORANGE = "#ffbd73",
+}

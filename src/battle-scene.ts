@@ -13,7 +13,7 @@ import { Biome } from "./data/enums/biome";
 import { Arena, ArenaBase } from "./field/arena";
 import { GameData } from "./system/game-data";
 import { PlayerGender } from "./data/enums/player-gender";
-import { TextStyle, addTextObject, getTextColor } from "./ui/text";
+import { addTextObject, getTextColor } from "./ui/text";
 import { Moves } from "./data/enums/moves";
 import { allMoves } from "./data/move";
 import { ModifierPoolType, getDefaultModifierTypeForTier, getEnemyModifierTypesForWave, getLuckString, getLuckTextTint, getModifierPoolForType, getPartyLuckValue } from "./modifier/modifier-type";
@@ -61,8 +61,9 @@ import { MoneyFormat } from "./enums/money-format";
 import { NewArenaEvent } from "./events/battle-scene";
 import { Abilities } from "./data/enums/abilities";
 import ArenaFlyout from "./ui/arena-flyout";
-import { EaseType } from "./ui/enums/ease-type";
+import { EaseType } from "./enums/ease-type";
 import { ExpNotification } from "./enums/exp-notification";
+import { TextStyle } from "#enums/text";
 
 export const bypassLogin = import.meta.env.VITE_BYPASS_LOGIN === "1";
 

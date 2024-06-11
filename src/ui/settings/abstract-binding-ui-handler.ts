@@ -2,7 +2,8 @@ import UiHandler from "../ui-handler";
 import BattleScene from "../../battle-scene";
 import {Mode} from "../ui";
 import {addWindow} from "../ui-theme";
-import {addTextObject, TextStyle} from "../text";
+import {addTextObject } from "../text";
+import { TextStyle } from "#enums/text.js";
 import {Button} from "../../enums/buttons";
 import {NavigationManager} from "#app/ui/settings/navigationMenu";
 

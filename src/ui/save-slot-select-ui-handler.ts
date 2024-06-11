@@ -7,7 +7,8 @@ import { SessionSaveData } from "../system/game-data";
 import PokemonData from "../system/pokemon-data";
 import * as Utils from "../utils";
 import MessageUiHandler from "./message-ui-handler";
-import { TextStyle, addTextObject } from "./text";
+import { addTextObject } from "./text";
+import { TextStyle } from "#enums/text.js";
 import { Mode } from "./ui";
 import { addWindow } from "./ui-theme";
 

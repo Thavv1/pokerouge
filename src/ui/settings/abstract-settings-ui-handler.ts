@@ -1,6 +1,7 @@
 import BattleScene from "../../battle-scene";
 import { hasTouchscreen, isMobile } from "../../touch-controls";
-import { TextStyle, addTextObject } from "../text";
+import { addTextObject } from "../text";
+import { TextStyle } from "#enums/text.js";
 import { Mode } from "../ui";
 import UiHandler from "../ui-handler";
 import { addWindow } from "../ui-theme";

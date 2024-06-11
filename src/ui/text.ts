@@ -6,35 +6,48 @@ import { UiTheme } from "../enums/ui-theme";
 import { ModifierTier } from "../modifier/modifier-tier";
 import Phaser from "phaser";
 import i18next from "i18next";
+import { TextStyle } from "#enums/text.js";
+import { Color, ShadowColor } from "#app/enums/color.js";
+import { FontConfig } from "#constants/text.js";
 
-export enum TextStyle {
-  MESSAGE,
-  WINDOW,
-  WINDOW_ALT,
-  BATTLE_INFO,
-  PARTY,
-  PARTY_RED,
-  SUMMARY,
-  SUMMARY_ALT,
-  SUMMARY_RED,
-  SUMMARY_BLUE,
-  SUMMARY_PINK,
-  SUMMARY_GOLD,
-  SUMMARY_GRAY,
-  SUMMARY_GREEN,
-  MONEY,
-  STATS_LABEL,
-  STATS_VALUE,
-  SETTINGS_LABEL,
-  SETTINGS_SELECTED,
-  SETTINGS_LOCKED,
-  TOOLTIP_TITLE,
-  TOOLTIP_CONTENT,
-  MOVE_INFO_CONTENT,
-  MOVE_PP_FULL,
-  MOVE_PP_HALF_FULL,
-  MOVE_PP_NEAR_EMPTY,
-  MOVE_PP_EMPTY
+const defaultStyle: Phaser.Types.GameObjects.Text.TextStyle = {
+  fontFamily: "emerald, unifont",
+  fontSize: 96,
+  padding: {
+    bottom: 6
+  }
+};
+
+const scale: number =  0.1666666667;
+
+interface Style {
+  color: Color,
+  fontConfig: {fontSize: number, offsetX: number, offsetY: number},
+  shadowColor: ShadowColor,
+}
+
+export function addTextObject2(scene: BattleScene, x: number, y: number, content: string, style: Style, extraStyleOptions?: Phaser.Types.GameObjects.Text.TextStyle): Phaser.GameObjects.Text {
+  const ret = scene.add.text(x, y, content);
+  ret.setScale(scale);
+  ret.setColor(style.color);
+
+  if (extraStyleOptions) {
+    if (extraStyleOptions.fontSize) {
+      const sizeRatio = parseInt(extraStyleOptions.fontSize.toString().slice(0, -2)) / parseInt(style.fontConfig.fontSize.toString().slice(0, -2));
+      style.fontConfig.offsetX *= sizeRatio;
+    }
+    if (!extraStyleOptions.lineSpacing) {
+      ret.setLineSpacing(5);
+    }
+  }
+  const textStyle = structuredClone(defaultStyle);
+  Object.assign(textStyle, style);
+  ret.setStyle(textStyle);
+  ret.setFontSize(extraStyleOptions?.fontSize ?? style.fontConfig.fontSize);
+  ret.setShadow(style.fontConfig.offsetX, style.fontConfig.offsetY, style.shadowColor);
+
+
+  return ret;
 }
 
 export function addTextObject(scene: Phaser.Scene, x: number, y: number, content: string, style: TextStyle, extraStyleOptions?: Phaser.Types.GameObjects.Text.TextStyle): Phaser.GameObjects.Text {
@@ -87,19 +100,19 @@ function getTextStyleOptions(style: TextStyle, uiTheme: UiTheme, extraStyleOptio
   const {resolvedLanguage} = i18next;
   let shadowXpos = 4;
   let shadowYpos = 5;
-  const scale = 0.1666666667;
-  const defaultFontSize = 96;
 
   let styleOptions: Phaser.Types.GameObjects.Text.TextStyle = {
-    fontFamily: "emerald, unifont",
-    fontSize: 96,
+    ...defaultStyle,
     color: getTextColor(style, false, uiTheme),
-    padding: {
-      bottom: 6
-    }
   };
 
   switch (style) {
+  case TextStyle.STATS_LABEL:
+  case TextStyle.MESSAGE:
+  case TextStyle.SETTINGS_LABEL:
+  case TextStyle.SETTINGS_LOCKED:
+  case TextStyle.SETTINGS_SELECTED:
+    break;
   case TextStyle.SUMMARY:
   case TextStyle.SUMMARY_ALT:
   case TextStyle.SUMMARY_BLUE:
@@ -114,33 +127,27 @@ function getTextStyleOptions(style: TextStyle, uiTheme: UiTheme, extraStyleOptio
     shadowXpos = 3;
     shadowYpos = 3;
     break;
-  case TextStyle.STATS_LABEL:
-  case TextStyle.MESSAGE:
-  case TextStyle.SETTINGS_LABEL:
-  case TextStyle.SETTINGS_LOCKED:
-  case TextStyle.SETTINGS_SELECTED:
-    break;
   case TextStyle.BATTLE_INFO:
   case TextStyle.MONEY:
   case TextStyle.TOOLTIP_TITLE:
-    styleOptions.fontSize = defaultFontSize - 24;
-    shadowXpos = 3.5;
-    shadowYpos = 3.5;
+    styleOptions.fontSize = FontConfig.L.fontSize;
+    shadowXpos = FontConfig.L.offsetX;
+    shadowYpos = FontConfig.L.offsetY;
     break;
   case TextStyle.PARTY:
   case TextStyle.PARTY_RED:
-    styleOptions.fontSize = defaultFontSize - 30;
-    styleOptions.fontFamily = "pkmnems";
+    styleOptions.fontSize = FontConfig.M.fontSize;
+    styleOptions.fontFamily = "pkmnems, unifont";
     break;
   case TextStyle.TOOLTIP_CONTENT:
-    styleOptions.fontSize = defaultFontSize - 32;
-    shadowXpos = 3;
-    shadowYpos = 3;
+    styleOptions.fontSize = FontConfig.S.fontSize;
+    shadowXpos = FontConfig.S.offsetX;
+    shadowYpos = FontConfig.S.offsetX;
     break;
   case TextStyle.MOVE_INFO_CONTENT:
-    styleOptions.fontSize = defaultFontSize - 40;
-    shadowXpos = 3;
-    shadowYpos = 3;
+    styleOptions.fontSize = FontConfig.XS.fontSize;
+    shadowXpos = FontConfig.XS.offsetX;
+    shadowYpos = FontConfig.XS.offsetX;
     break;
   }
 

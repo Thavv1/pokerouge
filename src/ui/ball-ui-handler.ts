@@ -1,7 +1,8 @@
 import { CommandPhase } from "../phases";
 import BattleScene from "../battle-scene";
 import { getPokeballName } from "../data/pokeball";
-import { addTextObject, TextStyle } from "./text";
+import { addTextObject } from "./text";
+import { TextStyle } from "#enums/text.js";
 import { Command } from "./command-ui-handler";
 import { Mode } from "./ui";
 import UiHandler from "./ui-handler";

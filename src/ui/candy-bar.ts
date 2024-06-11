@@ -1,5 +1,6 @@
 import BattleScene, { starterColors } from "../battle-scene";
-import { TextStyle, addTextObject } from "./text";
+import { addTextObject } from "./text";
+import { TextStyle } from "#enums/text.js";
 import { argbFromRgba } from "@material/material-color-utilities";
 import * as Utils from "../utils";
 import { Species } from "#app/data/enums/species";

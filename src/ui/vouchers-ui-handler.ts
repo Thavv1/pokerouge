@@ -3,7 +3,8 @@ import { Button } from "../enums/buttons";
 import i18next from "../plugins/i18n";
 import { Voucher, getVoucherTypeIcon, getVoucherTypeName, vouchers } from "../system/voucher";
 import MessageUiHandler from "./message-ui-handler";
-import { TextStyle, addTextObject } from "./text";
+import { addTextObject } from "./text";
+import { TextStyle } from "#enums/text.js";
 import { Mode } from "./ui";
 import { addWindow } from "./ui-theme";
 

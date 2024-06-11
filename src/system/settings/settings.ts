@@ -7,7 +7,7 @@ import { PlayerGender } from "#app/data/enums/player-gender";
 import { CandyUpgradeNotificationChangedEvent } from "../../events/battle-scene";
 import { MoneyFormat } from "../../enums/money-format";
 import SettingsUiHandler from "#app/ui/settings/settings-ui-handler";
-import { EaseType } from "#app/ui/enums/ease-type.js";
+import { EaseType } from "#enums/ease-type.js";
 
 const MUTE = "Mute";
 const VOLUME_OPTIONS = new Array(11).fill(null).map((_, i) => i ? (i * 10).toString() : MUTE);

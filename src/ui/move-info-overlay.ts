@@ -1,5 +1,6 @@
 import BattleScene, {InfoToggle} from "../battle-scene";
-import { TextStyle, addTextObject } from "./text";
+import { addTextObject } from "./text";
+import { TextStyle } from "#enums/text.js";
 import { addWindow } from "./ui-theme";
 import * as Utils from "../utils";
 import Move, { MoveCategory } from "../data/move";

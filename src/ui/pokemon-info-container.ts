@@ -10,7 +10,8 @@ import { DexAttr } from "../system/game-data";
 import * as Utils from "../utils";
 import ConfirmUiHandler from "./confirm-ui-handler";
 import { StatsContainer } from "./stats-container";
-import { TextStyle, addBBCodeTextObject, addTextObject, getTextColor } from "./text";
+import { addBBCodeTextObject, addTextObject, getTextColor } from "./text";
+import { TextStyle } from "#enums/text.js";
 import { addWindow } from "./ui-theme";
 
 interface LanguageSetting {

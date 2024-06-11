@@ -1,6 +1,7 @@
 import BattleScene from "#app/battle-scene.js";
 import { addWindow } from "./ui-theme";
-import { addTextObject, TextStyle } from "./text";
+import { addTextObject } from "./text";
+import { TextStyle } from "#enums/text.js";
 import { EggCountChangedEvent, EggEventType } from "#app/events/egg.js";
 import EggHatchSceneHandler from "./egg-hatch-scene-handler";
 

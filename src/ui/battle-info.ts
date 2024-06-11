@@ -1,7 +1,8 @@
 import { EnemyPokemon, default as Pokemon } from "../field/pokemon";
 import { getLevelTotalExp, getLevelRelExp } from "../data/exp";
 import * as Utils from "../utils";
-import { addTextObject, TextStyle } from "./text";
+import { addTextObject } from "./text";
+import { TextStyle } from "#enums/text.js";
 import { getGenderSymbol, getGenderColor, Gender } from "../data/gender";
 import { StatusEffect } from "../data/status-effect";
 import BattleScene from "../battle-scene";

@@ -6,7 +6,7 @@ import { PlayerPokemon } from "../field/pokemon";
 import { getStarterValueFriendshipCap, speciesStarters } from "../data/pokemon-species";
 import { argbFromRgba } from "@material/material-color-utilities";
 import { Type, getTypeRgb } from "../data/type";
-import { TextStyle, addBBCodeTextObject, addTextObject, getBBCodeFrag } from "./text";
+import { addBBCodeTextObject, addTextObject, getBBCodeFrag } from "./text";
 import Move, { MoveCategory } from "../data/move";
 import { getPokeballAtlasKey } from "../data/pokeball";
 import { getGenderColor, getGenderSymbol } from "../data/gender";
@@ -23,6 +23,7 @@ import {Button} from "../enums/buttons";
 import { Ability } from "../data/ability.js";
 import i18next from "i18next";
 import {modifierSortFunc} from "../modifier/modifier";
+import { TextStyle } from "#enums/text.js";
 
 
 enum Page {
@@ -796,7 +797,13 @@ export default class SummaryUiHandler extends UiHandler {
       this.passiveContainer?.nameText.setVisible(false);
       this.passiveContainer?.descriptionText.setVisible(false);
 
-      const memoString = `${getBBCodeFrag(Utils.toReadableString(Nature[this.pokemon.getNature()]), TextStyle.SUMMARY_RED)}${getBBCodeFrag(" nature,", TextStyle.WINDOW_ALT)}\n${getBBCodeFrag(`${this.pokemon.metBiome === -1 ? "apparently " : ""}met at Lv`, TextStyle.WINDOW_ALT)}${getBBCodeFrag(this.pokemon.metLevel.toString(), TextStyle.SUMMARY_RED)}${getBBCodeFrag(",", TextStyle.WINDOW_ALT)}\n${getBBCodeFrag(getBiomeName(this.pokemon.metBiome), TextStyle.SUMMARY_RED)}${getBBCodeFrag(".", TextStyle.WINDOW_ALT)}`;
+      let memoString = "";
+      memoString += `${getBBCodeFrag(Utils.toReadableString(Nature[this.pokemon.getNature()]), TextStyle.SUMMARY_RED)}`;
+      memoString += `${getBBCodeFrag(" nature,", TextStyle.WINDOW_ALT)}\n`;
+      memoString += `${getBBCodeFrag(`${this.pokemon.metBiome === -1 ? "apparently " : ""}met at Lv`, TextStyle.WINDOW_ALT)}`;
+      memoString += `${getBBCodeFrag(this.pokemon.metLevel.toString(), TextStyle.SUMMARY_RED)}`;
+      memoString += `${getBBCodeFrag(",", TextStyle.WINDOW_ALT)}\n${getBBCodeFrag(getBiomeName(this.pokemon.metBiome), TextStyle.SUMMARY_RED)}`;
+      memoString += `${getBBCodeFrag(".", TextStyle.WINDOW_ALT)}`;
 
       const memoText = addBBCodeTextObject(this.scene, 7, 113, memoString, TextStyle.WINDOW_ALT);
       memoText.setOrigin(0, 0);

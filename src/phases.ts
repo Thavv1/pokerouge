@@ -60,7 +60,8 @@ import PokemonSpecies, { getPokemonSpecies, speciesStarters } from "./data/pokem
 import i18next from "./plugins/i18n";
 import { Abilities } from "./data/enums/abilities";
 import * as Overrides from "./overrides";
-import { TextStyle, addTextObject } from "./ui/text";
+import { addTextObject } from "./ui/text";
+import { TextStyle } from "#enums/text.js";
 import { Type } from "./data/type";
 import { BerryUsedEvent, EncounterPhaseEvent, MoveUsedEvent, TurnEndEvent, TurnInitEvent } from "./events/battle-scene";
 import { ExpNotification } from "./enums/exp-notification";

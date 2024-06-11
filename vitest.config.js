@@ -1,3 +1,4 @@
+import { resolve } from 'path';
 import { defineConfig } from 'vite';
 // import fs from 'vite-plugin-fs';
 
@@ -38,5 +39,8 @@ export default defineConfig(({ mode }) => {
 			pure: mode === 'production' ? [ 'console.log' ] : [],
 			keepNames: true,
 		},
+		resolve: {
+			alias: [{ find: "@", replacement: resolve(__dirname, "./src")}]
+		}
 	}
 })

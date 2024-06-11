@@ -1,5 +1,6 @@
 import BattleScene from "../battle-scene";
-import { addBBCodeTextObject, addTextObject, getTextColor, TextStyle } from "./text";
+import { addBBCodeTextObject, addTextObject, getTextColor} from "./text";
+import { TextStyle } from "#enums/text.js";
 import { Mode } from "./ui";
 import * as Utils from "../utils";
 import MessageUiHandler from "./message-ui-handler";

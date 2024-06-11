@@ -1,4 +1,5 @@
-import { addTextObject, TextStyle } from "./text";
+import { addTextObject } from "./text";
+import { TextStyle } from "#enums/text.js";
 import BattleScene from "#app/battle-scene.js";
 import { ArenaTagSide } from "#app/data/arena-tag.js";
 import { WeatherType } from "#app/data/weather.js";

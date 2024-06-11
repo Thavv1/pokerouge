@@ -12,7 +12,10 @@
 		"baseUrl": "./src",
 		"paths": {
 			"#app/*": ["*.ts"],
-			"#app": ["."]
+			"#app": ["."],
+			"#constants/*": ["./constants/*"],
+			"#enums/*": ["./enums/*"],
+			"#interfaces/*": ["./interfaces/*"]
 		},
 		"outDir": "./build",
 		"noEmit": true

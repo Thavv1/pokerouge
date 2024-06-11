@@ -1,5 +1,6 @@
 import BattleScene from "../battle-scene";
-import { TextStyle, getTextColor } from "./text";
+import { getTextColor } from "./text";
+import { TextStyle } from "#enums/text.js";
 import { Mode } from "./ui";
 import {Button} from "../enums/buttons";
 

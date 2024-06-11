@@ -54,6 +54,9 @@
 	},
 	"imports": {
 		"#app": "./src/main.js",
-		"#app/*": "./src/*"
+		"#app/*": "./src/*",
+		"#constants/*": "./src/constants/*",
+		"#enums/*": "./src/enums/*",
+		"#interfaces/*": "./src/interfaces/*"
 	}
 }

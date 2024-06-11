@@ -1,5 +1,6 @@
 import { default as Pokemon } from "../field/pokemon";
-import { addTextObject, TextStyle } from "./text";
+import { addTextObject } from "./text";
+import { TextStyle } from "#enums/text.js";
 import * as Utils from "../utils";
 import BattleScene from "#app/battle-scene.js";
 import { UiTheme } from "#app/enums/ui-theme.js";

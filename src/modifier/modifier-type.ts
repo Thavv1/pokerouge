@@ -22,7 +22,7 @@ import { FormChangeItem, SpeciesFormChangeItemTrigger, pokemonFormChanges } from
 import { ModifierTier } from "./modifier-tier";
 import { Nature, getNatureName, getNatureStatMultiplier } from "#app/data/nature";
 import i18next from "#app/plugins/i18n";
-import { getModifierTierTextTint } from "#app/ui/text";
+import { getModifierTierTextTint } from "#app/ui/text.js";
 import { BattlerTagType } from "#app/data/enums/battler-tag-type.js";
 import * as Overrides from "../overrides";
 import { MoneyMultiplierModifier } from "./modifier";

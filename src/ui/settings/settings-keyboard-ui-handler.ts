@@ -11,7 +11,8 @@ import {
 import {reverseValueToKeySetting, truncateString} from "#app/utils";
 import AbstractControlSettingsUiHandler from "#app/ui/settings/abstract-control-settings-ui-handler.js";
 import {InterfaceConfig} from "#app/inputs-controller";
-import {addTextObject, TextStyle} from "#app/ui/text";
+import {addTextObject} from "#app/ui/text.js";
+import { TextStyle } from "#enums/text.js";
 import {deleteBind} from "#app/configs/inputs/configHandler";
 import {Device} from "#app/enums/devices";
 import {NavigationManager} from "#app/ui/settings/navigationMenu";

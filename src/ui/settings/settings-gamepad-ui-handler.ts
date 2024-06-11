@@ -1,5 +1,6 @@
 import BattleScene from "../../battle-scene";
-import {addTextObject, TextStyle} from "../text";
+import {addTextObject } from "../text";
+import { TextStyle } from "#enums/text.js";
 import {Mode} from "../ui";
 import {
   setSettingGamepad,
@@ -13,7 +14,7 @@ import pad_dualshock from "#app/configs/inputs/pad_dualshock";
 import pad_unlicensedSNES from "#app/configs/inputs/pad_unlicensedSNES";
 import {InterfaceConfig} from "#app/inputs-controller";
 import AbstractControlSettingsUiHandler from "#app/ui/settings/abstract-control-settings-ui-handler.js";
-import {Device} from "#app/enums/devices";
+import {Device} from "#enums/devices";
 import {truncateString} from "#app/utils";
 
 /**

@@ -3,7 +3,8 @@ import AbstractBindingUiHandler from "./abstract-binding-ui-handler";
 import {Mode} from "../ui";
 import { getKeyWithKeycode} from "#app/configs/inputs/configHandler";
 import {Device} from "#app/enums/devices";
-import {addTextObject, TextStyle} from "#app/ui/text";
+import {addTextObject } from "#app/ui/text.js";
+import { TextStyle } from "#enums/text.js";
 
 
 export default class KeyboardBindingUiHandler extends AbstractBindingUiHandler {

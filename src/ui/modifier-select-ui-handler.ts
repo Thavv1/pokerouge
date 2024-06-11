@@ -1,7 +1,8 @@
 import BattleScene from "../battle-scene";
 import { getPlayerShopModifierTypeOptionsForWave, ModifierTypeOption, TmModifierType } from "../modifier/modifier-type";
 import { getPokeballAtlasKey, PokeballType } from "../data/pokeball";
-import { addTextObject, getModifierTierTextTint, getTextColor, TextStyle } from "./text";
+import { addTextObject, getModifierTierTextTint, getTextColor } from "./text";
+import { TextStyle } from "#enums/text.js";
 import AwaitableUiHandler from "./awaitable-ui-handler";
 import { Mode } from "./ui";
 import { LockModifierTiersModifier, PokemonHeldItemModifier } from "../modifier/modifier";
