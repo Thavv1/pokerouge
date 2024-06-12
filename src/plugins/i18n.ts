@@ -219,6 +219,13 @@ declare module "i18next" {
       tutorial: SimpleTranslationEntries;
       voucher: SimpleTranslationEntries;
       weather: SimpleTranslationEntries;
+      statusEffectHealText: SimpleTranslationEntries;
+        statusEffectDescriptor: SimpleTranslationEntries;
+        statusEffectObtainText: SimpleTranslationEntries;
+        statusEffectActivationText: SimpleTranslationEntries;
+        statusEffectOverlapText: SimpleTranslationEntries;
+        statusEffectSourceClause: SimpleTranslationEntries;
+        arenaTag: SimpleTranslationEntries;
     };
   }
 }

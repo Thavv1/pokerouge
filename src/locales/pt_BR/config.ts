@@ -39,6 +39,13 @@ import { titles, trainerClasses, trainerNames } from "./trainers";
 import { tutorial } from "./tutorial";
 import { voucher } from "./voucher";
 import { weather } from "./weather";
+import {
+  statusEffectActivationText,
+  statusEffectDescriptor,
+  statusEffectHealText,
+  statusEffectObtainText, statusEffectOverlapText, statusEffectSourceClause
+} from "./status-effect";
+import {arenaTag} from "./arena-tag";
 
 export const ptBrConfig = {
   ability: ability,
@@ -83,4 +90,11 @@ export const ptBrConfig = {
   tutorial: tutorial,
   voucher: voucher,
   weather: weather,
+  statusEffectHealText: statusEffectHealText,
+  statusEffectDescriptor: statusEffectDescriptor,
+  statusEffectObtainText: statusEffectObtainText,
+  statusEffectActivationText: statusEffectActivationText,
+  statusEffectOverlapText: statusEffectOverlapText,
+  statusEffectSourceClause: statusEffectSourceClause,
+  arenaTag: arenaTag
 };

@@ -7,3 +7,4 @@ export const fightUiHandler: SimpleTranslationEntries = {
   "abilityFlyInText": " {{pokemonName}}'s {{passive}}{{abilityName}}",
   "passive": "Passive ", // The space at the end is important
 } as const;
+
