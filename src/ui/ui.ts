@@ -45,6 +45,7 @@ import SettingsKeyboardUiHandler from "#app/ui/settings/settings-keyboard-ui-han
 import KeyboardBindingUiHandler from "#app/ui/settings/keyboard-binding-ui-handler";
 import SettingsDisplayUiHandler from "./settings/settings-display-ui-handler";
 import SettingsAudioUiHandler from "./settings/settings-audio-ui-handler";
+import MysteryEncounterUiHandler from "./mystery-encounter-ui-handler";
 
 export enum Mode {
   MESSAGE,
@@ -82,7 +83,8 @@ export enum Mode {
   SESSION_RELOAD,
   UNAVAILABLE,
   OUTDATED,
-  CHALLENGE_SELECT
+  CHALLENGE_SELECT,
+  MYSTERY_ENCOUNTER
 }
 
 const transitionModes = [
@@ -177,7 +179,8 @@ export default class UI extends Phaser.GameObjects.Container {
       new SessionReloadModalUiHandler(scene),
       new UnavailableModalUiHandler(scene),
       new OutdatedModalUiHandler(scene),
-      new GameChallengesUiHandler(scene)
+      new GameChallengesUiHandler(scene),
+      new MysteryEncounterUiHandler(scene),
     ];
   }
 
