@@ -5,7 +5,7 @@ import { hasTouchscreen } from "../../touch-controls";
 import { updateWindowType } from "../../ui/ui-theme";
 import { PlayerGender } from "#enums/player-gender";
 import { CandyUpgradeNotificationChangedEvent } from "../../events/battle-scene";
-import { MoneyFormat } from "../../enums/money-format";
+import { MoneyFormat } from "#enums/money-format";
 import SettingsUiHandler from "#app/ui/settings/settings-ui-handler";
 import { EaseType } from "#enums/ease-type.js";
 

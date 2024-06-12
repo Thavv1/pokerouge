@@ -1,15 +1,15 @@
 import { BattleType } from "../battle";
 import BattleScene from "../battle-scene";
-import { Biome } from "../enums/biome";
+import { Biome } from "#enums/biome";
 import { Gender } from "../data/gender";
 import { Nature } from "../data/nature";
 import { PokeballType } from "../data/pokeball";
 import { getPokemonSpecies } from "../data/pokemon-species";
-import { Species } from "../enums/species";
+import { Species } from "#enums/species";
 import { Status } from "../data/status-effect";
 import Pokemon, { EnemyPokemon, PokemonMove, PokemonSummonData } from "../field/pokemon";
 import { TrainerSlot } from "../data/trainer-config";
-import { Moves } from "../enums/moves";
+import { Moves } from "#enums/moves";
 import { Variant } from "#app/data/variant";
 import { loadBattlerTag } from "../data/battler-tags";
 

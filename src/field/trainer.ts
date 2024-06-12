@@ -11,8 +11,8 @@ import {
   trainerPartyTemplates,
   signatureSpecies
 } from "../data/trainer-config";
-import {PartyMemberStrength} from "../enums/party-member-strength";
-import {TrainerType} from "../enums/trainer-type";
+import {PartyMemberStrength} from "#enums/party-member-strength";
+import {TrainerType} from "#enums/trainer-type";
 import {EnemyPokemon} from "./pokemon";
 import * as Utils from "../utils";
 import {PersistentModifier} from "../modifier/modifier";
