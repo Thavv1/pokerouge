@@ -60,6 +60,7 @@ import PokemonSpecies, { getPokemonSpecies, speciesStarters } from "./data/pokem
 import i18next from "./plugins/i18n";
 import { Abilities } from "./data/enums/abilities";
 import * as Overrides from "./overrides";
+import * as OverridesFunctions from "./overrides-functions";
 import { TextStyle, addTextObject } from "./ui/text";
 import { Type } from "./data/type";
 import { BerryUsedEvent, EncounterPhaseEvent, MoveUsedEvent, TurnEndEvent, TurnInitEvent } from "./events/battle-scene";
@@ -5004,7 +5005,11 @@ export class SelectModifierPhase extends BattlePhase {
     if (this.isPlayer()) {
       this.scene.applyModifiers(ExtraModifierModifier, true, modifierCount);
     }
-    const typeOptions: ModifierTypeOption[] = this.getModifierTypeOptions(modifierCount.value);
+
+    // Override the number of rewards to display, if applicable.
+    const rewardAmount: integer = OverridesFunctions.tryOverridePostBattleRewardAmount(modifierCount.value);
+
+    const typeOptions: ModifierTypeOption[] = this.getModifierTypeOptions(rewardAmount);
 
     const modifierSelectCallback = (rowCursor: integer, cursor: integer) => {
       if (rowCursor < 0 || cursor < 0) {
@@ -5183,7 +5188,7 @@ export class SelectModifierPhase extends BattlePhase {
   }
 
   getModifierTypeOptions(modifierCount: integer): ModifierTypeOption[] {
-    return getPlayerModifierTypeOptions(modifierCount, this.scene.getParty(), this.scene.lockModifierTiers ? this.modifierTiers : undefined);
+    return OverridesFunctions.tryOverridePostBattleRewardOptions(getPlayerModifierTypeOptions(modifierCount, this.scene.getParty(), this.scene.lockModifierTiers ? this.modifierTiers : undefined));
   }
 
   addModifier(modifier: Modifier): Promise<boolean> {
