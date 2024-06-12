@@ -1855,9 +1855,11 @@ export class EatBerryAttr extends MoveEffectAttr {
  *  Attribute used for moves that steal a random berry from the target. The user then eats the stolen berry.
  *  Used for Pluck & Bug Bite.
  */
-export class StealEatBerryAttr extends EatBerryAttr {
+export class StealEatBerryAttr extends MoveEffectAttr {
+  protected chosenBerry: BerryModifier;
   constructor() {
-    super();
+    super(true, MoveEffectTrigger.HIT);
+    this.chosenBerry = undefined;
   }
   /**
  * User steals a random berry from the target and then eats it.
@@ -1880,16 +1882,41 @@ export class StealEatBerryAttr extends EatBerryAttr {
     if (heldBerries.length) { // if the target has berries, pick a random berry and steal it
       this.chosenBerry = heldBerries[user.randSeedInt(heldBerries.length)];
 
-      if (this.chosenBerry.stackCount === 1) { // remove modifier if its the last berry
+      if (!this.chosenBerry) { // if no berry has been provided, pick a random berry from their inventory
+        const heldBerries = this.getTargetHeldBerries(target);
+        if (heldBerries.length <= 0) {
+          return false;
+        }
+        this.chosenBerry = heldBerries[user.randSeedInt(heldBerries.length)];
+      }
+
+      const message = i18next.t("battle:stealEatBerry", {pokemonName: user.name, targetName: target.name, berryName: this.chosenBerry.type.name});
+      user.scene.queueMessage(message);
+
+
+
+      if (this.chosenBerry.stackCount === 1) {
         target.scene.removeModifier(this.chosenBerry, !target.isPlayer());
+      } else {
+        this.chosenBerry.stackCount--;
       }
       target.scene.updateModifiers(target.isPlayer());
 
-      user.scene.queueMessage(getPokemonMessage(user, ` stole and ate\n${target.name}'s ${this.chosenBerry.type.name}!`));
-      return super.apply(user, user, move, args);
+      getBerryEffectFunc(this.chosenBerry.berryType)(user); // user eats the berry
+
+      this.chosenBerry = undefined;
+
+      applyAbAttrs(HealFromBerryUseAbAttr, target, new Utils.BooleanHolder(false));
+
+      return true;
     }
 
     return false;
+  }
+
+  getTargetHeldBerries(target: Pokemon): BerryModifier[] {
+    return target.scene.findModifiers(m => m instanceof BerryModifier
+      && (m as BerryModifier).pokemonId === target.id, target.isPlayer()) as BerryModifier[];
   }
 }
 
