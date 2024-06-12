@@ -13,7 +13,7 @@ import { CommonAnim, CommonBattleAnim, MoveAnim, initMoveAnim, loadMoveAnimAsset
 import { StatusEffect, getStatusEffectActivationText, getStatusEffectCatchRateMultiplier, getStatusEffectHealText, getStatusEffectObtainText, getStatusEffectOverlapText } from "./data/status-effect";
 import { SummaryUiMode } from "./ui/summary-ui-handler";
 import EvolutionSceneHandler from "./ui/evolution-scene-handler";
-import { EvolutionPhase } from "./phases/evolution-phase";
+import { EvolutionPhase } from "./evolution-phase";
 import { Phase } from "./phase";
 import { BattleStat, getBattleStatLevelChangeDescription, getBattleStatName } from "./data/battle-stat";
 import { biomeLinks, getBiomeName } from "./data/biomes";
@@ -48,7 +48,7 @@ import { Species } from "./data/enums/species";
 import { ChallengeAchv, HealAchv, LevelAchv, achvs } from "./system/achv";
 import { TrainerSlot, trainerConfigs } from "./data/trainer-config";
 import { TrainerType } from "./data/enums/trainer-type";
-import { EggHatchPhase } from "./phases/egg-hatch-phase";
+import { EggHatchPhase } from "./egg-hatch-phase";
 import { Egg } from "./data/egg";
 import { vouchers } from "./system/voucher";
 import { loggedInUser, updateUserInfo } from "./account";
@@ -70,7 +70,7 @@ import { Abilities } from "./data/enums/abilities";
 import * as Overrides from "./overrides";
 import { TextStyle, addTextObject } from "./ui/text";
 import { Type } from "./data/type";
-import { BerryUsedEvent, EncounterPhaseEvent, MoveUsedEvent, TurnEndEvent, TurnInitEvent } from "./battle-scene-events";
+import { BerryUsedEvent, EncounterPhaseEvent, MoveUsedEvent, TurnEndEvent, TurnInitEvent } from "./events/battle-scene";
 import { ExpNotification } from "./enums/exp-notification";
 import {SelectModifierPhase} from "#app/phases/select-modifier-phase";
 import {BattlePhase} from "#app/phases/battle-phase";
@@ -630,7 +630,14 @@ export abstract class FieldPhase extends BattlePhase {
     const enemyField = this.scene.getEnemyField().filter(p => p.isActive()) as Pokemon[];
 
     // We shuffle the list before sorting so speed ties produce random results
-    let orderedTargets: Pokemon[] = Utils.randSeedShuffle(playerField.concat(enemyField)).sort((a: Pokemon, b: Pokemon) => {
+    let orderedTargets: Pokemon[] = playerField.concat(enemyField);
+    // We seed it with the current turn to prevent an inconsistency where it
+    // was varying based on how long since you last reloaded
+    this.scene.executeWithSeedOffset(() => {
+      orderedTargets = Utils.randSeedShuffle(orderedTargets);
+    }, this.scene.currentBattle.turn, this.scene.waveSeed);
+
+    orderedTargets.sort((a: Pokemon, b: Pokemon) => {
       const aSpeed = a?.getBattleStat(Stat.SPD) || 0;
       const bSpeed = b?.getBattleStat(Stat.SPD) || 0;
 
@@ -1039,7 +1046,15 @@ export class EncounterPhase extends BattlePhase {
     });
 
     if (this.scene.currentBattle.battleType !== BattleType.TRAINER) {
-      enemyField.map(p => this.scene.pushPhase(new PostSummonPhase(this.scene, p.getBattlerIndex())));
+      enemyField.map(p => this.scene.pushConditionalPhase(new PostSummonPhase(this.scene, p.getBattlerIndex()), () => {
+        // is the player party initialized ?
+        const a = !!this.scene.getParty()?.length;
+        // how many player pokemon are on the field ?
+        const amountOnTheField = this.scene.getParty().filter(p => p.isOnField()).length;
+        // if it's a double, there should be 2, otherwise 1
+        const b = this.scene.currentBattle.double ? amountOnTheField === 2 : amountOnTheField === 1;
+        return a && b;
+      }));
       const ivScannerModifier = this.scene.findModifier(m => m instanceof IvScannerModifier);
       if (ivScannerModifier) {
         enemyField.map(p => this.scene.pushPhase(new ScanIvsPhase(this.scene, p.getBattlerIndex(), Math.min(ivScannerModifier.getStackCount() * 2, 6))));
@@ -1196,6 +1211,9 @@ export class PostSummonPhase extends PokemonPhase {
 
     const pokemon = this.getPokemon();
 
+    if (pokemon.status?.effect === StatusEffect.TOXIC) {
+      pokemon.status.turnCount = 0;
+    }
     this.scene.arena.applyTags(ArenaTrapTag, pokemon);
     applyPostSummonAbAttrs(PostSummonAbAttr, pokemon).then(() => this.end());
   }
@@ -1558,7 +1576,6 @@ export class SummonPhase extends PartyMemberPokemonPhase {
 
     if (!this.loaded || this.scene.currentBattle.battleType === BattleType.TRAINER || this.scene.currentBattle.battleType === BattleType.MYSTERY_ENCOUNTER || (this.scene.currentBattle.waveIndex % 10) === 1) {
       this.scene.triggerPokemonFormChange(pokemon, SpeciesFormChangeActiveTrigger, true);
-
       this.queuePostSummon();
     }
   }
@@ -3721,7 +3738,7 @@ export class FaintPhase extends PokemonPhase {
       this.scene.currentBattle.enemyFaints += 1;
     }
 
-    this.scene.queueMessage(getPokemonMessage(pokemon, " fainted!"), null, true);
+    this.scene.queueMessage(i18next.t("battle:fainted", { pokemonNameWithAffix: getPokemonNameWithAffix(pokemon) }), null, true);
 
     if (pokemon.turnData?.attacksReceived?.length) {
       const lastAttack = pokemon.turnData.attacksReceived[0];
@@ -5074,15 +5091,15 @@ export class EggLapsePhase extends Phase {
       return Overrides.IMMEDIATE_HATCH_EGGS_OVERRIDE ? true : --egg.hatchWaves < 1;
     });
 
-    let eggsToHatchCount: integer = eggsToHatch.length;
+    let eggCount: integer = eggsToHatch.length;
 
-    if (eggsToHatchCount) {
+    if (eggCount) {
       this.scene.queueMessage(i18next.t("battle:eggHatching"));
 
       for (const egg of eggsToHatch) {
-        this.scene.unshiftPhase(new EggHatchPhase(this.scene, egg, eggsToHatchCount));
-        if (eggsToHatchCount > 0) {
-          eggsToHatchCount--;
+        this.scene.unshiftPhase(new EggHatchPhase(this.scene, egg, eggCount));
+        if (eggCount > 0) {
+          eggCount--;
         }
       }
 
