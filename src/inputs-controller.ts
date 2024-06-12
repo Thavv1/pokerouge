@@ -11,7 +11,7 @@ import {Mode} from "./ui/ui";
 import SettingsGamepadUiHandler from "./ui/settings/settings-gamepad-ui-handler";
 import SettingsKeyboardUiHandler from "./ui/settings/settings-keyboard-ui-handler";
 import cfg_keyboard_qwerty from "./configs/inputs/cfg_keyboard_qwerty";
-import {Device} from "#app/enums/devices";
+import {Device} from "#enums/devices";
 import {
   assign,
   getButtonWithKeycode,

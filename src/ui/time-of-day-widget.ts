@@ -1,6 +1,6 @@
 import * as Utils from "../utils";
 import BattleScene from "#app/battle-scene.js";
-import { TimeOfDay } from "#app/enums/time-of-day.js";
+import { TimeOfDay } from "#enums/time-of-day.js";
 import { BattleSceneEventType } from "../events/battle-scene";
 import { EaseType } from "../enums/ease-type";
 

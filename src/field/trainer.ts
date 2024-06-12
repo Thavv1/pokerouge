@@ -20,7 +20,7 @@ import {trainerNamePools} from "../data/trainer-names";
 import {ArenaTagSide, ArenaTrapTag} from "#app/data/arena-tag";
 import {getIsInitialized, initI18n} from "#app/plugins/i18n";
 import i18next from "i18next";
-import {Species} from "#app/enums/species.js";
+import {Species} from "#enums/species.js";
 
 export enum TrainerVariant {
     DEFAULT,

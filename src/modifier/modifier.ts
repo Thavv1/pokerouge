@@ -19,7 +19,7 @@ import { achvs } from "../system/achv";
 import { VoucherType } from "../system/voucher";
 import { FormChangeItem, SpeciesFormChangeItemTrigger } from "../data/pokemon-forms";
 import { Nature } from "#app/data/nature";
-import { BattlerTagType } from "#app/enums/battler-tag-type.js";
+import { BattlerTagType } from "#enums/battler-tag-type.js";
 import * as Overrides from "../overrides";
 import { ModifierType, modifierTypes } from "./modifier-type";
 import { Command } from "#app/ui/command-ui-handler.js";

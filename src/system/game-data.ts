@@ -33,11 +33,11 @@ import { Variant, variantData } from "#app/data/variant";
 import {setSettingGamepad, SettingGamepad, settingGamepadDefaults} from "./settings/settings-gamepad";
 import {setSettingKeyboard, SettingKeyboard} from "#app/system/settings/settings-keyboard";
 import { TerrainChangedEvent, WeatherChangedEvent } from "#app/events/arena.js";
-import { Device } from "#app/enums/devices.js";
+import { Device } from "#enums/devices.js";
 import { EnemyAttackStatusEffectChanceModifier } from "../modifier/modifier";
 import { StatusEffect } from "#app/data/status-effect.js";
-import { PlayerGender } from "#app/enums/player-gender";
-import { GameDataType } from "#app/enums/game-data-type";
+import { PlayerGender } from "#enums/player-gender";
+import { GameDataType } from "#enums/game-data-type";
 import ChallengeData from "./challenge-data";
 
 const saveKey = "x0i2O7WRiANTqPmZ"; // Temporary; secure encryption is not yet necessary

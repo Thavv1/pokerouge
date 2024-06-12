@@ -2,15 +2,15 @@ import {afterEach, beforeAll, beforeEach, describe, expect, it, vi} from "vitest
 import Phaser from "phaser";
 import GameManager from "#app/test/utils/gameManager";
 import * as overrides from "#app/overrides";
-import {Abilities} from "#app/enums/abilities.js";
-import {Species} from "#app/enums/species.js";
+import {Abilities} from "#enums/abilities.js";
+import {Species} from "#enums/species.js";
 import {
   CommandPhase,
   EnemyCommandPhase,
   TurnInitPhase,
 } from "#app/phases";
 import {Mode} from "#app/ui/ui";
-import {Moves} from "#app/enums/moves.js";
+import {Moves} from "#enums/moves.js";
 import {getMovePosition} from "#app/test/utils/gameManagerUtils";
 import {Command} from "#app/ui/command-ui-handler";
 import {BattleStat} from "#app/data/battle-stat";

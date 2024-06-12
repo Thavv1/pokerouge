@@ -23,7 +23,7 @@ import { ModifierTier } from "./modifier-tier";
 import { Nature, getNatureName, getNatureStatMultiplier } from "#app/data/nature";
 import i18next from "#app/plugins/i18n";
 import { getModifierTierTextTint } from "#app/ui/text";
-import { BattlerTagType } from "#app/enums/battler-tag-type.js";
+import { BattlerTagType } from "#enums/battler-tag-type.js";
 import * as Overrides from "../overrides";
 import { MoneyMultiplierModifier } from "./modifier";
 

@@ -2,9 +2,9 @@ import {afterEach, beforeAll, beforeEach, describe, expect, it, vi} from "vitest
 import GameManager from "#app/test/utils/gameManager";
 import Phaser from "phaser";
 import * as overrides from "#app/overrides";
-import {Species} from "#app/enums/species.js";
-import {Moves} from "#app/enums/moves.js";
-import {Abilities} from "#app/enums/abilities.js";
+import {Species} from "#enums/species.js";
+import {Moves} from "#enums/moves.js";
+import {Abilities} from "#enums/abilities.js";
 
 describe("Test Battle Phase", () => {
   let phaserGame: Phaser.Game;
