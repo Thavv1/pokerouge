@@ -62,4 +62,5 @@ export const battle: SimpleTranslationEntries = {
   "drainMessage": "{{pokemonName}}[[로]]부터\n체력을 흡수했다!",
   "regainHealth": "{{pokemonName}}[[는]]\n기력을 회복했다!",
   "fainted": "{{pokemonNameWithAffix}}[[는]] 쓰러졌다!",
+  "useQuickClaw": "{{pokemonName}} used its Quick Claw to move faster!"
 } as const;
