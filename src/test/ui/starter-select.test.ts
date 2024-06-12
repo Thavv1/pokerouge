@@ -1,7 +1,7 @@
 import {afterEach, beforeAll, beforeEach, describe, expect, it} from "vitest";
 import Phaser from "phaser";
 import GameManager from "#app/test/utils/gameManager";
-import {Species} from "#app/data/enums/species";
+import {Species} from "#app/enums/species.js";
 import {
   EncounterPhase,
   SelectStarterPhase,
@@ -17,7 +17,7 @@ import {OptionSelectItem} from "#app/ui/abstact-option-select-ui-handler";
 import {Gender} from "#app/data/gender";
 import {allSpecies} from "#app/data/pokemon-species";
 import {Nature} from "#app/data/nature";
-import {Abilities} from "#app/data/enums/abilities";
+import {Abilities} from "#app/enums/abilities.js";
 
 
 describe("UI - Starter select", () => {

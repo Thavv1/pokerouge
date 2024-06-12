@@ -1,10 +1,10 @@
-import { Species } from "./data/enums/species";
-import { Abilities } from "./data/enums/abilities";
-import { Biome } from "./data/enums/biome";
-import { Moves } from "./data/enums/moves";
+import { Species } from "./enums/species";
+import { Abilities } from "./enums/abilities";
+import { Biome } from "./enums/biome";
+import { Moves } from "./enums/moves";
 import { WeatherType } from "./data/weather";
 import { Variant } from "./data/variant";
-import { BerryType } from "./data/enums/berry-type";
+import { BerryType } from "./enums/berry-type";
 import { TempBattleStat } from "./data/temp-battle-stat";
 import { Nature } from "./data/nature";
 import { Type } from "./data/type";

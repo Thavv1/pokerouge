@@ -5,8 +5,8 @@ import BattleScene from "#app/battle-scene.js";
 import { UiTheme } from "#app/enums/ui-theme.js";
 import Move from "#app/data/move.js";
 import { BattleSceneEventType, BerryUsedEvent, MoveUsedEvent } from "../events/battle-scene";
-import { BerryType } from "#app/data/enums/berry-type.js";
-import { Moves } from "#app/data/enums/moves.js";
+import { BerryType } from "#app/enums/berry-type.js";
+import { Moves } from "#app/enums/moves.js";
 
 /** Container for info about a {@linkcode Move} */
 interface MoveInfo {

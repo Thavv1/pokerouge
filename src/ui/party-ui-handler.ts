@@ -8,7 +8,7 @@ import { Mode } from "./ui";
 import * as Utils from "../utils";
 import { PokemonFormChangeItemModifier, PokemonHeldItemModifier, SwitchEffectTransferModifier } from "../modifier/modifier";
 import { allMoves } from "../data/move";
-import { Moves } from "../data/enums/moves";
+import { Moves } from "../enums/moves";
 import { getGenderColor, getGenderSymbol } from "../data/gender";
 import { StatusEffect } from "../data/status-effect";
 import PokemonIconAnimHandler, { PokemonIconAnimMode } from "./pokemon-icon-anim-handler";
