@@ -19,6 +19,9 @@ export const titles: SimpleTranslationEntries = {
   "galactic_boss": "Chefe da Equipe Galáctica",
   "plasma_boss": "Chefe da Equipe Plasma",
   "flare_boss": "Chefe da Equipe Flare",
+  "cipher_admin": "Cipher Admin",
+  "cipher": "Cipher",
+  "cipher_head": "Cipher Head",
   // Maybe if we add the evil teams we can add "Team Rocket" and "Team Aqua" etc. here as well as "Team Rocket Boss" and "Team Aqua Admin" etc.
 } as const;
 
@@ -127,16 +130,25 @@ export const trainerClasses: SimpleTranslationEntries = {
   "youngster": "Jovem",
   "rocket_grunt": "Recruta da Equipe Rocket",
   "rocket_grunt_female": "Recruta da Equipe Rocket",
+  "rocket_grunts": "Rocket Grunts",
   "magma_grunt": "Recruta da Equipe Magma",
   "magma_grunt_female": "Recruta da Equipe Magma",
+  "magma_grunts": "Magma Grunts",
   "aqua_grunt": "Recruta da Equipe Aqua",
   "aqua_grunt_female": "Recruta da Equipe Aqua",
+  "aqua_grunts": "Aqua Grunts",
   "galactic_grunt": "Recruta da Equipe Galáctica",
   "galactic_grunt_female": "Recruta da Equipe Galáctica",
+  "galactic_grunts": "Galactic Grunts",
   "plasma_grunt": "Recruta da Equipe Plasma",
   "plasma_grunt_female": "Recruta da Equipe Plasma",
+  "plasma_grunts": "Plasma Grunts",
   "flare_grunt": "Recruta da Equipe Flare",
   "flare_grunt_female": "Recruta da Equipe Flare",
+  "flare_grunts": "Flare Grunts",
+  "cipher_peon": "Cipher Peon",
+  "cipher_peon_female": "Cipher Peon",
+  "cipher_peons": "Cipher Peons",
 } as const;
 
 // Names of special trainers like gym leaders, elite four, and the champion
@@ -270,6 +282,12 @@ export const trainerNames: SimpleTranslationEntries = {
   "cyrus": "Cyrus",
   "ghetsis": "Ghetsis",
   "lysandre": "Lysandre",
+  "mirror_b": "Mirror B",
+  "dakim": "Dakim",
+  "venus": "Venus",
+  "ein": "Ein",
+  "nascour": "Nascour",
+  "evice": "Evice",
 
   // Double Names
   "blue_red_double": "Blue & Red",
