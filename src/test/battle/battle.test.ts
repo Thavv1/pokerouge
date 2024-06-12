@@ -2,7 +2,7 @@ import {afterEach, beforeAll, beforeEach, describe, expect, it, vi} from "vitest
 import {generateStarter, getMovePosition,} from "#app/test/utils/gameManagerUtils";
 import {Mode} from "#app/ui/ui";
 import {GameModes} from "#app/game-mode";
-import {Species} from "#app/data/enums/species";
+import {Species} from "#enums/species.js";
 import * as overrides from "../../overrides";
 import {Command} from "#app/ui/command-ui-handler";
 import {
@@ -17,13 +17,13 @@ import {
   TitlePhase,
   TurnInitPhase, VictoryPhase,
 } from "#app/phases";
-import {Moves} from "#app/data/enums/moves";
+import {Moves} from "#enums/moves.js";
 import GameManager from "#app/test/utils/gameManager";
 import Phaser from "phaser";
 import {allSpecies} from "#app/data/pokemon-species";
-import {PlayerGender} from "#app/data/enums/player-gender";
+import {PlayerGender} from "#enums/player-gender";
 import { getGameMode } from "#app/game-mode.js";
-import {Abilities} from "#app/data/enums/abilities";
+import {Abilities} from "#enums/abilities.js";
 
 describe("Test Battle Phase", () => {
   let phaserGame: Phaser.Game;

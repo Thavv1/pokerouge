@@ -1,7 +1,7 @@
 import * as Modifiers from "./modifier";
 import { AttackMove, allMoves } from "../data/move";
-import { Moves } from "../data/enums/moves";
-import { Abilities } from "../data/enums/abilities";
+import { Moves } from "#enums/moves";
+import { Abilities } from "#enums/abilities";
 import { PokeballType, getPokeballCatchMultiplier, getPokeballName } from "../data/pokeball";
 import Pokemon, { EnemyPokemon, PlayerPokemon, PokemonMove } from "../field/pokemon";
 import { EvolutionItem, pokemonEvolutions } from "../data/pokemon-evolutions";
@@ -12,7 +12,7 @@ import PartyUiHandler, { PokemonMoveSelectFilter, PokemonSelectFilter } from "..
 import * as Utils from "../utils";
 import { TempBattleStat, getTempBattleStatBoosterItemName, getTempBattleStatName } from "../data/temp-battle-stat";
 import { getBerryEffectDescription, getBerryName } from "../data/berry";
-import { BerryType } from "../data/enums/berry-type";
+import { BerryType } from "#enums/berry-type";
 import { Unlockables } from "../system/unlockables";
 import { StatusEffect, getStatusEffectDescriptor } from "../data/status-effect";
 import { SpeciesFormKey } from "../data/pokemon-species";
@@ -23,7 +23,7 @@ import { ModifierTier } from "./modifier-tier";
 import { Nature, getNatureName, getNatureStatMultiplier } from "#app/data/nature";
 import i18next from "#app/plugins/i18n";
 import { getModifierTierTextTint } from "#app/ui/text";
-import { BattlerTagType } from "#app/data/enums/battler-tag-type.js";
+import { BattlerTagType } from "#enums/battler-tag-type.js";
 import * as Overrides from "../overrides";
 import { MoneyMultiplierModifier } from "./modifier";
 

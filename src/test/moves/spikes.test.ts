@@ -2,12 +2,12 @@ import {afterEach, beforeAll, beforeEach, describe, expect, it, vi} from "vitest
 import Phaser from "phaser";
 import GameManager from "#app/test/utils/gameManager";
 import * as overrides from "#app/overrides";
-import {Abilities} from "#app/data/enums/abilities";
-import {Species} from "#app/data/enums/species";
+import {Abilities} from "#enums/abilities.js";
+import {Species} from "#enums/species.js";
 import {
   CommandPhase
 } from "#app/phases";
-import {Moves} from "#app/data/enums/moves";
+import {Moves} from "#enums/moves.js";
 
 
 describe("Moves - Spikes", () => {
