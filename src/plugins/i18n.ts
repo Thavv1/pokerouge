@@ -8,6 +8,7 @@ import { esConfig } from "#app/locales/es/config.js";
 import { frConfig } from "#app/locales/fr/config.js";
 import { itConfig } from "#app/locales/it/config.js";
 import { koConfig } from "#app/locales/ko/config.js";
+import { jpConfig } from "#app/locales/jp/config.js";
 import { ptBrConfig } from "#app/locales/pt_BR/config.js";
 import { zhCnConfig } from "#app/locales/zh_CN/config.js";
 import { zhTwConfig } from "#app/locales/zh_TW/config.js";
@@ -90,6 +91,7 @@ export interface Localizable {
 
 const fonts = [
   new FontFace("emerald", "url(./fonts/PokePT_Wansung.ttf)"),
+  new FontFace("emerald", "KH-Dot-Kodenmachou-12.ttf)"),
   new FontFace("emerald", "url(./fonts/pokemon-emerald-pro.ttf"),
 ];
 
@@ -130,7 +132,7 @@ export async function initI18n(): Promise<void> {
   await i18next.init({
     nonExplicitSupportedLngs: true,
     fallbackLng: "en",
-    supportedLngs: ["en", "es", "fr", "it", "de", "zh", "pt", "ko"],
+    supportedLngs: ["en", "es", "fr", "it", "de", "zh", "pt", "ko", "jp"],
     detection: {
       lookupLocalStorage: "prLang"
     },
@@ -165,6 +167,9 @@ export async function initI18n(): Promise<void> {
       },
       ko: {
         ...koConfig
+      },
+      jp: {
+        ...jpConfig
       },
     },
     postProcess: ["korean-postposition"],
