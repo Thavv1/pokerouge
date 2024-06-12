@@ -190,6 +190,16 @@ export interface StarterData {
   [key: integer]: StarterDataEntry
 }
 
+export interface LocalOnlyStarterDataEntry {
+  nature: integer;
+  abilityIndex: integer;
+  dexAttrCursor: bigint;
+}
+
+export interface LocalOnlyStarterData {
+  [key: integer]: Partial<LocalOnlyStarterDataEntry>
+}
+
 export interface TutorialFlags {
   [key: string]: boolean
 }
@@ -228,6 +238,7 @@ export class GameData {
   private defaultDexData: DexData;
 
   public starterData: StarterData;
+  public localOnlyStarterData: LocalOnlyStarterData;
 
   public gameStats: GameStats;
 
@@ -249,6 +260,7 @@ export class GameData {
     this.trainerId = Utils.randInt(65536);
     this.secretId = Utils.randInt(65536);
     this.starterData = {};
+    this.localOnlyStarterData = {};
     this.gameStats = new GameStats();
     this.unlocks = {
       [Unlockables.ENDLESS_MODE]: false,
@@ -485,6 +497,14 @@ export class GameData {
               this.starterData[s].candyCount += 4;
             }
           }
+        }
+
+        const starterDataKey = `starterData_${loggedInUser.username}`;
+        if (localStorage.hasOwnProperty(starterDataKey)) {
+          this.localOnlyStarterData = JSON.parse(
+            decrypt(localStorage.getItem(starterDataKey), bypassLogin),
+            (k, v) => k === "dexAttrCursor" ? BigInt(v) : v
+          );
         }
 
         resolve(true);
@@ -1121,6 +1141,8 @@ export class GameData {
 
         localStorage.setItem(`sessionData${scene.sessionSlotId ? scene.sessionSlotId : ""}_${loggedInUser.username}`, encrypt(JSON.stringify(sessionData), bypassLogin));
 
+        localStorage.setItem(`starterData_${loggedInUser.username}`, encrypt(JSON.stringify(this.localOnlyStarterData, (k: any, v: any) => typeof v === "bigint" ? v <= maxIntAttrValue ? Number(v) : v.toString() : v), bypassLogin));
+
         console.debug("Session data saved");
 
         if (!bypassLogin && sync) {
@@ -1562,7 +1584,9 @@ export class GameData {
       ? attr & DexAttr.SHINY ? attr & DexAttr.VARIANT_3 ? DexAttr.VARIANT_3 : attr & DexAttr.VARIANT_2 ? DexAttr.VARIANT_2 : DexAttr.DEFAULT_VARIANT : DexAttr.DEFAULT_VARIANT
       : attr & DexAttr.DEFAULT_VARIANT ? DexAttr.DEFAULT_VARIANT : attr & DexAttr.VARIANT_2 ? DexAttr.VARIANT_2 : attr & DexAttr.VARIANT_3 ? DexAttr.VARIANT_3 : DexAttr.DEFAULT_VARIANT;
     ret |= this.getFormAttr(this.getFormIndex(attr));
-    return ret;
+
+    const localOnlyStarterData = this.localOnlyStarterData[species.speciesId];
+    return localOnlyStarterData?.dexAttrCursor ?? ret;
   }
 
   getSpeciesDexAttrProps(species: PokemonSpecies, dexAttr: bigint): DexAttrProps {
@@ -1580,11 +1604,21 @@ export class GameData {
   }
 
   getStarterSpeciesDefaultAbilityIndex(species: PokemonSpecies): integer {
+    const lastAbilityIndex = this.localOnlyStarterData[species.speciesId]?.abilityIndex;
+    if (lastAbilityIndex !== undefined) {
+      return lastAbilityIndex;
+    }
+
     const abilityAttr = this.starterData[species.speciesId].abilityAttr;
     return abilityAttr & AbilityAttr.ABILITY_1 ? 0 : !species.ability2 || abilityAttr & AbilityAttr.ABILITY_2 ? 1 : 2;
   }
 
   getSpeciesDefaultNature(species: PokemonSpecies): Nature {
+    const lastNature = this.localOnlyStarterData[species.speciesId]?.nature;
+    if (lastNature !== undefined) {
+      return lastNature;
+    }
+
     const dexEntry = this.dexData[species.speciesId];
     for (let n = 0; n < 25; n++) {
       if (dexEntry.natureAttr & Math.pow(2, n + 1)) {
