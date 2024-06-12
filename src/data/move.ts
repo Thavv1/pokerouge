@@ -4,7 +4,7 @@ import { BattleEndPhase, MovePhase, NewBattlePhase, PartyStatusCurePhase, Pokemo
 import { BattleStat, getBattleStatName } from "./battle-stat";
 import { EncoreTag } from "./battler-tags";
 import { BattlerTagType } from "./enums/battler-tag-type";
-import { getPokemonMessage } from "../messages";
+import { getPokemonMessage, getPokemonPrefix } from "../messages";
 import Pokemon, { AttackMoveResult, EnemyPokemon, HitResult, MoveResult, PlayerPokemon, PokemonMove, TurnMove } from "../field/pokemon";
 import { StatusEffect, getStatusEffectHealText, isNonVolatileStatusEffect, getNonVolatileStatusEffects} from "./status-effect";
 import { Type } from "./type";
@@ -1234,6 +1234,42 @@ export class HealAttr extends MoveEffectAttr {
 }
 
 /**
+ * Attribute used by the {@link Moves.STOCKPILE} to heal based on STOCKPILE BattlerTags stored
+ * @extends HealAttr
+ * @see {@linkcode apply}
+ */
+export class SwallowHealAttr extends HealAttr {
+
+  /**
+   * @construct HealAttr as normal. Variable heal will be set in {@linkcode apply}
+   */
+  constructor() {
+    super(1, true, true);
+  }
+
+  /**
+   * Sets the healing ratio based on amount of STOCKPILE BattlerTags stored
+   * 
+   * Amount of STOCKPILE BattlerTags on user is stored in the variable stock
+   * Then stock is checked; if stock is:
+   *   1, then healing is 0.25 of health
+   *   2, then healing is 0.50 of health
+   *   3, then healing is 1.00 of health
+   * 
+   * @param user {@linkcode Pokemon} using this move
+   * @param target {@linkcode Pokemon} target of this move
+   * @param move {@linkcode Move} being used
+   * @param args [0] {@linkcode Utils.NumberHolder} for arenaAttackTypeMultiplier
+   * @returns true if the function succeeds
+   */
+  apply(user: Pokemon, target: Pokemon, move: Move, args: any[]): boolean {
+    const stock = getStockpiles(user);
+    this.addHealPhase(this.selfTarget ? user : target, (stock >= 3 ? 1 : (stock * 0.25)));
+    return true;
+  }
+}
+
+/**
  * Cures the user's party of non-volatile status conditions, ie. Heal Bell, Aromatherapy
  * @extends MoveEffectAttr
  * @see {@linkcode apply}
@@ -2348,6 +2384,59 @@ export class GrowthStatChangeAttr extends StatChangeAttr {
   }
 }
 
+/**
+ * Attribute for the stat changes for {@link Move.STOCKPILE}, {@link Move.SPIT_UP}, and {@link Move.SWALLOW}
+ * 
+ * @prop @private tagTypes - an array of the 3 STOCKPILE BattleTags
+ * 
+ * @extends StatChangeAttr
+ * @see {@linkcode apply}
+ */
+export class StockpileStatChangeAttr extends StatChangeAttr {
+  private tagTypes = [BattlerTagType.STOCKPILE_ONE, BattlerTagType.STOCKPILE_TWO, BattlerTagType.STOCKPILE_THREE];
+
+  /**
+   * @construct StatChangeAttr with BattleStat.DEF and BattleStat.SPDEF
+   * for moves associated with the STOCKPILE Battler Tags
+   * 
+   * @param gainsStats - boolean serving as a switch for this Attr:
+   *   - if true, we save 1 under levels
+   *   - if false, we save -1 under levels
+   */
+  constructor(gainStats: boolean = true) {
+    super(
+      [ BattleStat.DEF, BattleStat.SPDEF ],
+      gainStats ? 1 : -1,
+      true);
+  }
+
+  /**
+   * This applies the state changes as normal in {@link StatChangeAttr}
+   * if this.levels is negative, however:
+   *   first, multiply this.levels by stock (so that stats get removed based on number of stock)
+   *   second, this goes through the class @prop tagTypes and removes them from the user
+   * 
+   * @param user {@linkcode Pokemon} using this move
+   * @param target {@linkcode Pokemon} target of this move
+   * @param move {@linkcode Move} being used
+   * @param args [0] {@linkcode Utils.NumberHolder} for arenaAttackTypeMultiplier
+   * @returns true if the function succeeds
+   */
+  apply(user: Pokemon, target: Pokemon, move: Move, args: any[]): boolean | Promise<boolean> {
+    const stock = getStockpiles(user);
+    
+    if (this.levels < 0) {
+      this.levels = stock * -1;
+
+      // remove the stats equal to the number of stocks
+      for (let tagType of this.tagTypes)
+        user.removeTag(tagType);
+    }
+
+    return super.apply(user, target, move, args);
+  }
+}
+
 export class HalfHpStatMaxAttr extends StatChangeAttr {
   constructor(stat: BattleStat) {
     super(stat, 12, true, null, false);
@@ -3073,6 +3162,30 @@ export class WaterShurikenPowerAttr extends VariablePowerAttr {
 }
 
 /**
+ * Attribute used by the {@link Moves.SPIT_UP} based on the number of stored STOCKPILE BattlerTagTypes
+ * @extends VariablePowerAttr
+ * @see {@linkcode apply}
+ */
+export class SpitUpPowerAttr extends VariablePowerAttr {
+
+  /**
+   * This sets the power based on number of STOCKPILE BattlerTags on the user
+   * Power is number of stock multiplied by 100
+   * 
+   * @param user {@linkcode Pokemon} using this move
+   * @param target {@linkcode Pokemon} target of this move
+   * @param move {@linkcode Move} being used
+   * @param args [0] {@linkcode Utils.NumberHolder} for arenaAttackTypeMultiplier
+   * @returns true if the function succeeds
+   */
+  apply(user: Pokemon, target: Pokemon, move: Move, args: any[]): boolean {
+    const power = args[0] as Utils.NumberHolder;
+    power.value = getStockpiles(user)*100;
+    return true;
+  }
+}
+
+/*
  * Attribute used for multi-hit moves that increase power in increments of the
  * move's base power for each hit, namely Triple Kick and Triple Axel.
  * @extends VariablePowerAttr
@@ -3877,6 +3990,9 @@ export class AddBattlerTagAttr extends MoveEffectAttr {
     case BattlerTagType.INGRAIN:
     case BattlerTagType.IGNORE_ACCURACY:
     case BattlerTagType.AQUA_RING:
+    case BattlerTagType.STOCKPILE_ONE:
+    case BattlerTagType.STOCKPILE_TWO:
+    case BattlerTagType.STOCKPILE_THREE:
       return 3;
     case BattlerTagType.PROTECTED:
     case BattlerTagType.FLYING:
@@ -4065,6 +4181,66 @@ export class FaintCountdownAttr extends AddBattlerTagAttr {
 }
 
 /**
+ * Attribute used by the {@link Moves.STOCKPILE} to add the STOCKPILE BattlerTagTypes
+ * @extends AddBattlerTagTypeAttr
+ * {@linkcode apply}
+ */
+export class StockpileAttr extends AddBattlerTagAttr {
+
+  /**
+   * @construct StockpileChangeAttr as an AddBattlerTagAttr
+   * @prop tagType is @default BattlerTagType.STOCKPILE_THREE
+   */
+  constructor() {
+    super(BattlerTagType.STOCKPILE_THREE, true, false, 20, 20);
+  }
+
+  /**
+   * This changes the @prop tagType based on the {@link stock} of the user
+   * if stock is:
+   *   0 - tagType should be BattlerTagType.STOCKPILE_ONE
+   *   1 - tagType should be BattlerTagType.STOCKPILE_TWO
+   *   2 - tagType should be BattlerTagType.STOCKPILE_THREE
+   * 
+   * a localised message is then queued
+   * 
+   * @param user {@linkcode Pokemon} using this move. It's needed to retrieve
+   *   how much stockpile the Pokemon has as well as its name for the message
+   * @param target {@linkcode Pokemon} target of this move
+   * @param move {@linkcode Move} being used
+   * @param args [0] {@linkcode Utils.NumberHolder} for arenaAttackTypeMultiplier
+   * @returns true if the function succeeds
+   */
+  apply(user: Pokemon, target: Pokemon, move: Move, args: any[]): boolean {
+    const stock = getStockpiles(user);
+
+    switch (stock){
+      case 0:
+        this.tagType = BattlerTagType.STOCKPILE_ONE;
+        break;
+      case 1:
+        this.tagType = BattlerTagType.STOCKPILE_TWO;
+        break;
+      default:
+        this.tagType = BattlerTagType.STOCKPILE_THREE;
+        break;
+    }
+
+
+    if (!super.apply(user, target, move, args))
+      return false;
+
+    user.scene.queueMessage(this.getTriggerMessage(user, (stock+1)));
+
+    return true;
+  }
+  
+  getTriggerMessage(pokemon: Pokemon, stockpileNumber: integer, ...args: any[]) {
+    return i18next.t('abilityTriggers:stockpile', {pokemonName: `${getPokemonPrefix(pokemon)}${pokemon.name}`, stockpileNumber: stockpileNumber});
+  }
+}
+
+/** 
  * Attribute used when a move hits a {@linkcode BattlerTagType} for double damage
  * @extends MoveAttr
 */
@@ -5265,11 +5441,25 @@ export class VariableTargetAttr extends MoveAttr {
   }
 }
 
+/**
+ * Used to get how many stockpiles a Pokemon has
+ * @param user to retrieve the BattlerTagTypes
+ * @returns number of stockpile BattleTagTypes on the Pokemon
+ */
+function getStockpiles(user: Pokemon) : integer {
+  const stock = [BattlerTagType.STOCKPILE_ONE, BattlerTagType.STOCKPILE_TWO, BattlerTagType.STOCKPILE_THREE];
+  return stock.filter((stock) => user.getTag(stock)).length;
+}
+
 const failOnGravityCondition: MoveConditionFunc = (user, target, move) => !user.scene.arena.getTag(ArenaTagType.GRAVITY);
 
 const failOnBossCondition: MoveConditionFunc = (user, target, move) => !target.isBossImmune();
 
 const failOnMaxCondition: MoveConditionFunc = (user, target, move) => !target.isMax();
+
+const failOnMaxStockCondition: MoveConditionFunc = (user, target, move) => getStockpiles(user) != 3;
+
+const failOnNoStockCondition: MoveConditionFunc = (user, target, move) => getStockpiles(user) != 0;
 
 const failIfDampCondition: MoveConditionFunc = (user, target, move) => {
   const cancelled = new Utils.BooleanHolder(false);
@@ -6119,12 +6309,18 @@ export function initMoves() {
       .target(MoveTarget.RANDOM_NEAR_ENEMY)
       .partial(),
     new SelfStatusMove(Moves.STOCKPILE, Type.NORMAL, -1, 20, -1, 0, 3)
-      .unimplemented(),
+      .attr(StockpileAttr)
+      .attr(StockpileStatChangeAttr)
+      .condition(failOnMaxStockCondition),
     new AttackMove(Moves.SPIT_UP, Type.NORMAL, MoveCategory.SPECIAL, -1, 100, 10, -1, 0, 3)
-      .unimplemented(),
+      .attr(SpitUpPowerAttr)
+      .attr(StockpileStatChangeAttr, false)
+      .condition(failOnNoStockCondition),
     new SelfStatusMove(Moves.SWALLOW, Type.NORMAL, -1, 10, -1, 0, 3)
-      .triageMove()
-      .unimplemented(),
+      .attr(SwallowHealAttr)
+      .attr(StockpileStatChangeAttr, false)
+      .condition(failOnNoStockCondition)
+      .triageMove(),
     new AttackMove(Moves.HEAT_WAVE, Type.FIRE, MoveCategory.SPECIAL, 95, 90, 10, 10, 0, 3)
       .attr(HealStatusEffectAttr, true, StatusEffect.FREEZE)
       .attr(StatusEffectAttr, StatusEffect.BURN)
