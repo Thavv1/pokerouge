@@ -65,21 +65,21 @@ export function hideMysteryEncounterIntroVisuals(scene: BattleScene): Promise<bo
  * Will never remove the player's last non-fainted Pokemon (if they only have 1)
  * Otherwise, picks a Pokemon completely at random and removes from the party
  * @param scene
- * @param unfainted - default false. If true, only picks from unfainted mons. If there is only 1 unfainted mon left and doNotReturnLastUnfaintedMon is also true, will return fainted mon
- * @param doNotReturnLastUnfaintedMon - If true, will never return the last unfainted pokemon in the party. Useful when this function is being used to determine what Pokemon to remove from the party (Don't want to remove last unfainted)
+ * @param isAllowedInBattle - default false. If true, only picks from unfainted mons. If there is only 1 unfainted mon left and doNotReturnLastAbleMon is also true, will return fainted mon
+ * @param doNotReturnLastAbleMon - If true, will never return the last unfainted pokemon in the party. Useful when this function is being used to determine what Pokemon to remove from the party (Don't want to remove last unfainted)
  * @returns
  */
-export function getRandomPlayerPokemon(scene: BattleScene, unfainted: boolean = false, doNotReturnLastUnfaintedMon: boolean = true): PlayerPokemon {
+export function getRandomPlayerPokemon(scene: BattleScene, isAllowedInBattle: boolean = false, doNotReturnLastAbleMon: boolean = false): PlayerPokemon {
   const party = scene.getParty();
   let chosenIndex: number;
   let chosenPokemon: PlayerPokemon;
-  const unfaintedMons = party.filter(p => !p.isFainted());
-  const faintedMons = party.filter(p => p.isFainted());
+  const unfaintedMons = party.filter(p => p.isAllowedInBattle());
+  const faintedMons = party.filter(p => !p.isAllowedInBattle());
 
-  if (doNotReturnLastUnfaintedMon && unfaintedMons.length === 1) {
+  if (doNotReturnLastAbleMon && unfaintedMons.length === 1) {
     chosenIndex = Utils.randSeedInt(faintedMons.length);
     chosenPokemon = faintedMons.at(chosenIndex);
-  } else if (unfainted) {
+  } else if (isAllowedInBattle) {
     chosenIndex = Utils.randSeedInt(unfaintedMons.length);
     chosenPokemon = unfaintedMons.at(chosenIndex);
   } else {
@@ -99,7 +99,15 @@ export function getRandomPlayerPokemon(scene: BattleScene, unfainted: boolean = 
 export function getHighestLevelPlayerPokemon(scene: BattleScene, unfainted: boolean = false): PlayerPokemon {
   const party = scene.getParty();
   let pokemon: PlayerPokemon;
-  party.forEach(p => pokemon = (unfainted && p.isFainted() ? pokemon : pokemon?.level < p?.level ? p : pokemon));
+  party.every(p => {
+    if (unfainted && p.isFainted()) {
+      return true;
+    }
+
+    pokemon = pokemon ? pokemon?.level < p?.level ? p : pokemon : p;
+    return true;
+  });
+
   return pokemon;
 }
 
@@ -112,7 +120,15 @@ export function getHighestLevelPlayerPokemon(scene: BattleScene, unfainted: bool
 export function getLowestLevelPlayerPokemon(scene: BattleScene, unfainted: boolean = false): PlayerPokemon {
   const party = scene.getParty();
   let pokemon: PlayerPokemon;
-  party.forEach(p => pokemon = (unfainted && p.isFainted() ? pokemon : pokemon?.level > p?.level ? p : pokemon));
+  party.every(p => {
+    if (unfainted && p.isFainted()) {
+      return true;
+    }
+
+    pokemon = pokemon ? pokemon?.level > p?.level ? p : pokemon : p;
+    return true;
+  });
+
   return pokemon;
 }
 
@@ -206,7 +222,7 @@ export function getRandomSpeciesByEggTier(scene: BattleScene, tiers: EggTier[]):
 }
 
 export class EnemyPartyConfig {
-  levelMultiplier?: number = 1;
+  levelAdditiveMultiplier?: number = 0; // Formula for enemy: level += waveIndex / 10 * levelAdditive
   doubleBattle?: boolean = false;
   trainerType?: TrainerType; // Generates trainer battle solely off trainer type
   trainerConfig?: TrainerConfig; // More customizable option for configuring trainer battle
@@ -261,7 +277,7 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
   battle.enemyParty = [];
 
   // Adjust levels for battle by modifier
-  battle.enemyLevels = battle.enemyLevels.map(level => Math.max(Math.round(level * (partyConfig?.levelMultiplier ? partyConfig?.levelMultiplier : 1)), 1) as integer);
+  battle.enemyLevels = battle.enemyLevels.map(level => Math.round(level + scene.currentBattle.waveIndex / 10 * partyConfig.levelAdditiveMultiplier));
 
   battle.enemyLevels.forEach((level, e) => {
     let enemySpecies;

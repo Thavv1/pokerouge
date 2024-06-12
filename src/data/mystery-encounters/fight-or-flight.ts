@@ -31,7 +31,7 @@ export const FightOrFlightEncounter: MysteryEncounter = new MysteryEncounterBuil
     // Calculate boss mon
     const bossSpecies = scene.arena.randomSpecies(scene.currentBattle.waveIndex, scene.currentBattle.waveIndex, 0, getPartyLuckValue(scene.getParty()), true);
     const config: EnemyPartyConfig = {
-      levelMultiplier: 1.5,
+      levelAdditiveMultiplier: 1,
       pokemonBosses: [bossSpecies]
     };
     instance.enemyPartyConfigs = [config];
@@ -69,7 +69,7 @@ export const FightOrFlightEncounter: MysteryEncounter = new MysteryEncounterBuil
     .withOptionPhase(async (scene: BattleScene) => {
       // Pick battle
       const item = scene.currentBattle.mysteryEncounter.misc as ModifierTypeOption;
-      setEncounterRewards(scene, null, [modifierTypes[item.type.id]]);
+      setEncounterRewards(scene, { guaranteedModifiers: [modifierTypes[item.type.id]], fillRemaining: false});
       await initBattleWithEnemyConfig(scene, scene.currentBattle.mysteryEncounter.enemyPartyConfigs[0]);
     })
     .build())
@@ -85,7 +85,7 @@ export const FightOrFlightEncounter: MysteryEncounter = new MysteryEncounterBuil
       } else {
         // Steal item (25%)
         const item = scene.currentBattle.mysteryEncounter.misc as ModifierTypeOption;
-        setEncounterRewards(scene, null, [modifierTypes[item.type.id]]);
+        setEncounterRewards(scene, { guaranteedModifiers: [modifierTypes[item.type.id]], fillRemaining: false});
         // Display result message then proceed to rewards
         await showEncounterText(scene, "mysteryEncounter:fight_or_flight_option_2_good_result")
           .then(() => leaveEncounterWithoutBattle(scene));

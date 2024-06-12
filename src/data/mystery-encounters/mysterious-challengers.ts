@@ -53,7 +53,7 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
     brutalConfig.partyTemplateFunc = null; // Overrides gym leader party template func
     const brutalSpriteKey = brutalConfig.getSpriteKey(normalConfig.hasGenders ? !!Utils.randSeedInt(2) : false, normalConfig.doubleOnly);
     instance.enemyPartyConfigs.push({
-      levelMultiplier: 1.25,
+      levelAdditiveMultiplier: 1.1,
       trainerConfig: brutalConfig
     });
 

@@ -76,6 +76,30 @@ export class WeatherRequirement implements EncounterRequirement {
   }
 }
 
+export class PartySizeRequirement implements EncounterRequirement {
+  partySizeRange: [number, number];
+
+  /**
+   * Used for specifying a unique wave or wave range requirement
+   * If minWaveIndex and maxWaveIndex are equivalent, will check for exact wave number
+   * @param partySizeRange - [min, max]
+   */
+  constructor(partySizeRange: [number, number]) {
+    this.partySizeRange = partySizeRange;
+  }
+
+  meetsRequirement(scene: BattleScene): boolean {
+    if (!isNullOrUndefined(this?.partySizeRange) && this.partySizeRange?.[0] <= this.partySizeRange?.[1]) {
+      const partySize = scene.getParty().length;
+      if (partySize >= 0 && (this?.partySizeRange?.[0] >= 0 && this.partySizeRange?.[0] > partySize) || (this?.partySizeRange?.[1] >= 0 && this.partySizeRange?.[1] < partySize)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+}
+
 export class PartySpeciesRequirement implements EncounterRequirement {
   requiredPartyPokemon: Species[];
 
