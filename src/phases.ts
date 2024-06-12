@@ -43,7 +43,7 @@ import { EggHatchPhase } from "./egg-hatch-phase";
 import { Egg } from "./data/egg";
 import { vouchers } from "./system/voucher";
 import { loggedInUser, updateUserInfo } from "./account";
-import { SessionSaveData } from "./system/game-data";
+import { SessionSaveData, saveRunHistory } from "./system/game-data";
 import { PlayerGender } from "./data/enums/player-gender";
 import { addPokeballCaptureStars, addPokeballOpenParticles } from "./field/anims";
 import { SpeciesFormChangeActiveTrigger, SpeciesFormChangeManualTrigger, SpeciesFormChangeMoveLearnedTrigger, SpeciesFormChangePostMoveTrigger, SpeciesFormChangePreMoveTrigger } from "./data/pokemon-forms";
@@ -64,6 +64,8 @@ import { TextStyle, addTextObject } from "./ui/text";
 import { Type } from "./data/type";
 import { BerryUsedEvent, EncounterPhaseEvent, MoveUsedEvent, TurnEndEvent, TurnInitEvent } from "./events/battle-scene";
 import { ExpNotification } from "./enums/exp-notification";
+import { MoveUsedEvent, TurnEndEvent, TurnInitEvent } from "./battle-scene-events";
+import { runCount } from "./ui/run-history-ui-handler";
 
 
 export class LoginPhase extends Phase {
@@ -4103,6 +4105,15 @@ export class GameOverPhase extends BattlePhase {
             this.scene.gameData.gameStats.dailyRunSessionsWon++;
           }
         }
+
+        this.scene.gameData.getSession(this.scene.sessionSlotId).then(sessionData => {
+          if (sessionData) {
+            this.scene.gameData.saveRunHistory(this.scene, sessionData, this.victory, true);
+          }
+        }).catch(err => {
+          console.error(err);
+        });
+
         const fadeDuration = this.victory ? 10000 : 5000;
         this.scene.fadeOutBgm(fadeDuration, true);
         const activeBattlers = this.scene.getField().filter(p => p?.isActive(true));

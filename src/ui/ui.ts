@@ -19,7 +19,6 @@ import { TextStyle, addTextObject } from "./text";
 import AchvBar from "./achv-bar";
 import MenuUiHandler from "./menu-ui-handler";
 import AchvsUiHandler from "./achvs-ui-handler";
-import OptionSelectUiHandler from "./settings/option-select-ui-handler";
 import EggHatchSceneHandler from "./egg-hatch-scene-handler";
 import EggListUiHandler from "./egg-list-ui-handler";
 import EggGachaUiHandler from "./egg-gacha-ui-handler";
@@ -45,6 +44,8 @@ import SettingsKeyboardUiHandler from "#app/ui/settings/settings-keyboard-ui-han
 import KeyboardBindingUiHandler from "#app/ui/settings/keyboard-binding-ui-handler";
 import SettingsDisplayUiHandler from "./settings/settings-display-ui-handler";
 import SettingsAudioUiHandler from "./settings/settings-audio-ui-handler";
+import RunHistoryUiHandler from "./run-history-ui-handler";
+import OptionSelectUiHandler from "./option-select-ui-handler";
 
 export enum Mode {
   MESSAGE,
@@ -72,6 +73,7 @@ export enum Mode {
   SETTINGS_KEYBOARD,
   KEYBOARD_BINDING,
   ACHIEVEMENTS,
+  RUN_HISTORY,
   GAME_STATS,
   VOUCHERS,
   EGG_LIST,
@@ -114,6 +116,7 @@ const noTransitionModes = [
   Mode.GAME_STATS,
   Mode.VOUCHERS,
   Mode.LOGIN_FORM,
+  Mode.RUN_HISTORY,
   Mode.REGISTRATION_FORM,
   Mode.LOADING,
   Mode.SESSION_RELOAD,
@@ -167,6 +170,7 @@ export default class UI extends Phaser.GameObjects.Container {
       new SettingsKeyboardUiHandler(scene),
       new KeyboardBindingUiHandler(scene),
       new AchvsUiHandler(scene),
+      new RunHistoryUiHandler(scene),
       new GameStatsUiHandler(scene),
       new VouchersUiHandler(scene),
       new EggListUiHandler(scene),
@@ -448,6 +452,7 @@ export default class UI extends Phaser.GameObjects.Container {
             touchControls.dataset.uiMode = Mode[mode];
           }
           this.getHandler().show(args);
+          console.log(args);
         }
         resolve();
       };
