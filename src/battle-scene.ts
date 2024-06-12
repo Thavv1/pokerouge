@@ -58,7 +58,7 @@ import * as Overrides from "./overrides";
 import {InputsController} from "./inputs-controller";
 import {UiInputs} from "./ui-inputs";
 import { MoneyFormat } from "./enums/money-format";
-import { NewArenaEvent } from "./battle-scene-events";
+import { NewArenaEvent } from "./events/battle-scene";
 import { Abilities } from "./data/enums/abilities";
 import ArenaFlyout from "./ui/arena-flyout";
 import { EaseType } from "./ui/enums/ease-type";
@@ -67,6 +67,12 @@ import { ExpNotification } from "./enums/exp-notification";
 export const bypassLogin = import.meta.env.VITE_BYPASS_LOGIN === "1";
 
 const DEBUG_RNG = false;
+
+const OPP_IVS_OVERRIDE_VALIDATED : integer[] = (
+  Array.isArray(Overrides.OPP_IVS_OVERRIDE) ?
+    Overrides.OPP_IVS_OVERRIDE :
+    new Array(6).fill(Overrides.OPP_IVS_OVERRIDE)
+).map(iv => isNaN(iv) || iv === null || iv > 31 ? -1 : iv);
 
 export const startingWave = Overrides.STARTING_WAVE_OVERRIDE || 1;
 
@@ -176,6 +182,8 @@ export default class BattleScene extends SceneBase {
   private phaseQueue: Phase[];
   /** PhaseQueuePrepend: is a temp storage of what will be added to PhaseQueue */
   private phaseQueuePrepend: Phase[];
+
+  public conditionalQueue: Array<[() => boolean, Phase]>;
   /** overrides default of inserting phases to end of phaseQueuePrepend array, useful or inserting Phases "out of order" */
   private phaseQueuePrependSpliceIndex: integer;
   private nextCommandPhaseQueue: Phase[];
@@ -261,6 +269,7 @@ export default class BattleScene extends SceneBase {
     super("battle");
     this.phaseQueue = [];
     this.phaseQueuePrepend = [];
+    this.conditionalQueue = [];
     this.phaseQueuePrependSpliceIndex = -1;
     this.nextCommandPhaseQueue = [];
     this.updateGameInfo();
@@ -696,6 +705,10 @@ export default class BattleScene extends SceneBase {
     return this.getPlayerField().find(p => p.isActive());
   }
 
+  /**
+   * Returns an array of PlayerPokemon of length 1 or 2 depending on if double battles or not
+   * @returns array of {@linkcode PlayerPokemon}
+   */
   getPlayerField(): PlayerPokemon[] {
     const party = this.getParty();
     return party.slice(0, Math.min(party.length, this.currentBattle?.double ? 2 : 1));
@@ -709,6 +722,10 @@ export default class BattleScene extends SceneBase {
     return this.getEnemyField().find(p => p.isActive());
   }
 
+  /**
+   * Returns an array of EnemyPokemon of length 1 or 2 depending on if double battles or not
+   * @returns array of {@linkcode EnemyPokemon}
+   */
   getEnemyField(): EnemyPokemon[] {
     const party = this.getEnemyParty();
     return party.slice(0, Math.min(party.length, this.currentBattle?.double ? 2 : 1));
@@ -773,6 +790,13 @@ export default class BattleScene extends SceneBase {
     if (postProcess) {
       postProcess(pokemon);
     }
+
+    for (let i = 0; i < pokemon.ivs.length; i++) {
+      if (OPP_IVS_OVERRIDE_VALIDATED[i] > -1) {
+        pokemon.ivs[i] = OPP_IVS_OVERRIDE_VALIDATED[i];
+      }
+    }
+
     pokemon.init();
     return pokemon;
   }
@@ -1853,10 +1877,18 @@ export default class BattleScene extends SceneBase {
   }
 
   /**
-	 * PhaseQueuePrepend: is a temp storage of what will be added to PhaseQueue
-	 * PhaseQueue: dequeue/remove the first element to get the next phase
-	 * queues are moved around during shiftPhase() below
-	 */
+   * Adds a phase to the conditional queue and ensures it is executed only when the specified condition is met.
+   *
+   * This method allows deferring the execution of a phase until certain conditions are met, which is useful for handling
+   * situations like abilities and entry hazards that depend on specific game states.
+   *
+   * @param {Phase} phase - The phase to be added to the conditional queue.
+   * @param {() => boolean} condition - A function that returns a boolean indicating whether the phase should be executed.
+   *
+   */
+  pushConditionalPhase(phase: Phase, condition: () => boolean): void {
+    this.conditionalQueue.push([condition, phase]);
+  }
 
   /**
 	 * Adds a phase to nextCommandPhaseQueue, as long as boolean passed in is false
@@ -1937,6 +1969,21 @@ export default class BattleScene extends SceneBase {
     }
     // front of phaseQueue will be next to start
     this.currentPhase = this.phaseQueue.shift();
+
+    // Check if there are any conditional phases queued
+    if (this.conditionalQueue?.length) {
+      // Retrieve the first conditional phase from the queue
+      const conditionalPhase = this.conditionalQueue.shift();
+      // Evaluate the condition associated with the phase
+      if (conditionalPhase[0]()) {
+        // If the condition is met, add the phase to the front of the phase queue
+        this.unshiftPhase(conditionalPhase[1]);
+      } else {
+        // If the condition is not met, re-add the phase back to the front of the conditional queue
+        this.conditionalQueue.unshift(conditionalPhase);
+      }
+    }
+
     this.currentPhase.start();
   }
 
