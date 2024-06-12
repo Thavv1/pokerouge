@@ -202,9 +202,6 @@ export class InterruptedTag extends BattlerTag {
   }
 }
 
-/**
- * BattlerTag that represents the {@link https://bulbapedia.bulbagarden.net/wiki/Confusion_(status_condition)}
- */
 export class ConfusedTag extends BattlerTag {
   constructor(turnCount: integer, sourceMove: Moves) {
     super(BattlerTagType.CONFUSED, BattlerTagLapseType.MOVE, turnCount, sourceMove);
@@ -1027,7 +1024,34 @@ export class AbilityBattlerTag extends BattlerTag {
     this.ability = source.ability as Abilities;
   }
 }
+export class GulpMissileArrokudaTag extends AbilityBattlerTag {
+  onAdd(pokemon: Pokemon): void {
+    super.onAdd(pokemon);
 
+    pokemon.scene.queueMessage(getPokemonMessage(pokemon, " has\ncaught something in its mouth!"), null, false, null);
+  }
+
+  onRemove(pokemon: Pokemon): void {
+    super.onRemove(pokemon);
+
+    pokemon.scene.queueMessage(getPokemonMessage(pokemon, " spat out\nwhat it caught!"), null, false, null);
+  }
+}
+
+export class GulpMissilePikachuTag extends AbilityBattlerTag {
+
+  onAdd(pokemon: Pokemon): void {
+    super.onAdd(pokemon);
+
+    pokemon.scene.queueMessage(getPokemonMessage(pokemon, " has\ncaught something in its mouth!"), null, false, null);
+  }
+
+  onRemove(pokemon: Pokemon): void {
+    super.onRemove(pokemon);
+
+    pokemon.scene.queueMessage(getPokemonMessage(pokemon, " spat out\nwhat it caught!"), null, false, null);
+  }
+}
 export class TruantTag extends AbilityBattlerTag {
   constructor() {
     super(BattlerTagType.TRUANT, Abilities.TRUANT, BattlerTagLapseType.MOVE, 1);
@@ -1347,7 +1371,7 @@ export class CursedTag extends BattlerTag {
       applyAbAttrs(BlockNonDirectDamageAbAttr, pokemon, cancelled);
 
       if (!cancelled.value) {
-        pokemon.damageAndUpdate(Math.max(Math.floor(pokemon.getMaxHp() / 4), 1));
+        pokemon.damageAndUpdate(Math.floor(pokemon.getMaxHp() / 4));
         pokemon.scene.queueMessage(getPokemonMessage(pokemon, ` is hurt by the ${this.getMoveName()}!`));
       }
     }
@@ -1520,8 +1544,6 @@ export function getBattlerTag(tagType: BattlerTagType, turnCount: integer, sourc
     return new MinimizeTag();
   case BattlerTagType.DESTINY_BOND:
     return new DestinyBondTag(sourceMove, sourceId);
-  case BattlerTagType.ICE_FACE:
-    return new IceFaceTag(sourceMove);
   case BattlerTagType.NONE:
   default:
     return new BattlerTag(tagType, BattlerTagLapseType.CUSTOM, turnCount, sourceMove, sourceId);
