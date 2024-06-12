@@ -156,6 +156,7 @@ export default class MenuUiHandler extends MessageUiHandler {
       manageDataOptions.push({
         label: i18next.t("menuUiHandler:importData"),
         handler: () => {
+          ui.revertMode();
           this.scene.gameData.importData(GameDataType.SYSTEM);
           return true;
         },

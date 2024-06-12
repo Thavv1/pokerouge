@@ -1213,9 +1213,11 @@ export class GameData {
 
         reader.onload = (_ => {
           return e => {
+            let dataName: string;
             let dataStr = AES.decrypt(e.target.result.toString(), saveKey).toString(enc.Utf8);
             let valid = false;
             try {
+              dataName = GameDataType[dataType].toLowerCase();
               switch (dataType) {
               case GameDataType.SYSTEM:
                 dataStr = this.convertSystemDataStr(dataStr);
@@ -1235,28 +1237,12 @@ export class GameData {
               console.error(ex);
             }
 
-            let dataName: string;
-            switch (dataType) {
-            case GameDataType.SYSTEM:
-              dataName = "save";
-              break;
-            case GameDataType.SESSION:
-              dataName = "session";
-              break;
-            case GameDataType.SETTINGS:
-              dataName = "settings";
-              break;
-            case GameDataType.TUTORIALS:
-              dataName = "tutorials";
-              break;
-            }
-
             const displayError = (error: string) => this.scene.ui.showText(error, null, () => this.scene.ui.showText(null, 0), Utils.fixedInt(1500));
 
             if (!valid) {
               return this.scene.ui.showText(`Your ${dataName} data could not be loaded. It may be corrupted.`, null, () => this.scene.ui.showText(null, 0), Utils.fixedInt(1500));
             }
-            this.scene.ui.revertMode();
+
             this.scene.ui.showText(`Your ${dataName} data will be overridden and the page will reload. Proceed?`, null, () => {
               this.scene.ui.setOverlayMode(Mode.CONFIRM, () => {
                 localStorage.setItem(dataKey, encrypt(dataStr, bypassLogin));
