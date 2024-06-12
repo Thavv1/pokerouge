@@ -3516,44 +3516,39 @@ export class IceFaceMoveImmunityAbAttr extends MoveImmunityAbAttr {
   }
 }
 
-function applyAbAttrsInternal<TAttr extends AbAttr>(attrType: { new(...args: any[]): TAttr },
-  pokemon: Pokemon, applyFunc: AbAttrApplyFunc<TAttr>, args: any[], isAsync: boolean = false, showAbilityInstant: boolean = false, quiet: boolean = false, passive: boolean = false): Promise<void> {
-  return new Promise(resolve => {
-    if (!pokemon.canApplyAbility(passive, args[0])) {
-      if (!passive) {
-        return applyAbAttrsInternal(attrType, pokemon, applyFunc, args, isAsync, showAbilityInstant, quiet, true).then(() => resolve());
-      } else {
-        return resolve();
-      }
+async function applyAbAttrsInternal<TAttr extends AbAttr>(
+  attrType: { new (...args: any[]): TAttr },
+  pokemon: Pokemon,
+  applyFunc: AbAttrApplyFunc<TAttr>,
+  args: any[],
+  showAbilityInstant: boolean = false,
+  quiet: boolean = false,
+) {
+  for (const passive of [false, true]) {
+    if (!pokemon.canApplyAbility(passive)) {
+      continue;
     }
 
-    const ability = (!passive ? pokemon.getAbility() : pokemon.getPassiveAbility());
-    const attrs = ability.getAttrs(attrType);
+    const ability = passive ? pokemon.getPassiveAbility() : pokemon.getAbility();
+    for (const attr of ability.getAttrs(attrType)) {
+      const condition = attr.getCondition();
+      if (condition && !condition(pokemon)) {
+        continue;
+      }
 
-    const clearSpliceQueueAndResolve = () => {
-      pokemon.scene.clearPhaseQueueSplice();
-      if (!passive) {
-        return applyAbAttrsInternal(attrType, pokemon, applyFunc, args, isAsync, showAbilityInstant, quiet, true).then(() => resolve());
-      } else {
-        return resolve();
-      }
-    };
-    const applyNextAbAttr = () => {
-      if (attrs.length) {
-        applyAbAttr(attrs.shift());
-      } else {
-        clearSpliceQueueAndResolve();
-      }
-    };
-    const applyAbAttr = (attr: TAttr) => {
-      if (!canApplyAttr(pokemon, attr)) {
-        return applyNextAbAttr();
-      }
       pokemon.scene.setPhaseQueueSplice();
-      const onApplySuccess = () => {
+
+      let result = applyFunc(attr, passive);
+      // TODO Remove this when promises get reworked PR#924
+      if (result instanceof Promise) {
+        result = await result;
+      }
+
+      if (result) {
         if (pokemon.battleData && !pokemon.battleData.abilitiesApplied.includes(ability.id)) {
           pokemon.battleData.abilitiesApplied.push(ability.id);
         }
+
         if (attr.showAbility && !quiet) {
           if (showAbilityInstant) {
             pokemon.scene.abilityBar.showAbility(pokemon, passive);
@@ -3561,38 +3556,22 @@ function applyAbAttrsInternal<TAttr extends AbAttr>(attrType: { new(...args: any
             queueShowAbility(pokemon, passive);
           }
         }
+
         if (!quiet) {
-          const message = attr.getTriggerMessage(pokemon, (!passive ? pokemon.getAbility() : pokemon.getPassiveAbility()).name, args);
+          const message = attr.getTriggerMessage(pokemon, ability.name, args);
           if (message) {
-            if (isAsync) {
-              pokemon.scene.ui.showText(message, null, () => pokemon.scene.ui.showText(null, 0), null, true);
-            } else {
-              pokemon.scene.queueMessage(message);
-            }
+            pokemon.scene.queueMessage(message);
           }
         }
-      };
-      const result = applyFunc(attr, passive);
-      if (result instanceof Promise) {
-        result.then(success => {
-          if (success) {
-            onApplySuccess();
-          }
-          applyNextAbAttr();
-        });
-      } else {
-        if (result) {
-          onApplySuccess();
-        }
-        applyNextAbAttr();
       }
-    };
-    applyNextAbAttr();
-  });
+    }
+
+    pokemon.scene.clearPhaseQueueSplice();
+  }
 }
 
 export function applyAbAttrs(attrType: { new(...args: any[]): AbAttr }, pokemon: Pokemon, cancelled: Utils.BooleanHolder, ...args: any[]): Promise<void> {
-  return applyAbAttrsInternal<AbAttr>(attrType, pokemon, (attr, passive) => attr.apply(pokemon, passive, cancelled, args), args);
+  return applyAbAttrsInternal(attrType, pokemon, (attr, passive) => attr.apply(pokemon, passive, cancelled, args), args);
 }
 
 export function applyPostBattleInitAbAttrs(attrType: { new(...args: any[]): PostBattleInitAbAttr },
@@ -3603,7 +3582,7 @@ export function applyPostBattleInitAbAttrs(attrType: { new(...args: any[]): Post
 export function applyPreDefendAbAttrs(attrType: { new(...args: any[]): PreDefendAbAttr },
   pokemon: Pokemon, attacker: Pokemon, move: Move, cancelled: Utils.BooleanHolder, ...args: any[]): Promise<void> {
   const simulated = args.length > 1 && args[1];
-  return applyAbAttrsInternal<PreDefendAbAttr>(attrType, pokemon, (attr, passive) => attr.applyPreDefend(pokemon, passive, attacker, move, cancelled, args), args, false, false, simulated);
+  return applyAbAttrsInternal<PreDefendAbAttr>(attrType, pokemon, (attr, passive) => attr.applyPreDefend(pokemon, passive, attacker, move, cancelled, args), args, false, simulated);
 }
 
 export function applyPostDefendAbAttrs(attrType: { new(...args: any[]): PostDefendAbAttr },
@@ -3663,7 +3642,7 @@ export function applyPostSummonAbAttrs(attrType: { new(...args: any[]): PostSumm
 
 export function applyPreSwitchOutAbAttrs(attrType: { new(...args: any[]): PreSwitchOutAbAttr },
   pokemon: Pokemon, ...args: any[]): Promise<void> {
-  return applyAbAttrsInternal<PreSwitchOutAbAttr>(attrType, pokemon, (attr, passive) => attr.applyPreSwitchOut(pokemon, passive, args), args, false, true);
+  return applyAbAttrsInternal<PreSwitchOutAbAttr>(attrType, pokemon, (attr, passive) => attr.applyPreSwitchOut(pokemon, passive, args), args, true);
 }
 
 export function applyPreStatChangeAbAttrs(attrType: { new(...args: any[]): PreStatChangeAbAttr },
@@ -3679,7 +3658,7 @@ export function applyPostStatChangeAbAttrs(attrType: { new(...args: any[]): Post
 export function applyPreSetStatusAbAttrs(attrType: { new(...args: any[]): PreSetStatusAbAttr },
   pokemon: Pokemon, effect: StatusEffect, cancelled: Utils.BooleanHolder, ...args: any[]): Promise<void> {
   const simulated = args.length > 1 && args[1];
-  return applyAbAttrsInternal<PreSetStatusAbAttr>(attrType, pokemon, (attr, passive) => attr.applyPreSetStatus(pokemon, passive, effect, cancelled, args), args, false, false, !simulated);
+  return applyAbAttrsInternal<PreSetStatusAbAttr>(attrType, pokemon, (attr, passive) => attr.applyPreSetStatus(pokemon, passive, effect, cancelled, args), args, false, !simulated);
 }
 
 export function applyPreApplyBattlerTagAbAttrs(attrType: { new(...args: any[]): PreApplyBattlerTagAbAttr },
@@ -3689,7 +3668,7 @@ export function applyPreApplyBattlerTagAbAttrs(attrType: { new(...args: any[]): 
 
 export function applyPreWeatherEffectAbAttrs(attrType: { new(...args: any[]): PreWeatherEffectAbAttr },
   pokemon: Pokemon, weather: Weather, cancelled: Utils.BooleanHolder, ...args: any[]): Promise<void> {
-  return applyAbAttrsInternal<PreWeatherDamageAbAttr>(attrType, pokemon, (attr, passive) => attr.applyPreWeatherEffect(pokemon, passive, weather, cancelled, args), args, false, true);
+  return applyAbAttrsInternal<PreWeatherDamageAbAttr>(attrType, pokemon, (attr, passive) => attr.applyPreWeatherEffect(pokemon, passive, weather, cancelled, args), args, true);
 }
 
 export function applyPostTurnAbAttrs(attrType: { new(...args: any[]): PostTurnAbAttr },
@@ -3714,7 +3693,7 @@ export function applyPostTerrainChangeAbAttrs(attrType: { new(...args: any[]): P
 
 export function applyCheckTrappedAbAttrs(attrType: { new(...args: any[]): CheckTrappedAbAttr },
   pokemon: Pokemon, trapped: Utils.BooleanHolder, otherPokemon: Pokemon, ...args: any[]): Promise<void> {
-  return applyAbAttrsInternal<CheckTrappedAbAttr>(attrType, pokemon, (attr, passive) => attr.applyCheckTrapped(pokemon, passive, trapped, otherPokemon, args), args, true);
+  return applyAbAttrsInternal<CheckTrappedAbAttr>(attrType, pokemon, (attr, passive) => attr.applyCheckTrapped(pokemon, passive, trapped, otherPokemon, args), args);
 }
 
 export function applyPostBattleAbAttrs(attrType: { new(...args: any[]): PostBattleAbAttr },
@@ -3725,11 +3704,6 @@ export function applyPostBattleAbAttrs(attrType: { new(...args: any[]): PostBatt
 export function applyPostFaintAbAttrs(attrType: { new(...args: any[]): PostFaintAbAttr },
   pokemon: Pokemon, attacker: Pokemon, move: Move, hitResult: HitResult, ...args: any[]): Promise<void> {
   return applyAbAttrsInternal<PostFaintAbAttr>(attrType, pokemon, (attr, passive) => attr.applyPostFaint(pokemon, passive, attacker, move, hitResult, args), args);
-}
-
-function canApplyAttr(pokemon: Pokemon, attr: AbAttr): boolean {
-  const condition = attr.getCondition();
-  return !condition || condition(pokemon);
 }
 
 function queueShowAbility(pokemon: Pokemon, passive: boolean): void {
