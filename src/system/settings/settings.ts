@@ -30,6 +30,10 @@ export interface Setting {
   default: number
   type: SettingType
   requireReload?: boolean
+  /** Whether the setting can be activated or not */
+  activatable?: boolean
+  /** Determines whether the setting should be hidden from the UI */
+  hidden?: () => boolean
 }
 
 /**
@@ -68,7 +72,8 @@ export const SettingKeys = {
   Master_Volume: "MASTER_VOLUME",
   BGM_Volume: "BGM_VOLUME",
   SE_Volume: "SE_VOLUME",
-  Music_Preference: "MUSIC_PREFERENCE"
+  Music_Preference: "MUSIC_PREFERENCE",
+  Move_Touch_Controls: "MOVE_TOUCH_CONTROLS"
 };
 
 /**
@@ -304,6 +309,15 @@ export const Setting: Array<Setting> = [
     default: 0,
     type: SettingType.AUDIO,
     requireReload: true
+  },
+  {
+    key: SettingKeys.Move_Touch_Controls,
+    label: "Move Touch Controls",
+    options: ["Configure"],
+    default: 0,
+    type: SettingType.GENERAL,
+    activatable: true,
+    hidden: () => !hasTouchscreen()
   }
 ];
 
